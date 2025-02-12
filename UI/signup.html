@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Offer Signup</title>
+  <head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+  </head>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+
+    body {                  /*Background*/
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f7fff0;
+      padding: 20px;
+    }
+
+    .container {
+      display: flex;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      max-width: 900px;
+      width: 100%;
+    }
+
+    .info-section {              /*main box*/
+      background: #ddead1;
+      padding: 40px;
+      width: 50%;
+    }
+
+    .info-section h1 {
+      font-size: 36px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .info-section h1 span {    /*tag line*/
+      color: #52694a;
+    }
+
+    .info-section p {
+      color: #666;
+      margin-top: 20px;
+      line-height: 1.6;
+    }
+
+    .form-section {
+      padding: 40px;
+      width: 50%;
+      background: white;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    input[type="text"], input[type="email"], input[type="password"] {
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      color: #666;
+    }
+
+    label input[type="checkbox"] {
+      margin-right: 10px;
+      accent-color: #75975e; /* Change checkbox color */
+      
+    }
+
+    button {
+      background: #75975e;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+
+    button:hover {
+      background: #4b6043;
+    }
+
+    .social-buttons {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 10px;
+    }
+
+    .social-buttons a {
+      color: #75975e;
+      text-decoration: none;
+      font-size: 25px;
+      padding: 20px;
+    }
+    .social-buttons a:hover {
+      color: #4b6043;
+      text-decoration: none;
+      font-size: 25px;
+      transform: scale(1.2); /* Slight zoom on hover */
+    }
+
+    .or {
+      text-align: center;
+      color: #666;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="info-section">
+      <h1>Trade<span>Trail</span></h1>
+      <p>(TAGLINE... )Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
+    </div>
+    <div class="form-section">
+      <form action="#" method="POST">
+        <input type="text" placeholder="First name" required>
+        <input type="text" placeholder="Last name" required>
+        <input type="email" placeholder="Email address" required>
+        <input type="password" placeholder="Password" required>
+        <label>
+          <input type="checkbox"> Remember Me
+        </label>
+        <button type="submit">SIGN UP</button>
+        <div class="or">or sign up with:</div>
+        <div class="social-buttons">
+          <a href="#"><i class="fab fa-facebook"></i></a> <!-- FontAwesome icons for FB, etc.-->
+          <a href="#"><i class="fab fa-google"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-github"></i></a>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
