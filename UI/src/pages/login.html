@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Business Offer Signup</title>
-  <head>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-  </head>
+  <title>Login</title>
+  
+  <!-- Font Awesome for icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
   
   <style>
     * {
@@ -16,7 +16,7 @@
       font-family: 'Arial', sans-serif;
     }
 
-    body {                  /*Background*/
+    body {                  
       display: flex;
       justify-content: center;
       align-items: center;
@@ -35,7 +35,7 @@
       width: 100%;
     }
 
-    .info-section {              /*main box*/
+    .info-section {              
       background: #ddead1;
       padding: 40px;
       width: 50%;
@@ -47,7 +47,7 @@
       margin-bottom: 10px;
     }
 
-    .info-section h1 span {    /*tag line*/
+    .info-section h1 span {    
       color: #52694a;
     }
 
@@ -68,7 +68,7 @@
       flex-direction: column;
     }
 
-    input[type="text"], input[type="email"], input[type="password"] {
+    input[type="email"], input[type="password"] {
       padding: 12px;
       margin-bottom: 15px;
       border: 1px solid #ddd;
@@ -86,7 +86,6 @@
     label input[type="checkbox"] {
       margin-right: 10px;
       accent-color: #75975e; /* Change checkbox color */
-      
     }
 
     button {
@@ -104,29 +103,20 @@
       background: #4b6043;
     }
 
-    .social-buttons {
-      display: flex;
-      justify-content: space-around;
+    .signup-link {
+      text-align: center;
       margin-top: 10px;
     }
 
-    .social-buttons a {
+    .signup-link a {
       color: #75975e;
       text-decoration: none;
-      font-size: 25px;
-      padding: 20px;
-    }
-    .social-buttons a:hover {
-      color: #4b6043;
-      text-decoration: none;
-      font-size: 25px;
-      transform: scale(1.2); /* Slight zoom on hover */
+      font-size: 14px;
     }
 
-    .or {
-      text-align: center;
-      color: #666;
-      margin-top: 10px;
+    .signup-link a:hover {
+      color: #4b6043;
+      text-decoration: underline;
     }
   </style>
 </head>
@@ -137,24 +127,61 @@
       <p>(TAGLINE... )Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
     </div>
     <div class="form-section">
-      <form action="#" method="POST">
-        <input type="text" placeholder="First name" required>
-        <input type="text" placeholder="Last name" required>
-        <input type="email" placeholder="Email address" required>
-        <input type="password" placeholder="Password" required>
+      <form id="loginForm">
+        <input type="email" id="email" placeholder="Email address" required>
+        <input type="password" id="password" placeholder="Password" required>
         <label>
           <input type="checkbox"> Remember Me
         </label>
-        <button type="submit">SIGN UP</button>
-        <div class="or">or sign up with:</div>
-        <div class="social-buttons">
-          <a href="#"><i class="fab fa-facebook"></i></a> <!-- FontAwesome icons for FB, etc.-->
-          <a href="#"><i class="fab fa-google"></i></a>
-          <a href="#"><i class="fab fa-twitter"></i></a>
-          <a href="#"><i class="fab fa-github"></i></a>
+        <button type="submit">LOGIN</button>
+        
+        <div class="signup-link">
+          Don't have an account? <a href="/api/auth/signup">Sign Up</a>
         </div>
       </form>
     </div>
   </div>
+
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async function(event) {
+      event.preventDefault(); // Prevent default form submission
+
+      // Get form values
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      // Check if any field is empty
+      if (!email || !password) {
+        alert("Please fill in all fields.");
+        return; // Stop further execution
+      }
+
+      // Create request body
+      const userData = { email, password };
+
+      try {
+        const response = await fetch("http://localhost:5001/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(userData),
+        });
+
+        const data = await response.json();
+        console.log("Server Response:", data);
+
+        if (response.ok) {
+          alert("Login successful!");
+          window.location.href = "/api/auth/home"; // Redirect to dashboard/home page
+        } else {
+          alert(data.message || "Login failed. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("An error occurred. Please try again later.");
+      }
+    });
+  </script>
 </body>
 </html>
