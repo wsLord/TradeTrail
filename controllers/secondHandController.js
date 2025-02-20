@@ -17,23 +17,23 @@ exports.getAddProduct = (req, res, next) => {
   });
 };
 
-//creating products 
+//creating products
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
   const location = req.body.location;
-  const startDate=req.body.startDate;
-  const endDate=req.body.endDate;
+  const startDate = req.body.startDate;
+  const endDate = req.body.endDate;
   const product = new Product({
     title: title,
     imageUrl: imageUrl,
     price: price,
     description: description,
-    location:location,
-    startDate:startDate,
-    endDate:endDate
+    location: location,
+    startDate: startDate,
+    endDate: endDate,
   });
   product
     .save()
@@ -50,14 +50,14 @@ exports.postAddProduct = (req, res, next) => {
 //for buy page--all the products
 exports.getProducts = (req, res, next) => {
   Product.find()
-    .then(products => {
-      res.render('secondHand/buy', {
+    .then((products) => {
+      res.render("secondHand/buy", {
         prods: products,
-        pageTitle: 'All Products',
-        path: '/products'
+        pageTitle: "All Products",
+        path: "/products",
       });
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
     });
 };
@@ -67,19 +67,18 @@ exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
   Product.findById(prodId)
     .populate("bids") // Populate bid products
-    .then(product => {
+    .then((product) => {
       res.render("secondHand/auction", {
         product: product,
         pageTitle: "Auction",
         path: "/product",
-        bidProducts: product.bids // Pass bid products to EJS
+        bidProducts: product.bids, // Pass bid products to EJS
       });
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
     });
 };
-
 
 //add product bid page
 exports.getAddBidProduct = (req, res, next) => {
@@ -87,7 +86,7 @@ exports.getAddBidProduct = (req, res, next) => {
   res.render("secondHand/addBidProduct", {
     pageTitle: "Add Bid Product",
     path: "/add-bid-product",
-    productId: prodId
+    productId: prodId,
   });
 };
 
@@ -108,8 +107,8 @@ exports.getAddBidProduct = (req, res, next) => {
 //   .save()
 //   .then((savedBidProduct) => {
 //     console.log("Successfully saved bid product:", savedBidProduct);
-//     return Product.findByIdAndUpdate(prodId, { 
-//       $push: { bids: savedBidProduct._id } 
+//     return Product.findByIdAndUpdate(prodId, {
+//       $push: { bids: savedBidProduct._id }
 //     }, { new: true });
 //   })
 //   .then(updatedProduct => {
@@ -122,10 +121,13 @@ exports.getAddBidProduct = (req, res, next) => {
 // };
 exports.postAddBidProduct = (req, res, next) => {
   const prodId = req.params.productId;
-  const { title, imageUrl, description, location, bidAmount, bidder } = req.body;
+  const { title, imageUrl, description, location, bidAmount, bidder } =
+    req.body;
 
   if (!bidAmount && !title) {
-    return res.status(400).send("Error: Provide either a bid amount or a product.");
+    return res
+      .status(400)
+      .send("Error: Provide either a bid amount or a product.");
   }
 
   const bidProduct = new BidProduct({
@@ -135,20 +137,24 @@ exports.postAddBidProduct = (req, res, next) => {
     location: location || null,
     bidAmount: bidAmount ? Number(bidAmount) : null,
     // bidder,
-    auction: prodId
+    auction: prodId,
   });
 
   bidProduct
     .save()
     .then((savedBidProduct) => {
-      return Product.findByIdAndUpdate(prodId, { 
-        $push: { bids: savedBidProduct._id } 
-      }, { new: true });
+      return Product.findByIdAndUpdate(
+        prodId,
+        {
+          $push: { bids: savedBidProduct._id },
+        },
+        { new: true }
+      );
     })
-    .then(updatedProduct => {
+    .then((updatedProduct) => {
       res.redirect(`/secondHand/buy/${prodId}`);
     })
-    .catch(err => {
+    .catch((err) => {
       console.log("Error saving bid:", err);
       res.status(500).send("Internal Server Error");
     });
