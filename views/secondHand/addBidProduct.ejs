@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title><%= pageTitle %></title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/forms.css">
+    <!-- <link rel="stylesheet" href="/css/product.css"> -->
+    <link rel="stylesheet" href="/css/navigation.css">
+</head>
+
+<body>
+   <%- include('../includes/navigation.ejs') %>
+
+    <main>
+        <form class="product-form" action="/secondHand/buy/<%= productId %>/add-bid-product" method="POST">
+            <div class="form-control">
+                <label for="title">Title</label>
+                <input type="text" name="title" id="title" >
+            </div>
+            <div class="form-control">
+                <label for="imageUrl">Upload image</label>
+                <input type="text" name="imageUrl" id="imageUrl" >
+            </div>
+            <div class="form-control">
+                <label for="description">Description</label>
+                <textarea name="description" id="description" rows="5"></textarea>
+            </div>
+            <div class="form-control">
+                <label for="location">location</label>
+                <textarea name="location" id="location" rows="5"></textarea>
+            </div>
+
+            <button class="btn" type="submit">Add Product</button>
+        </form>
+    </main>
+    <!-- nnn -->
