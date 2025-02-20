@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  
+  <!-- Font Awesome for icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+
+    body {                  
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f7fff0;
+      padding: 20px;
+    }
+
+    .container {
+      display: flex;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      max-width: 900px;
+      width: 100%;
+    }
+
+    .info-section {              
+      background: #ddead1;
+      padding: 40px;
+      width: 50%;
+    }
+
+    .info-section h1 {
+      font-size: 36px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .info-section h1 span {    
+      color: #52694a;
+    }
+
+    .info-section p {
+      color: #666;
+      margin-top: 20px;
+      line-height: 1.6;
+    }
+
+    .form-section {
+      padding: 40px;
+      width: 50%;
+      background: white;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    input[type="email"], input[type="password"] {
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      color: #666;
+    }
+
+    label input[type="checkbox"] {
+      margin-right: 10px;
+      accent-color: #75975e;
+    }
+
+    button {
+      background: #75975e;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+
+    button:hover {
+      background: #4b6043;
+    }
+
+    .signup-link {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .signup-link a {
+      color: #75975e;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .signup-link a:hover {
+      color: #4b6043;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Include Navigation -->
+  <%- include('../common/navigation.ejs') %> 
+
+  <div class="container">
+    <div class="info-section">
+      <h1>Trade<span>Trail</span></h1>
+      <p>"Secure and seamless trading experience."</p>
+    </div>
+    <div class="form-section">
+      <form id="loginForm">
+        <input type="email" id="email" placeholder="Email address" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <label>
+          <input type="checkbox"> Remember Me
+        </label>
+        <button type="submit">LOGIN</button>
+        
+        <div class="signup-link">
+          Don't have an account? <a href="/api/auth/signup">Sign Up</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async function(event) {
+      event.preventDefault();
+
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      if (!email || !password) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      const userData = { email, password };
+
+      try {
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(userData),
+        });
+
+        const data = await response.json();
+        console.log("Server Response:", data);
+
+        if (response.ok) {
+          alert("Login successful!");
+          window.location.href = "/api/auth/home";
+        } else {
+          alert(data.message || "Login failed. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("An error occurred. Please try again later.");
+      }
+    });
+  </script>
+
+</body>
+</html>
