@@ -5,15 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title><%= pageTitle %></title>
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/product.css">
-    <link rel="stylesheet" href="/css/navigation.css">
+    <!-- <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/product.css"> -->
+    <link rel="stylesheet" href="/css/rentalStyles.css">
 </head>
 
 <%- include('../common/navigation.ejs') %>
 
-<h2>second-hand buying initial page</h2>
-<p>2 options as sell or buy. load pages accordingly</p>
 
-<a href="/secondHand/sell"><button>Go to Sell</button></a>
-<a href="/secondHand/buy"><button>Go to Buy</button></a>
+<div class="renting-container">
+    <h1>Second-Hand Chain Buying Options</h1>
+    <p>Choose an option to proceed</p>
+
+    <div class="options">
+        <div class="option">
+            <h2>Want to Post Something?</h2>
+            <p>List your item for sale and find interested buyers easily</p>
+            <button onclick="window.location.href='/secondHand/sell'">Post an Item to Sell</button>
+        </div>
+
+        <div class="option">
+            <h2>Want to Buy Something?</h2>
+            <p>Browse available items for sale and get what you need</p>
+            <button onclick="window.location.href='/secondHand/buy'">Buy an Item</button>
+        </div>
+    </div>
+</div>
+

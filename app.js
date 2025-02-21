@@ -44,7 +44,7 @@ const connectToMongoDB = require("./config/mongoose");
 // Import routes
 const authRoutes = require("./routes/authRoutes"); // ✅ ADD THIS
 const secondHandRoutes = require("./routes/secondHandRoutes");
-// const rentingRoutes = require("./routes/rentingRoutes"); // Ensure this file exists
+const rentingRoutes = require("./routes/rentingRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -62,7 +62,12 @@ app.set("views", path.join(__dirname, "views"));
 // ✅ Register Routes
 app.use("/api/auth", authRoutes); // ✅ FIX: Include auth routes
 app.use("/secondHand", secondHandRoutes);
-// app.use("/", rentingRoutes);
+app.use("/rentals", rentingRoutes);
+
+app.get("/", (req, res) => {
+  res.render("home"); // Renders the home.ejs file inside views/
+});
+
 
 // Connect to MongoDB **before** starting the server
 connectToMongoDB()

@@ -12,7 +12,9 @@
 </nav> -->
 
 <nav class="navbar">
-    <div class="logo">TradeTrail</div>
+    <div class="logo">
+        <a href="/">TradeTrail</a>
+    </div>
     <ul>
         <li><a href="/rentals">Renting Items</a></li>
         <li><a href="/subscriptions">Subscription Swapping</a></li>
@@ -43,6 +45,18 @@
         font-size: 20px;
         font-weight: bold;
     }
+
+    .logo a {
+        text-decoration: none; 
+        color: inherit; 
+        font-weight: bold;
+        font-size: 20px; 
+    }
+
+    .logo a:hover {
+        color: #242e20; 
+    }
+
     .navbar ul {
         list-style: none;
         display: flex;
