@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %></title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/rentalStyles.css">
+</head>
+<body>
+
+    <!-- Include Navbar -->
+    <div id="navbar">
+        <%- include('../common/navigation.ejs') %>
+    </div>
+
+    <main>
+        <h1>Available Rental Products</h1>
+        <div class="rental-list">
+            <% products.forEach(product => { %>
+                <div class="rental-item">
+                    <h3><%= product.title %></h3>
+                    <img src="<%= product.imageUrl %>" alt="<%= product.title %>" />
+                    <p><%= product.description %></p>
+                    <p><%= product.price %> per <%= product.rate %></p>
+                    <p><%= product.location %></p>
+                </div>
+            <% }) %>
+        </div>
+    </main>
+
+</body>
+</html>

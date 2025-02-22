@@ -62,7 +62,7 @@ app.set("views", path.join(__dirname, "views"));
 // ✅ Register Routes
 app.use("/api/auth", authRoutes); // ✅ FIX: Include auth routes
 app.use("/secondHand", secondHandRoutes);
-app.use("/rentals", rentingRoutes);
+app.use("/rental", rentingRoutes);
 
 app.get("/", (req, res) => {
   res.render("home"); // Renders the home.ejs file inside views/

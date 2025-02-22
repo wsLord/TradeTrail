@@ -54,7 +54,8 @@ body {
 }
 
 .form-control input,
-.form-control textarea {
+.form-control textarea,
+.form-control select { /* Added select styling */
     width: 100%;
     padding: 0.5rem;
     border: 1px solid #ccc;
@@ -62,11 +63,12 @@ body {
     font-size: 1rem;
 }
 
-/* Hover effect on inputs */
+/* Hover effect on inputs, textareas, and selects */
 .form-control input:focus,
-.form-control textarea:focus {
+.form-control textarea:focus,
+.form-control select:focus { /* Added select focus styling */
     outline: none;
-    border-color: #3E6B48; 
+    border-color: #3E6B48;
     box-shadow: 0px 0px 5px rgba(62, 107, 72, 0.5);
 }
 
@@ -89,4 +91,21 @@ body {
 
 .product__description {
     text-align: center;
+}
+
+/* Styling for the select dropdown */
+.form-control select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    background-color: white;
+}
+
+/* Hover and focus effects for the select dropdown */
+.form-control select:focus {
+    outline: none;
+    border-color: #3E6B48;
+    box-shadow: 0px 0px 5px rgba(62, 107, 72, 0.5);
 }
