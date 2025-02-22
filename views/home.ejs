@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home TradeTrail</title>
-    <link rel="stylesheet" href="/homestyles.css">
+    <link rel="stylesheet" href="/css/homeStyles.css">
 
 </head>
 <body>
@@ -46,7 +46,14 @@
             <div class="feature-content">
                 <h2><%= feature.title %></h2>
                 <p><%= feature.description %></p>
-                <button onclick="window.location.href='<%= feature.link %>'">Explore</button>
+                <!-- <button onclick="window.location.href='<%= feature.link %>'">Explore</button> -->
+                <% if (feature.title === "Renting Items") { %>
+                    <button onclick="window.location.href='/rental'">Rent an Item</button>  
+                <% } else if (feature.title === "Second-Hand Chain Buying") { %>
+                    <button onclick="window.location.href='/secondHand'">Buy an Item</button>                      
+                <% } else { %>
+                    <button onclick="window.location.href='<%= feature.link %>'">Explore</button>
+                <% } %>
             </div>
         </section>
     <% }) %>

@@ -16,33 +16,41 @@
     <%- include('../common/navigation.ejs') %>
 
     <main>
-        <form class="product-form" action="/secondHand/sell" method="POST">
+        <form class="product-form" action="/rental/post" method="POST">
             <div class="form-control">
                 <label for="title">Title</label>
-                <input type="text" name="title" id="title" >
+                <input type="text" name="title" id="title">
             </div>
             <div class="form-control">
                 <label for="imageUrl">Upload image</label>
-                <input type="text" name="imageUrl" id="imageUrl" >
+                <input type="text" name="imageUrl" id="imageUrl">
             </div>
+
+            <!-- Dropdown for rate options -->
             <div class="form-control">
-                <label for="price">Minimum Price</label>
-                <input type="number" name="price" id="price" step="0.01" >
+                <label for="rate">Price Type</label>
+                <select name="rate" id="rate">
+                    <option value="" selected>Select one</option> <!-- Default option -->
+                    <option value="hour">Price/hour</option>
+                    <option value="day">Price/day</option>
+                    <option value="week">Price/week</option>
+                    <option value="month">Price/month</option>
+                </select>
             </div>
+
             <div class="form-control">
-                <label for="start-date">Start Date</label>
-                <input type="date" name="startDate" id="startDate">
+                <label for="price">Price</label>
+                <input type="number" name="price" id="price" step="10">
             </div>
-            <div class="form-control">
-                <label for="end-date">End Date</label>
-                <input type="date" name="endDate" id="endDate">
-            </div>
+            
+            
+
             <div class="form-control">
                 <label for="description">Description</label>
                 <textarea name="description" id="description" rows="5"></textarea>
             </div>
             <div class="form-control">
-                <label for="location">location</label>
+                <label for="location">Location</label>
                 <textarea name="location" id="location" rows="5"></textarea>
             </div>
 
@@ -50,3 +58,6 @@
         </form>
     </main>
     <!-- nnn -->
+</body>
+
+</html>
