@@ -86,5 +86,7 @@ const checkAuth = (req, res) => {
   }
 };
 
-console.log("AuthController Loaded:", { signup, login, checkAuth });
+const jwt = require("jsonwebtoken");
+
+// console.log("AuthController Loaded:", { signup, login, checkAuth });
 module.exports = { signup, login, checkAuth };
