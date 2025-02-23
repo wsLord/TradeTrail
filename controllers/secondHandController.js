@@ -1,5 +1,6 @@
 const Product = require("../models/product");
 const BidProduct = require("../models/bidproduct");
+const User = require("../models/userModel");
 
 const { protectRoute } = require("../middleware/authmiddleware");
 
@@ -110,43 +111,91 @@ exports.getAddBidProduct = (req, res, next) => {
 };
 
 //save new bidproduct in db
-exports.postAddBidProduct = async (req, res, next) => {
-  try {
-    // console.log("✅ User in postAddBidProduct:", req.user);
-    if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized: Please log in" });
-    }
+// exports.postAddBidProduct = async (req, res, next) => {
+//   try {
+//     // console.log("✅ User in postAddBidProduct:", req.user);
+//     if (!req.user) {
+//       return res.status(401).json({ message: "Unauthorized: Please log in" });
+//     }
 
-    const prodId = req.params.productId;
-    const { title, imageUrl, description, location, bidAmount } = req.body;
+//     const prodId = req.params.productId;
+//     const { title, imageUrl, description, location, bidAmount } = req.body;
 
-    if (!bidAmount && !title) {
-      return res
-        .status(400)
-        .send("Error: Provide either a bid amount or a product.");
-    }
+//     if (!bidAmount && !title) {
+//       return res
+//         .status(400)
+//         .send("Error: Provide either a bid amount or a product.");
+//     }
 
-    const bidProduct = new BidProduct({
-      title: title || null,
-      imageUrl: imageUrl || null,
-      description: description || null,
-      location: location || null,
-      bidAmount: bidAmount ? Number(bidAmount) : null,
-      bidder: req.user._id, // ✅ Safe now
-      auction: prodId,
-    });
+//     const bidProduct = new BidProduct({
+//       title: title || null,
+//       imageUrl: imageUrl || null,
+//       description: description || null,
+//       location: location || null,
+//       bidAmount: bidAmount ? Number(bidAmount) : null,
+//       bidder: req.user._id, // ✅ Safe now
+//       auction: prodId,
+//     });
 
-    const savedBidProduct = await bidProduct.save();
+//     const savedBidProduct = await bidProduct.save();
 
-    await Product.findByIdAndUpdate(
-      prodId,
-      { $push: { bids: savedBidProduct._id } },
-      { new: true }
-    );
+//     await Product.findByIdAndUpdate(
+//       prodId,
+//       { $push: { bids: savedBidProduct._id } },
+//       { new: true }
+//     );
 
-    res.redirect(`/secondHand/buy/${prodId}`);
-  } catch (err) {
-    console.error("Error saving bid:", err);
-    res.status(500).send("Internal Server Error");
+//     res.redirect(`/secondHand/buy/${prodId}`);
+//   } catch (err) {
+//     console.error("Error saving bid:", err);
+//     res.status(500).send("Internal Server Error");
+//   }
+// };
+
+exports.postAddBidProduct = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Unauthorized: Please log in" });
   }
+
+  const prodId = req.params.productId;
+  const { title, imageUrl, description, location, bidAmount } = req.body;
+
+  if (!bidAmount && !title) {
+    return res
+      .status(400)
+      .send("Error: Provide either a bid amount or a product.");
+  }
+
+  const bidProduct = new BidProduct({
+    title: title || null,
+    imageUrl: imageUrl || null,
+    description: description || null,
+    location: location || null,
+    bidAmount: bidAmount ? Number(bidAmount) : null,
+    bidder: req.user._id,
+    auction: prodId,
+  });
+
+  bidProduct
+    .save()
+    .then((savedBidProduct) => {
+      return Promise.all([
+        Product.findByIdAndUpdate(
+          prodId,
+          { $push: { bids: savedBidProduct._id } },
+          { new: true }
+        ),
+        User.findByIdAndUpdate(
+          req.user._id,
+          { $addToSet: { cart: prodId } } // ✅ Adds product to bidder's cart
+        ),
+      ]);
+    })
+    .then(() => {
+      res.redirect(`/secondHand/buy/${prodId}`);
+    })
+    .catch((err) => {
+      console.error("Error saving bid:", err);
+      res.status(500).send("Internal Server Error");
+    });
 };
