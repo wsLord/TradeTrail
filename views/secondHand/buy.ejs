@@ -25,7 +25,7 @@
                                     <img src="<%= product.imageUrl %>" alt="<%= product.title %>">
                                 </div>
                                 <div class="card__content">
-                                    <h2 class="product__price">$
+                                    <h2 class="product__price">₹
                                         <%= product.price %>
                                     </h2>
                                     <p class="product__description">
@@ -34,10 +34,12 @@
                                     <p class="product__description">
                                         <%= product.location%>
                                     </p>
+                                    <p class="product__description">
+                                        <b>Seller:</b> <%= product.seller.fullName %> 
+                                    </p> 
                                 </div>
                                 <div class="card__actions">
                                     <a href="/secondHand/buy/<%= product._id %>" class="btn">Auction</a>
-                                    <!-- <a href="/secondHand/buy/<%= product._id %>" class="btn"><button>Auction</button></a> -->
                                 </div>
                             </article>
                             <% } %>

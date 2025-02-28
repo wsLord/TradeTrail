@@ -16,11 +16,13 @@
     <main>
         <section>
             <h1>Auction</h1>
+            <h2>Welcome, <%= user.fullName %>!</h2>
             <div><b>Product:</b>  <%= product.title %></div>
+            <p><b>Seller:</b> <%= product.seller ? product.seller.fullName : "Unknown Seller" %></p>
             <p>Start: <span id="start-date"><%= product.startDate %></span></p>
             <p>End: <span id="end-date"><%= product.endDate %></span></p>
             <p>Initial bid: <span id="initial-bid"><%= product.price %></span></p>
-            <p>Max bid: <span id="max-bid">260 rupees</span></p>
+            <p>Max bid: <span id="max-bid"><%= maxBid %></span></p>
         </section>
         <section>
             <h2>Bid Amount</h2>
@@ -28,6 +30,13 @@
                 <input type="number" id="bidAmount" name="bidAmount" placeholder="Enter bid amount" min="<%= product.price %>" required>
                 <button type="submit">Bid</button>
             </form>
+            <!-- <form id="bidForm" action="/secondHand/buy/<%= product._id %>/add-bid" method="POST">
+                <input type="hidden" name="productId" value="<%= product._id %>">
+                <input type="number" id="bidAmount" name="bidAmount" placeholder="Enter bid amount" min="<%= product.price %>" required>
+                <button type="submit">Bid</button>
+            </form> -->
+            
+            
         </section>
 
         <!-- Add Product Bid Section -->
@@ -53,7 +62,7 @@
                     <% if (moneyBids.length > 0) { %>
                         <% moneyBids.forEach(bid => { %>
                             <tr>
-                                <td><%= bid.bidder || "Anonymous" %></td>
+                                <td><%= bid.bidder.fullName || "Anonymous" %></td>
                                 <td>₹<%= bid.bidAmount %></td>
                             </tr>
                         <% }) %>
@@ -81,7 +90,7 @@
                     <% if (productBids.length > 0) { %>
                         <% productBids.forEach(bid => { %>
                             <tr>
-                                <td><%= bid.bidder || "Anonymous" %></td>
+                                <td><%= bid.bidder.fullName || "Anonymous" %></td>
                                 <td><%= bid.title %></td>
                                 <td><%= bid.description %></td>
                                 <td><%= bid.location %></td>

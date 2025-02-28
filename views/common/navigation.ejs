@@ -19,10 +19,18 @@
         <li><a href="/rental">Renting Items</a></li>
         <li><a href="/subscriptions">Subscription Swapping</a></li>
         <li><a href="/secondHand">Second-Hand Buying</a></li>
-        <li><a href="#">Cart Status</a></li>
+        <li><a href="/cart">Cart Status</a></li>
         <li><a href="#">Profile</a></li>
     </ul>
 </nav>
+
+<% if (messages.error && messages.error.length > 0) { %>
+    <div class="flash-message error">
+      <% messages.error.forEach(msg => { %>
+        <p><%= msg %></p>
+      <% }); %>
+    </div>
+  <% } %>
 
 <style>
     body {
@@ -75,3 +83,13 @@
         color: #242e20;
     }
 </style>
+
+<script>
+    // Auto-dismiss flash messages after 5 seconds
+    setTimeout(function() {
+      const flashMessages = document.querySelectorAll('.flash-message');
+      flashMessages.forEach(function(msg) {
+        msg.style.display = 'none';
+      });
+    }, 3000);
+  </script>

@@ -1,5 +1,6 @@
 const Product = require("../models/product");
 const BidProduct = require("../models/bidproduct");
+const User = require("../models/userModel");
 
 //homepage for second hand
 exports.getHome = (req, res, next) => {
@@ -9,7 +10,7 @@ exports.getHome = (req, res, next) => {
   });
 };
 
-//add product form
+//add product form for selling product
 exports.getAddProduct = (req, res, next) => {
   res.render("secondHand/add-product", {
     pageTitle: "Add Product",
@@ -17,7 +18,7 @@ exports.getAddProduct = (req, res, next) => {
   });
 };
 
-//creating products
+//creating products for sell
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
   const imageUrl = req.body.imageUrl;
@@ -34,6 +35,7 @@ exports.postAddProduct = (req, res, next) => {
     location: location,
     startDate: startDate,
     endDate: endDate,
+    seller: req.user._id,
   });
   product
     .save()
@@ -47,14 +49,16 @@ exports.postAddProduct = (req, res, next) => {
     });
 };
 
-//for buy page--all the products
+//all the products for buy page
 exports.getProducts = (req, res, next) => {
   Product.find()
+    .populate("seller", "fullName") // ✅ Fetch seller's full name
     .then((products) => {
       res.render("secondHand/buy", {
         prods: products,
         pageTitle: "All Products",
         path: "/products",
+        user: req.user,
       });
     })
     .catch((err) => {
@@ -63,16 +67,29 @@ exports.getProducts = (req, res, next) => {
 };
 
 //every product auction page
+// "/buy/:productId"
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
   Product.findById(prodId)
-    .populate("bids") // Populate bid products
+    // .populate("bids") // Populate bid products
+    .populate("seller", "fullName")
+    .populate({
+      path: "bids",
+      populate: { path: "bidder", select: "fullName" }, // Fetch bidder details
+    })
     .then((product) => {
+      // console.log("Authenticated User:", req.user);
+      //display max-bid
+      const maxBid = product.bids
+        .filter((bid) => bid.bidAmount !== null)
+        .reduce((max, bid) => Math.max(max, bid.bidAmount), 0);
       res.render("secondHand/auction", {
         product: product,
+        user: req.user,
         pageTitle: "Auction",
+        maxBid: maxBid,
         path: "/product",
-        bidProducts: product.bids, // Pass bid products to EJS
+        // bidProducts: product.bids, // Pass bid products to EJS
       });
     })
     .catch((err) => {
@@ -81,6 +98,7 @@ exports.getProduct = (req, res, next) => {
 };
 
 //add product bid page
+// "/buy/:productId/add-bid-product"
 exports.getAddBidProduct = (req, res, next) => {
   const prodId = req.params.productId;
   res.render("secondHand/addBidProduct", {
@@ -91,38 +109,54 @@ exports.getAddBidProduct = (req, res, next) => {
 };
 
 //save new bidproduct in db
-// exports.postAddBidProduct = (req, res, next) => {
-//   const prodId = req.params.productId;
-//   const { title,imageUrl, description,location } = req.body;
+// exports.postAddBidProduct = async (req, res, next) => {
+//   try {
+//     // console.log("✅ User in postAddBidProduct:", req.user);
+//     if (!req.user) {
+//       return res.status(401).json({ message: "Unauthorized: Please log in" });
+//     }
 
-//   const bidProduct = new BidProduct({
-//     title,
-//     imageUrl,
-//     description,
-//     location,
-//     auction: prodId
-//   });
+//     const prodId = req.params.productId;
+//     const { title, imageUrl, description, location, bidAmount } = req.body;
 
-//   bidProduct
-//   .save()
-//   .then((savedBidProduct) => {
-//     console.log("Successfully saved bid product:", savedBidProduct);
-//     return Product.findByIdAndUpdate(prodId, {
-//       $push: { bids: savedBidProduct._id }
-//     }, { new: true });
-//   })
-//   .then(updatedProduct => {
-//     console.log("Updated product with bid:", updatedProduct);
+//     if (!bidAmount && !title) {
+//       return res
+//         .status(400)
+//         .send("Error: Provide either a bid amount or a product.");
+//     }
+
+//     const bidProduct = new BidProduct({
+//       title: title || null,
+//       imageUrl: imageUrl || null,
+//       description: description || null,
+//       location: location || null,
+//       bidAmount: bidAmount ? Number(bidAmount) : null,
+//       bidder: req.user._id, // ✅ Safe now
+//       auction: prodId,
+//     });
+
+//     const savedBidProduct = await bidProduct.save();
+
+//     await Product.findByIdAndUpdate(
+//       prodId,
+//       { $push: { bids: savedBidProduct._id } },
+//       { new: true }
+//     );
+
 //     res.redirect(`/secondHand/buy/${prodId}`);
-//   })
-//   .catch(err => {
-//     console.log("Error saving bid product:", err);
-//   });
+//   } catch (err) {
+//     console.error("Error saving bid:", err);
+//     res.status(500).send("Internal Server Error");
+//   }
 // };
+
 exports.postAddBidProduct = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Unauthorized: Please log in" });
+  }
+
   const prodId = req.params.productId;
-  const { title, imageUrl, description, location, bidAmount, bidder } =
-    req.body;
+  const { title, imageUrl, description, location, bidAmount } = req.body;
 
   if (!bidAmount && !title) {
     return res
@@ -136,26 +170,30 @@ exports.postAddBidProduct = (req, res, next) => {
     description: description || null,
     location: location || null,
     bidAmount: bidAmount ? Number(bidAmount) : null,
-    // bidder,
+    bidder: req.user._id,
     auction: prodId,
   });
 
   bidProduct
     .save()
     .then((savedBidProduct) => {
-      return Product.findByIdAndUpdate(
-        prodId,
-        {
-          $push: { bids: savedBidProduct._id },
-        },
-        { new: true }
-      );
+      return Promise.all([
+        Product.findByIdAndUpdate(
+          prodId,
+          { $push: { bids: savedBidProduct._id } },
+          { new: true }
+        ),
+        User.findByIdAndUpdate(
+          req.user._id,
+          { $addToSet: { cart: prodId } } // ✅ Adds product to bidder's cart
+        ),
+      ]);
     })
-    .then((updatedProduct) => {
+    .then(() => {
       res.redirect(`/secondHand/buy/${prodId}`);
     })
     .catch((err) => {
-      console.log("Error saving bid:", err);
+      console.error("Error saving bid:", err);
       res.status(500).send("Internal Server Error");
     });
 };

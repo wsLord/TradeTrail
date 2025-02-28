@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= product.title %> Details</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/rentalStyles.css">
+  <style>
+    /* Example inline CSS for section title */
+    .section-title {
+      font-size: 1.2em;
+      color: #333;
+      text-decoration: underline;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="navbar">
+    <%- include('../common/navigation.ejs') %>
+  </div>
+
+  <main class="product-details-container">
+    <div class="details-grid">
+      <!-- Left Column: Product Image & Title -->
+      <div class="product-image-column">
+        <img src="<%= product.imageUrl %>" alt="<%= product.title %>" class="details-image">
+        <h1><%= product.title %></h1>
+      </div>
+      
+      <!-- Right Column: Product Info -->
+      <div class="product-info-column">
+        <h2 class="section-title">Description</h2>
+        <p class="description"><%= product.description %></p>
+        
+        <% if (product.currentBooking) { %>
+          <p>Currently rented until: <%= new Date(product.currentBooking.rentalEnd).toLocaleDateString('en-IN') %></p>
+        <% } else { %>
+          <p>This product is available for rent.</p>
+        <% } %>
+        
+        <div class="details-meta">
+          <p><strong>Price:</strong> <%= product.price %> per <%= product.rate %></p>
+          <p><strong>Location:</strong> <%= product.location %></p>
+          <p><strong>Available Quantity:</strong> <%= product.quantity %></p>
+        </div>
+        
+        <!-- Rental Form -->
+        <form action="/rental/rent/<%= product.id %>" method="POST">
+            <label for="rentalEnd">Return By:</label>
+            <input type="date" name="rentalEnd" required>
+            <button type="submit" class="buy-now-button">Rent Now</button>
+        </form>
+        
+        <!-- Add to Cart Action -->
+        <div class="details-actions">
+          <form action="/rental/add-to-cart/<%= product.id %>" method="POST" class="inline-form">
+            <button type="submit" class="add-to-cart-button">Add to Cart</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

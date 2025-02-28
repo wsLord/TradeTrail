@@ -9,26 +9,43 @@
     <link rel="stylesheet" href="/css/rentalStyles.css">
 </head>
 <body>
-
     <!-- Include Navbar -->
     <div id="navbar">
         <%- include('../common/navigation.ejs') %>
     </div>
 
     <main>
-        <h1>Available Rental Products</h1>
+        <h1>Rental Products</h1>
+        <form action="/rental/rent" method="GET" class="search-form">
+            <input 
+                type="text" 
+                name="search" 
+                placeholder="Search products by title, description, or location..."
+                value="<%= searchQuery || '' %>"
+            >
+            <button type="submit">Search</button>
+        </form>
+        
         <div class="rental-list">
             <% products.forEach(product => { %>
                 <div class="rental-item">
-                    <h3><%= product.title %></h3>
-                    <img src="<%= product.imageUrl %>" alt="<%= product.title %>" />
-                    <p><%= product.description %></p>
-                    <p><%= product.price %> per <%= product.rate %></p>
-                    <p><%= product.location %></p>
+                    <div class="product-card">
+                        <img src="<%= product.imageUrl %>" alt="<%= product.title %>" class="product-image" />
+                        <div class="product-info">
+                            <h3><%= product.title %></h3>
+                            <p class="price">Price: <%= product.price %> per <%= product.rate %></p>
+                            
+                            <div class="button-group vertical">
+                                <a href="/rental/details/<%= product.id %>" class="view-details-button">View Details</a>
+                                <form action="/rental/add-to-cart/<%= product.id %>" method="POST" class="inline-form">
+                                    <button type="submit" class="add-to-cart-button">Add to Cart</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             <% }) %>
         </div>
     </main>
-
 </body>
 </html>
