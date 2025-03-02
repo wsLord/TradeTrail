@@ -45,6 +45,10 @@ const connectToMongoDB = require("./config/mongoose");
 const authRoutes = require("./routes/authRoutes"); // ✅ ADD THIS
 const secondHandRoutes = require("./routes/secondHandRoutes");
 const rentingRoutes = require("./routes/rentingRoutes");
+const profileRoutes = require("./routes/profileRoutes");
+const subscriptionRoutes = require("./routes/subscriptionRoutes");
+
+
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -63,19 +67,21 @@ app.set("views", path.join(__dirname, "views"));
 app.use("/api/auth", authRoutes); // ✅ FIX: Include auth routes
 app.use("/secondHand", secondHandRoutes);
 app.use("/rental", rentingRoutes);
+app.use("/", profileRoutes);
+app.use("/subscription", subscriptionRoutes);
 
 app.get("/", (req, res) => {
-  res.render("home"); // Renders the home.ejs file inside views/
+    res.render("home"); // Renders the home.ejs file inside views/
 });
 
 
 // Connect to MongoDB **before** starting the server
 connectToMongoDB()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
+    .then(() => {
+        app.listen(PORT, () => {
+            console.log(`Server running on http://localhost:${PORT}`);
+        });
+    })
+    .catch((err) => {
+        console.error("Failed to connect to MongoDB. Server not started.", err);
     });
-  })
-  .catch((err) => {
-    console.error("Failed to connect to MongoDB. Server not started.", err);
-  });

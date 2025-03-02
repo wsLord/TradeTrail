@@ -2,7 +2,8 @@ body {
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #F5F8F2; /* Same as homepage */
+    background-color: #F5F8F2;
+    /* Same as homepage */
     text-align: center;
 }
 
@@ -13,7 +14,8 @@ body {
     display: block;
     margin-top: 40pt;
     padding: 2.5rem;
-    background: #ffffff; /* Light background for contrast */
+    background: #ffffff;
+    /* Light background for contrast */
     border-radius: 8px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -41,7 +43,9 @@ body {
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+
 /* Styling each form control */
+
 .form-control {
     margin-bottom: 1rem;
 }
@@ -55,7 +59,8 @@ body {
 
 .form-control input,
 .form-control textarea,
-.form-control select { /* Added select styling */
+.form-control select {
+    /* Added select styling */
     width: 100%;
     padding: 0.5rem;
     border: 1px solid #ccc;
@@ -63,10 +68,13 @@ body {
     font-size: 1rem;
 }
 
+
 /* Hover effect on inputs, textareas, and selects */
+
 .form-control input:focus,
 .form-control textarea:focus,
-.form-control select:focus { /* Added select focus styling */
+.form-control select:focus {
+    /* Added select focus styling */
     outline: none;
     border-color: #3E6B48;
     box-shadow: 0px 0px 5px rgba(62, 107, 72, 0.5);
@@ -74,26 +82,30 @@ body {
 
 .btn {
     width: 100%;
-    padding: 0.7rem; 
-    background-color: #3E6B48; 
+    padding: 0.7rem;
+    background-color: #3E6B48;
     color: white;
     border: none;
     border-radius: 5px;
     font-size: 16px;
     cursor: pointer;
     transition: background 0.3s ease;
-    margin-top: 30pt;
+    margin-top: 20pt;
+    margin-bottom: 10px;
 }
 
 .btn:hover {
-    background-color: #2d5035;;
+    background-color: #2d5035;
+    ;
 }
 
 .product__description {
     text-align: center;
 }
 
+
 /* Styling for the select dropdown */
+
 .form-control select {
     width: 100%;
     padding: 0.5rem;
@@ -103,7 +115,9 @@ body {
     background-color: white;
 }
 
+
 /* Hover and focus effects for the select dropdown */
+
 .form-control select:focus {
     outline: none;
     border-color: #3E6B48;

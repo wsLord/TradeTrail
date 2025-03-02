@@ -18,18 +18,22 @@
     <%- include('../common/navigation.ejs') %>
 
         <main>
-            <form class="product-form" action="/secondHand/sell" method="POST">
+            <form class="product-form" action="/subscription/sell" method="POST">
                 <div class="form-control">
-                    <label for="title">Title</label>
-                    <input type="text" name="title" id="title">
+                    <label for="platform_name">Platform Name</label>
+                    <input type="text" name="platform_name" id="title">
                 </div>
                 <div class="form-control">
                     <label for="imageUrl">Upload image</label>
                     <input type="text" name="imageUrl" id="imageUrl">
                 </div>
                 <div class="form-control">
-                    <label for="price">Minimum Price</label>
+                    <label for="price"> Price on direct purchase</label>
                     <input type="number" name="price" id="price" step="0.01">
+                </div>
+                <div class="form-control">
+                    <label for="min_price"> Minimum Price on auction</label>
+                    <input type="number" name="min_price" id="price" step="0.01">
                 </div>
                 <div class="form-control">
                     <label for="start-date">Start Date</label>
@@ -43,10 +47,7 @@
                     <label for="description">Description</label>
                     <textarea name="description" id="description" rows="5"></textarea>
                 </div>
-                <div class="form-control">
-                    <label for="location">location</label>
-                    <textarea name="location" id="location" rows="5"></textarea>
-                </div>
+
 
                 <button class="btn" type="submit">Add Product</button>
             </form>

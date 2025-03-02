@@ -1,34 +1,26 @@
-
-<!-- <nav class="navbar">
-    <div class="nav-container">
-        <a href="/" class="logo">TradeTrail</a>
-        <ul class="nav-links">
-            <li><a href="/rentals">Renting</a></li>
-            <li><a href="/secondHand">Second-Hand Buying</a></li>
-            <li><a href="/subscriptions">Subscription Swapping</a></li>
-        </ul>
-        <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-    </div>
-</nav> -->
-
 <nav class="navbar">
     <div class="logo">
         <a href="/">TradeTrail</a>
     </div>
     <ul>
         <li><a href="/rental">Renting Items</a></li>
-        <li><a href="/subscriptions">Subscription Swapping</a></li>
+        <li><a href="/subscription">Subscription Swapping</a></li>
         <li><a href="/secondHand">Second-Hand Buying</a></li>
         <li><a href="#">Cart Status</a></li>
-        <li><a href="#">Profile</a></li>
+        <!-- <li><a href="/profile">Profile</a></li> -->
+        <li><a href="/profile" id="profileLink" data-toggle="popover">Profile</a></li>
+
     </ul>
 </nav>
+
+
 
 <style>
     body {
         margin: 0;
         font-family: Arial, sans-serif;
     }
+    
     .navbar {
         background-color: #75975e;
         padding: 15px;
@@ -40,37 +32,41 @@
         top: 0;
         width: 100%;
     }
+    
     .navbar .logo {
         color: white;
         font-size: 20px;
         font-weight: bold;
     }
-
+    
     .logo a {
-        text-decoration: none; 
-        color: inherit; 
+        text-decoration: none;
+        color: inherit;
         font-weight: bold;
-        font-size: 20px; 
+        font-size: 20px;
     }
-
+    
     .logo a:hover {
-        color: #242e20; 
+        color: #242e20;
     }
-
+    
     .navbar ul {
         list-style: none;
         display: flex;
         margin: 0;
         padding: 0 20px;
     }
+    
     .navbar ul li {
         margin: 0 15px;
     }
+    
     .navbar ul li a {
         color: white;
         text-decoration: none;
         transition: color 0.3s;
     }
+    
     .navbar ul li a:hover {
         color: #242e20;
     }
