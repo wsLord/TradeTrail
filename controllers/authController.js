@@ -86,5 +86,4 @@ const checkAuth = (req, res) => {
   }
 };
 
-console.log("AuthController Loaded:", { signup, login, checkAuth });
 module.exports = { signup, login, checkAuth };

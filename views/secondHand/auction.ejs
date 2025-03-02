@@ -15,6 +15,7 @@
 
 <body>
     <%- include('../common/navigation.ejs') %>
+<<<<<<< HEAD
         <main>
             <section>
                 <h1>Auction</h1>
@@ -33,6 +34,33 @@
                     <button type="submit">Bid</button>
                 </form>
             </section>
+=======
+    <main>
+        <section>
+            <h1>Auction</h1>
+            <h2>Welcome, <%= user.fullName %>!</h2>
+            <div><b>Product:</b>  <%= product.title %></div>
+            <p><b>Seller:</b> <%= product.seller ? product.seller.fullName : "Unknown Seller" %></p>
+            <p>Start: <span id="start-date"><%= product.startDate %></span></p>
+            <p>End: <span id="end-date"><%= product.endDate %></span></p>
+            <p>Initial bid: <span id="initial-bid"><%= product.price %></span></p>
+            <p>Max bid: <span id="max-bid"><%= maxBid %></span></p>
+        </section>
+        <section>
+            <h2>Bid Amount</h2>
+            <form id="bidForm" action="/secondHand/buy/<%= product._id %>/add-bid-product" method="POST">
+                <input type="number" id="bidAmount" name="bidAmount" placeholder="Enter bid amount" min="<%= product.price %>" required>
+                <button type="submit">Bid</button>
+            </form>
+            <!-- <form id="bidForm" action="/secondHand/buy/<%= product._id %>/add-bid" method="POST">
+                <input type="hidden" name="productId" value="<%= product._id %>">
+                <input type="number" id="bidAmount" name="bidAmount" placeholder="Enter bid amount" min="<%= product.price %>" required>
+                <button type="submit">Bid</button>
+            </form> -->
+            
+            
+        </section>
+>>>>>>> 07855f16b0ec870c2a89a8d7b88da5cba0142408
 
             <!-- Add Product Bid Section -->
             <section>
@@ -42,6 +70,7 @@
                 </a>
             </section>
 
+<<<<<<< HEAD
             <!-- Table for Monetary Bids -->
             <section>
                 <h2>Monetary Bids</h2>
@@ -114,6 +143,64 @@
                 </table>
             </section>
         </main>
+=======
+        <!-- Table for Monetary Bids -->
+        <section>
+            <h2>Monetary Bids</h2>
+            <table id="monetaryBidsTable">
+                <thead>
+                    <tr>
+                        <th>Bidder</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% const moneyBids = product.bids.filter(bid => bid.bidAmount); %>
+                    <% if (moneyBids.length > 0) { %>
+                        <% moneyBids.forEach(bid => { %>
+                            <tr>
+                                <td><%= bid.bidder.fullName || "Anonymous" %></td>
+                                <td>₹<%= bid.bidAmount %></td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr><td colspan="2">No monetary bids yet.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Table for Product Bids -->
+        <section>
+            <h2>Product Bids</h2>
+            <table id="productBidsTable">
+                <thead>
+                    <tr>
+                        <th>Bidder</th>
+                        <th>Product Name</th>
+                        <th>Description</th>
+                        <th>Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% const productBids = product.bids.filter(bid => bid.title); %>
+                    <% if (productBids.length > 0) { %>
+                        <% productBids.forEach(bid => { %>
+                            <tr>
+                                <td><%= bid.bidder.fullName || "Anonymous" %></td>
+                                <td><%= bid.title %></td>
+                                <td><%= bid.description %></td>
+                                <td><%= bid.location %></td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr><td colspan="4">No product bids yet.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </section>
+    </main>
+>>>>>>> 07855f16b0ec870c2a89a8d7b88da5cba0142408
 </body>
 
 </html>

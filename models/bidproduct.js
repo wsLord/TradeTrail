@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+//for products i am bidding against other product
 
 const bidProductSchema = Schema({
   title: { type: String },
@@ -7,7 +8,7 @@ const bidProductSchema = Schema({
   imageUrl: { type: String },
   location: { type: String },
   bidAmount: { type: Number }, // New field for numeric bids
-  //   bidder: { type: String, required: true }, // Name or ID of the bidder
+  bidder: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // Reference to the user who placed the bid
   auction: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Product",

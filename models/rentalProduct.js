@@ -27,6 +27,11 @@ const rentalProductSchema = new mongoose.Schema({
     type: String,
     required: true, // Location is required.
   },
+  quantity: {
+    type: Number,
+    required: true, // Quantity is required.
+    default: 10, // Default quantity to 10 if not specified.
+  },
 });
 
 const RentalProduct = mongoose.model('RentalProduct', rentalProductSchema);
