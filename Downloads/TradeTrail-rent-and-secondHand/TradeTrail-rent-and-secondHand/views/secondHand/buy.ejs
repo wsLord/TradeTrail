@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>
+        <%= pageTitle %>
+    </title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/product.css">
+    <link rel="stylesheet" href="/css/navigation.css">
+</head>
+
+<body>
+    <%- include('../common/navigation.ejs') %>
+        <main>
+            <% if (prods.length > 0) { %>
+                <div class="grid">
+                    <% for (let product of prods) { %>
+                        <article class="card product-item">
+                            <header class="card__header">
+                                <h1 class="product__title">
+                                    <%= product.title %>
+                                </h1>
+                            </header>
+                            <div class="card__image">
+                                <img src="<%= product.imageUrl %>" alt="<%= product.title %>">
+                            </div>
+                            <div class="card__content">
+                                <h2 class="product__price">₹
+                                    <%= product.price %>
+                                </h2>
+                                <p class="product__description">
+                                    <%= product.description %>
+                                </p>
+                                <p class="product__description">
+                                    <%= product.location%>
+                                </p>
+                                <p class="product__description">
+                                    <b>Seller:</b>
+                                    <%= product.seller ? product.seller.fullName : 'Unknown' %>
+                                </p>
+                            </div>
+                            <div class="card__actions">
+                                <a href="/secondHand/buy/<%= product._id %>" class="btn">Auction</a>
+                            </div>
+                        </article>
+                        <% } %>
+                </div>
+                <% } else { %>
+                    <h1>No Products Found!</h1>
+                    <% } %>
+        </main>

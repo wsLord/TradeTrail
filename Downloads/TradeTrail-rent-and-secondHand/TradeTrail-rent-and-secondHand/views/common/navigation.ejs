@@ -1,0 +1,100 @@
+<nav class="navbar">
+    <div class="logo">
+        <a href="/">TradeTrail</a>
+    </div>
+    <ul>
+        <li><a href="/rental">Renting Items</a></li>
+        <li><a href="/subscription">Subscription Swapping</a></li>
+        <li><a href="/secondHand">Second-Hand Buying</a></li>
+        <li><a href="/cart">Cart Status</a></li>
+
+        <li><a href="/subscription/add-to-cart">Subscription Cart</a></li>
+        <!-- <li><a href="/profile">Profile</a></li> -->
+        <li><a href="/profile" id="profileLink" data-toggle="popover">Profile</a></li>
+
+    </ul>
+</nav>
+
+
+<li><a href="/cart">Cart Status</a></li>
+<li><a href="#">Profile</a></li>
+</ul>
+</nav>
+
+<% if (messages.error && messages.error.length > 0) { %>
+    <div class="flash-message error">
+        <% messages.error.forEach(msg => { %>
+            <p>
+                <%= msg %>
+            </p>
+            <% }); %>
+    </div>
+    <% } %>
+
+        <style>
+            body {
+                margin: 0;
+                font-family: Arial, sans-serif;
+            }
+            
+            .navbar {
+                background-color: #75975e;
+                padding: 15px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                position: fixed;
+                top: 0;
+                width: 100%;
+            }
+            
+            .navbar .logo {
+                color: white;
+                font-size: 20px;
+                font-weight: bold;
+            }
+            
+            .logo a {
+                text-decoration: none;
+                color: inherit;
+                font-weight: bold;
+                font-size: 20px;
+            }
+            
+            .logo a:hover {
+                color: #242e20;
+            }
+            
+            .navbar ul {
+                list-style: none;
+                display: flex;
+                margin: 0;
+                padding: 0 20px;
+            }
+            
+            .navbar ul li {
+                margin: 0 15px;
+            }
+            
+            .navbar ul li a {
+                color: white;
+                text-decoration: none;
+                transition: color 0.3s;
+            }
+            
+            .navbar ul li a:hover {
+                color: #242e20;
+            }
+        </style>
+        </style>
+
+        <script>
+            // Auto-dismiss flash messages after 5 seconds
+            setTimeout(function() {
+                const flashMessages = document.querySelectorAll('.flash-message');
+                flashMessages.forEach(function(msg) {
+                    msg.style.display = 'none';
+                });
+            }, 3000);
+        </script>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Cart</title>
+    <link rel="stylesheet" href="/css/cart.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+    <%- include('./common/navigation.ejs') %>
+        <div class="container">
+            <h2>Subscription Cart</h2>
+
+            <% if (subscriptionCart.items.length === 0) { %>
+                <p>Your subscription cart is empty.</p>
+                <% } else { %>
+                    <table class="cart-items">
+                        <thead>
+                            <tr>
+                                <th>Subscription Name</th>
+                                <th> </th>
+                                <th>Quantity</th>
+
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% subscriptionCart.items.forEach(item => { %>
+                                <tr>
+                                    <td>
+                                        <%= item.product.platform_name %>
+                                    </td>
+                                    <td>
+                                        <%=  %>
+                                    </td>
+                                    <td>
+                                        <%= item.quantity %>
+                                    </td>
+
+                                    <td>
+                                        <form action="/subscription/update-cart/<%= item.product._id %>" method="POST">
+                                            <!-- Limit quantity to available stock -->
+                                            <input type="number" name="quantity" value="<%= item.quantity %>" min="1" max="<%= item.product.quantity %>" class="quantity-input">
+                                            <button type="submit">Update</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                        </tbody>
+                    </table>
+
+                    <h3>Total Amount: $
+                        <%= totalAmount %>
+                    </h3>
+
+
+
+                    <form action="/subscription/checkout" method="POST">
+                        <button type="submit" class="btn">Proceed to Checkout</button>
+                    </form>
+                    <% } %>
+
+                        <br>
+                        <a href="/subscription" class="btn">Continue Browsing</a>
+        </div>
+</body>
+
+</html>
