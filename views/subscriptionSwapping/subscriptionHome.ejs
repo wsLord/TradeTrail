@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>
+        <%= pageTitle %>
+    </title>
+    <!-- <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/product.css"> -->
+    <link rel="stylesheet" href="/css/rentalStyles.css">
+</head>
+
+<%- include('../common/navigation.ejs') %>
+
+
+    <div class="renting-container">
+        <h1>Subscription Swapping</h1>
+        <p>Choose an option to proceed</p>
+
+        <div class="options">
+            <div class="option">
+                <h2>Want to Post an OTT subscription?</h2>
+                <p>List your ott Subscriptions for sale and find interested buyers easily</p>
+                <button onclick="window.location.href='/subscription/sell'">Post an ott platform to Sell</button>
+            </div>
+
+            <div class="option">
+                <h2>Want to access an OTT subscription?</h2>
+                <p>Browse available ott subscriptions and get what you need</p>
+                <button onclick="window.location.href='/subscription/buy'">Access an OTT subsciption</button>
+            </div>
+        </div>
+    </div>
