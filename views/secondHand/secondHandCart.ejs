@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Second-Hand Cart</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/cart.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/rentalStyles.css">
+</head>
+<body>
+  <div id="navbar">
+    <%- include('../common/navigation.ejs') %>
+  </div>
+  <main class="cart-container">
+    <div class="cart-header">
+      <h1>Second-Hand Cart</h1>
+    </div>
+    <% if (cart.items.length === 0) { %>
+      <p>Your cart is empty.</p>
+    <% } else { %>
+      <table class="cart-items">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Title</th>
+            <th>Unit Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+            <th>Remove</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% let grandTotal = 0; %>
+          <% cart.items.forEach(item => { %>
+            <% if (item.product) { %>
+              <% const totalPrice = item.product.price * item.quantity; %>
+              <% grandTotal += totalPrice; %>
+              <tr class="cart-item">
+                <td>
+                  <img src="<%= item.product.imageUrl %>" alt="<%= item.product.title %>">
+                </td>
+                <td><%= item.product.title %></td>
+                <td>$<%= item.product.price.toFixed(2) %></td>
+                <td>
+                  <form action="/secondHand/cart/update/<%= item.product._id %>" method="POST">
+                    <input type="number" name="quantity" value="<%= item.quantity %>" min="1" max="<%= item.product.quantity %>" class="quantity-input">
+                    <button type="submit">Update</button>
+                  </form>
+                </td>
+                <td>$<%= totalPrice.toFixed(2) %></td>
+                <td>
+                  <form action="/secondHand/cart/delete-item/<%= item.product._id %>" method="POST">
+                    <button type="submit" class="delete-button" style="background-color: black; color: white;">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            <% } else { %>
+              <tr class="cart-item">
+                <td colspan="6">Product information is unavailable.</td>
+              </tr>
+            <% } %>
+          <% }); %>
+        </tbody>
+      </table>
+      <div class="cart-total">
+        Grand Total: $<%= grandTotal.toFixed(2) %>
+      </div>
+      <div style="clear: both;"></div>
+      <button class="checkout-button">Proceed to Checkout</button>
+    <% } %>
+  </main>
+</body>
+</html>

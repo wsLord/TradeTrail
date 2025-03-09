@@ -7,22 +7,26 @@ exports.getCart = (req, res, next) => {
         .populate("items.product") // Ensures product details are available
         .then(cart => {
             if (!cart) {
-                return res.render("subscriptionCart", {
+                return res.render("subscriptionSwapping/subscriptionCart", {
                     pageTitle: "Your Cart",
                     subscriptionCart: { items: [] },
-                    totalAmount: 0 // ✅ Ensure totalAmount is always defined
+                    totalAmount: 0, // Ensure totalAmount is always defined
+                    activePage: "subCart", // Set active page for navbar highlighting
+                    messages: req.flash() // Pass flash messages if any
                 });
             }
 
-            // ✅ Calculate total amount
+            // Calculate total amount
             let totalAmount = cart.items.reduce((sum, item) => {
                 return sum + (item.product.price * item.quantity);
             }, 0);
 
-            res.render("subscriptionCart", {
+            res.render("subscriptionSwapping/subscriptionCart", {
                 pageTitle: "Your Cart",
                 subscriptionCart: cart,
-                totalAmount: totalAmount // ✅ Pass totalAmount to EJS
+                totalAmount: totalAmount, // Pass totalAmount to EJS
+                activePage: "subCart", // Set active page for navbar highlighting
+                messages: req.flash() // Pass flash messages if any
             });
         })
         .catch(err => {

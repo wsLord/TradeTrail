@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const rentingController = require("../controllers/rentingController");
-const cartController = require("../controllers/cartController");
+const cartController = require("../controllers/rentalCartController");
 const { protectRoute } = require("../middleware/authMiddleware");
 
 // Route to render the homepage for renting (options: post or rent an item)
@@ -30,6 +30,7 @@ router.get("/cart", protectRoute, cartController.getCart);
 
 
 router.post("/update-cart/:productId", protectRoute, rentingController.updateCart);
+
 
 // routes/rentingRoutes.js
 router.post("/rent/:productId", protectRoute, rentingController.rentProduct);

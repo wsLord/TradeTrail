@@ -11,5 +11,8 @@ exports.getProfile = (req, res) => {
         badge: "new user"
     };
 
-    res.render("profile", { user: userProfile });
+    res.render("profile", { 
+        user: userProfile,
+        activePage: "profile"  // Added activePage for navbar highlighting
+    });
 };

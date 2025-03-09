@@ -37,7 +37,6 @@ dotenv.config(); // Load environment variables
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser"); // Ensure cookies are parsed
-const cartRoutes = require("./routes/cartRoutes");
 const session = require("express-session");
 const flash = require("connect-flash");
 
@@ -53,6 +52,10 @@ const secondHandRoutes = require("./routes/secondHandRoutes");
 const rentingRoutes = require("./routes/rentingRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const subscriptionRoutes = require("./routes/subscriptionRoutes");
+
+const rentalCartRoutes = require("./routes/rentalCartRoutes");
+const secondHandCartRoutes = require("./routes/secondHandCartRoutes");
+const subscriptionCartRoutes = require("./routes/subscriptionCartRoutes");
 
 
 
@@ -92,12 +95,12 @@ app.set("views", path.join(__dirname, "views"));
 app.use("/api/auth", authRoutes); // ✅ FIX: Include auth routes
 app.use("/secondHand", secondHandRoutes);
 app.use("/rental", rentingRoutes);
-app.use("/cart", cartRoutes);
 app.use("/", profileRoutes);
 app.use("/subscription", subscriptionRoutes);
 
-const subscriptionCartRoutes = require("./routes/subscriptionCartRoutes");
+app.use("/rental/cart", rentalCartRoutes);
 app.use("/subscription/cart", subscriptionCartRoutes);
+app.use("/secondHand/cart", secondHandCartRoutes);
 
 
 app.get("/", (req, res) => {

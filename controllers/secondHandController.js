@@ -7,6 +7,8 @@ exports.getHome = (req, res, next) => {
   res.render("secondHand/secondHandHome", {
     pageTitle: "Second Hand",
     path: "/secondHand",
+    activePage: "secondHand", // Added activePage
+    messages: req.flash()
   });
 };
 
@@ -15,6 +17,8 @@ exports.getAddProduct = (req, res, next) => {
   res.render("secondHand/add-product", {
     pageTitle: "Add Product",
     path: "/secondHand/sell",
+    activePage: "secondHand", // Added activePage
+    messages: req.flash()
   });
 };
 
@@ -40,8 +44,7 @@ exports.postAddProduct = (req, res, next) => {
   product
     .save()
     .then((result) => {
-      // console.log("Created Product");
-      //want to show products in second hand buy
+      // After creation, redirect to the buy page
       res.redirect("/secondHand/buy");
     })
     .catch((err) => {
@@ -51,14 +54,31 @@ exports.postAddProduct = (req, res, next) => {
 
 //all the products for buy page
 exports.getProducts = (req, res, next) => {
-  Product.find()
-    .populate("seller", "fullName") // ✅ Fetch seller's full name
+  const searchQuery = req.query.search || "";
+  let filter = {};
+
+  // If a search term is provided, build a filter for title, description, or location.
+  if (searchQuery) {
+    filter = {
+      $or: [
+        { title: { $regex: searchQuery, $options: "i" } },
+        { description: { $regex: searchQuery, $options: "i" } },
+        { location: { $regex: searchQuery, $options: "i" } }
+      ]
+    };
+  }
+
+  Product.find(filter)
+    .populate("seller", "fullName") // Fetch seller's full name
     .then((products) => {
       res.render("secondHand/buy", {
         prods: products,
         pageTitle: "All Products",
         path: "/products",
         user: req.user,
+        searchQuery: searchQuery,  // Pass searchQuery to the view
+        activePage: "secondHand",  // Added activePage
+        messages: req.flash()
       });
     })
     .catch((err) => {
@@ -78,8 +98,7 @@ exports.getProduct = (req, res, next) => {
       populate: { path: "bidder", select: "fullName" }, // Fetch bidder details
     })
     .then((product) => {
-      // console.log("Authenticated User:", req.user);
-      //display max-bid
+      // Calculate maximum bid from existing bids
       const maxBid = product.bids
         .filter((bid) => bid.bidAmount !== null)
         .reduce((max, bid) => Math.max(max, bid.bidAmount), 0);
@@ -89,7 +108,8 @@ exports.getProduct = (req, res, next) => {
         pageTitle: "Auction",
         maxBid: maxBid,
         path: "/product",
-        // bidProducts: product.bids, // Pass bid products to EJS
+        activePage: "secondHand",  // Added activePage
+        messages: req.flash()
       });
     })
     .catch((err) => {
@@ -105,51 +125,12 @@ exports.getAddBidProduct = (req, res, next) => {
     pageTitle: "Add Bid Product",
     path: "/add-bid-product",
     productId: prodId,
+    activePage: "secondHand",  // Added activePage
+    messages: req.flash()
   });
 };
 
 //save new bidproduct in db
-// exports.postAddBidProduct = async (req, res, next) => {
-//   try {
-//     // console.log("✅ User in postAddBidProduct:", req.user);
-//     if (!req.user) {
-//       return res.status(401).json({ message: "Unauthorized: Please log in" });
-//     }
-
-//     const prodId = req.params.productId;
-//     const { title, imageUrl, description, location, bidAmount } = req.body;
-
-//     if (!bidAmount && !title) {
-//       return res
-//         .status(400)
-//         .send("Error: Provide either a bid amount or a product.");
-//     }
-
-//     const bidProduct = new BidProduct({
-//       title: title || null,
-//       imageUrl: imageUrl || null,
-//       description: description || null,
-//       location: location || null,
-//       bidAmount: bidAmount ? Number(bidAmount) : null,
-//       bidder: req.user._id, // ✅ Safe now
-//       auction: prodId,
-//     });
-
-//     const savedBidProduct = await bidProduct.save();
-
-//     await Product.findByIdAndUpdate(
-//       prodId,
-//       { $push: { bids: savedBidProduct._id } },
-//       { new: true }
-//     );
-
-//     res.redirect(`/secondHand/buy/${prodId}`);
-//   } catch (err) {
-//     console.error("Error saving bid:", err);
-//     res.status(500).send("Internal Server Error");
-//   }
-// };
-
 exports.postAddBidProduct = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ message: "Unauthorized: Please log in" });
@@ -185,7 +166,7 @@ exports.postAddBidProduct = (req, res, next) => {
         ),
         User.findByIdAndUpdate(
           req.user._id,
-          { $addToSet: { cart: prodId } } // ✅ Adds product to bidder's cart
+          { $addToSet: { cart: prodId } } // Adds product to bidder's cart
         ),
       ]);
     })

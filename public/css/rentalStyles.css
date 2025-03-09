@@ -71,7 +71,7 @@ body {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 20px;
+    gap: 150px;
     padding: 20px;
 }
 
@@ -220,7 +220,6 @@ body {
     margin-top: 15px;
 }
   
-/* View Details Button */
 .view-details-button {
     background-color: #3E6B48;
     color: white;
@@ -231,13 +230,15 @@ body {
     text-decoration: none;
     display: block;
     width: 100%;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
     margin-bottom: 10px;
-}
-
-.view-details-button:hover {
+  }
+  
+  .view-details-button:hover {
     background-color: #2d5035;
-}
+    transform: scale(1.02);
+  }
+  
 
 /* Product Details Page Styles - E-commerce Layout */
 .product-details-container {
@@ -436,6 +437,30 @@ body {
     position: relative;
     z-index: 1000; /* Ensure it's above other content if needed */
   }
+
+  .card__image {
+    width: 100%;
+    height: 200px; /* Set a fixed height for your image container */
+    overflow: hidden; /* Ensures anything outside the container is hidden */
+}
+
+.card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Prevents cropping and ensures the image shrinks */
+}
+
+.auction-btn {
+    background-color: #3E6B48 !important; /* Green background */
+    color: white !important;
+    border: none !important;
+}
+
+.auction-btn:hover {
+    background-color: #3E6B48 !important; /* Darker green on hover */
+}
+
+
   
   
   

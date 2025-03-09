@@ -14,7 +14,6 @@ exports.addToCart = (req, res, next) => {
       if (!product) {
         req.flash("error", "Product not found.");
         return res.redirect(req.get("Referrer") || "/");
-
       }
       return Cart.findOne({ user: userId }).then(cart => {
         return { product, cart };
@@ -26,7 +25,6 @@ exports.addToCart = (req, res, next) => {
         if (quantityToAdd > product.quantity) {
           req.flash("error", "Cannot add more items than available.");
           return res.redirect(req.get("Referrer") || "/");
-
         }
         const newCart = new Cart({
           user: userId,
@@ -42,14 +40,12 @@ exports.addToCart = (req, res, next) => {
           if (currentQuantity + quantityToAdd > product.quantity) {
             req.flash("error", "Cannot add more items than available.");
             return res.redirect(req.get("Referrer") || "/");
-
           }
           cart.items[itemIndex].quantity += quantityToAdd;
         } else {
           if (quantityToAdd > product.quantity) {
             req.flash("error", "Cannot add more items than available.");
             return res.redirect(req.get("Referrer") || "/");
-
           }
           cart.items.push({ product: productId, quantity: quantityToAdd });
         }
@@ -73,6 +69,7 @@ exports.getHome = (req, res, next) => {
   res.render("rentals/rentalHome", {
     pageTitle: "Renting",
     path: "/rental",
+    activePage: "rental"
   });
 };
 
@@ -81,6 +78,7 @@ exports.getAddProduct = (req, res, next) => {
   res.render("rentals/post-product", {
     pageTitle: "Post Product",
     path: "/rental/post",
+    activePage: "rental"
   });
 };
 
@@ -115,22 +113,7 @@ exports.postAddProduct = (req, res, next) => {
     });
 };
 
-// Get all rental items
-// exports.getRentItems = (req, res, next) => {
-//   RentalProduct.find()
-//     .then((products) => {
-//       res.render("rentals/rent-items", {
-//         pageTitle: "Available Rentals",
-//         path: "/rental/rent",
-//         products: products,
-//       });
-//     })
-//     .catch((err) => {
-//       console.log(err);
-//       res.status(500).send("An error occurred while fetching rental items.");
-//     });
-// };
-
+// Get all rental items (with search)
 exports.getRentItems = (req, res, next) => {
   const searchQuery = req.query.search || '';
   const query = {};
@@ -149,7 +132,8 @@ exports.getRentItems = (req, res, next) => {
               pageTitle: "Available Rentals",
               path: "/rental/rent",
               products: products,
-              searchQuery: searchQuery
+              searchQuery: searchQuery,
+              activePage: "rental"
           });
       })
       .catch((err) => {
@@ -157,7 +141,6 @@ exports.getRentItems = (req, res, next) => {
           res.status(500).send("An error occurred while fetching rental items.");
       });
 };
-
 
 // Controller method to handle the buying action and decrementing quantity
 exports.buyProduct = (req, res, next) => {
@@ -212,6 +195,7 @@ exports.getProductDetails = (req, res, next) => {
       res.render("rentals/product-details", {
         pageTitle: fetchedProduct.title,
         product: fetchedProduct,
+        activePage: "rental"
       });
     })
     .catch(err => {
@@ -291,8 +275,5 @@ exports.rentProduct = (req, res, next) => {
       res.status(500).send("Error processing your rental.");
     });
 };
-
-
-
 
 
