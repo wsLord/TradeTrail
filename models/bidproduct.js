@@ -23,4 +23,5 @@ bidProductSchema.pre("save", function (next) {
   next();
 });
 
+
 module.exports = mongoose.model("BidProduct", bidProductSchema);

@@ -10,6 +10,13 @@ router.get("/buy", protectRoute, secondHandController.getProducts);
 // router.get("/buy/:productId", secondHandController.getProduct); //auction page
 router.get("/buy/:productId", protectRoute, secondHandController.getProduct); // Ensure protectRoute is used
 
+router.post(
+  "/delete-bid/:bidId",
+  protectRoute,
+  secondHandController.deleteBid
+);
+
+
 // Existing routes for product-based bidding
 router.get(
   "/buy/:productId/add-bid-product",
