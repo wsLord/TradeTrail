@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="/css/auction.css">
   <style>
     /* Flash message container */
-.alert-box {
+    .alert-box {
   position: relative;
   max-width: 400px;
   margin: 20px auto;
@@ -91,22 +91,20 @@
       <p><b>Seller:</b> <%= product.seller ? product.seller.fullName : "Unknown Seller" %></p>
       <p>Start: <span id="start-date"><%= product.startDate %></span></p>
       <p>End: <span id="end-date"><%= product.endDate %></span></p>
-      <div class="price-display">
-        <p>Actual Price: ₹<span id="actual-price"><%= product.price %></span></p>
-        <p>Minimum Bid: ₹<span id="min-bid"><%= product.min_price %></span></p>
-        <p>Max bid: <span id="max-bid"><%= maxBid %></span></p>
-      </div>
+      <p>Actual Price: ₹<span id="actual-price"><%= product.price %></span></p>
+      <p>Minimum Bid: ₹<span id="min-bid"><%= product.min_price %></span></p>
+      <p>Max bid: <span id="max-bid"><%= maxBid %></span></p>
     </section>
     
     <section>
       <h2>Bid Amount</h2>
       <% 
-         // Check if the current user already placed a bid on this product.
+         // Check if the current user has an existing bid on this product.
          const userBid = product.bids.find(bid => String(bid.bidder._id) === String(user._id));
       %>
       <% if (!userBid) { %>
-        <!-- Bid form shown only if the user hasn't placed a bid -->
-        <form id="bidForm" action="/secondHand/buy/<%= product._id %>/add-bid-product" method="POST">
+        <!-- Bid form shown only if user hasn't bid already -->
+        <form id="bidForm" action="/subscription/buy/<%= product._id %>/add-bid-product" method="POST">
           <input 
             type="number" 
             id="bidAmount" 
@@ -118,11 +116,11 @@
           <button type="submit">Bid</button>
         </form>
       <% } else { %>
-        <!-- If a bid exists, prompt the user to delete it first -->
+        <!-- If user already has a bid, prompt to delete it -->
         <div class="alert-info">
           <p>You have already placed a bid of ₹<%= userBid.bidAmount %> on this auction.</p>
           <p>Please delete your existing bid before placing a new one.</p>
-          <form action="/secondHand/delete-bid/<%= userBid._id %>" method="POST">
+          <form action="/subscription/delete-bid/<%= userBid._id %>" method="POST">
             <button type="submit" class="btn btn-delete">Delete Your Bid</button>
           </form>
         </div>
@@ -132,7 +130,7 @@
     <!-- Add Product Bid Section -->
     <section>
       <h2>Bid with a Product</h2>
-      <a href="/secondHand/buy/<%= product._id %>/add-bid-product">
+      <a href="/subscription/buy/<%= product._id %>/add-bid-product">
         <button>Add Product Bid</button>
       </a>
     </section>
@@ -151,13 +149,13 @@
         <tbody>
           <% const moneyBids = product.bids.filter(bid => bid.bidAmount); %>
           <% if (moneyBids.length > 0) { %>
-            <% moneyBids.forEach(function(bid) { %>
+            <% moneyBids.forEach(bid => { %>
               <tr>
                 <td><%= bid.bidder.fullName || "Anonymous" %></td>
                 <td>₹<%= bid.bidAmount %></td>
                 <td>
-                  <% if (String(bid.bidder._id) === String(user._id)) { %>
-                    <form action="/secondHand/delete-bid/<%= bid._id %>" method="POST">
+                  <% if(String(bid.bidder._id) === String(user._id)) { %>
+                    <form action="/subscription/delete-bid/<%= bid._id %>" method="POST">
                       <button type="submit" class="delete-btn">Delete</button>
                     </form>
                   <% } %>
@@ -187,15 +185,15 @@
         <tbody>
           <% const productBids = product.bids.filter(bid => bid.title); %>
           <% if (productBids.length > 0) { %>
-            <% productBids.forEach(function(bid) { %>
+            <% productBids.forEach(bid => { %>
               <tr>
                 <td><%= bid.bidder.fullName || "Anonymous" %></td>
                 <td><%= bid.title %></td>
                 <td><%= bid.description %></td>
                 <td><%= bid.location %></td>
                 <td>
-                  <% if (String(bid.bidder._id) === String(user._id)) { %>
-                    <form action="/secondHand/delete-bid/<%= bid._id %>" method="POST">
+                  <% if(String(bid.bidder._id) === String(user._id)) { %>
+                    <form action="/subscription/delete-bid/<%= bid._id %>" method="POST">
                       <button type="submit" class="delete-btn">Delete</button>
                     </form>
                   <% } %>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= pageTitle %></title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/rentalStyles.css">
+  <link rel="stylesheet" href="/css/navigation.css">
+  <style>
+    /* Verification badges */
+    .verified-badge {
+      color: #155724;
+      background-color: #d4edda;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.8em;
+      margin-left: 10px;
+      display: inline-block;
+    }
+    .pending-badge {
+      color: #856404;
+      background-color: #fff3cd;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.8em;
+      margin-left: 10px;
+      display: inline-block;
+    }
+    /* Verification button */
+    .verify-btn {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-size: 0.9em;
+        margin: 5px 0 0 0;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(76, 175, 80, 0.2);
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+
+    .verify-btn:hover {
+        background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 8px rgba(76, 175, 80, 0.3);
+        text-decoration: none;
+    }
+
+    .verify-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+    }
+
+    /* Add icon using Font Awesome */
+    .verify-btn i {
+        font-size: 1.1em;
+    }
+  </style>
+</head>
+<body>
+  <div id="navbar">
+    <%- include('../common/navigation.ejs') %>
+  </div>
+  <main>
+    <h1>Subscriptions</h1>
+    <form action="/subscription/buy" method="GET" class="search-form">
+      <input 
+        type="text" 
+        name="search" 
+        placeholder="Search products by platform name or description..."
+        value="<%= searchQuery || '' %>"
+      >
+      <button type="submit">Search</button>
+    </form>
+    
+    <% if (prods.length > 0) { %>
+      <div class="rental-list">
+        <% for (let product of prods) { %>
+          <div class="rental-item">
+            <div class="product-card">
+              <div class="card__image">
+                <img src="<%= product.imageUrl %>" alt="<%= product.platform_name %>">
+              </div>
+              <div class="product-info">
+                <h3>
+                  <%= product.platform_name %>
+                  <% if (product.credentialsVerified) { %>
+                    <span class="verified-badge">✓ Verified</span>
+                  <% } else if (product.verificationPending) { %>
+                    <span class="pending-badge">Pending Verification</span>
+                    <% if (user && product.seller && product.seller._id.toString() === user._id.toString()) { %>
+                      <a href="/subscription/verify-credentials?productId=<%= product._id %>" class="verify-btn">
+                        <i class="fas fa-shield-alt"></i>
+                        Verify Now
+                    </a>
+                    <% } %>
+                  <% } %>
+                </h3>
+                
+                <div class="price-group">
+                  <p class="price">Actual Price: ₹<%= product.price %></p>
+                  <p class="min-price">Auction Starts At: ₹<%= product.min_price %></p>
+              </div>
+                <p class="description"><%= product.description %></p>
+                <% if (product.seller && product.seller.fullName) { %>
+                  <p class="seller"><b>Seller:</b> <%= product.seller.fullName %></p>
+                <% } %>
+                <div class="button-group vertical">
+                  <a href="/subscription/buy/<%= product._id %>" class="btn auction-btn">Auction</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    <% } else { %>
+      <h1>No Products Found!</h1>
+    <% } %>
+  </main>
+</body>
+</html>

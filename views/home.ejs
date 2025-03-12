@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="/css/homeStyles.css">
 
 </head>
+
 <body>
 
     <!-- Include Navbar -->
@@ -25,7 +27,8 @@
     <section class="about-us">
         <h2>About Us</h2>
         <div class="abtus-container">
-            TradeTrail is here to make sustainability simple and accessible. By embracing circular economy principles, we provide a platform for renting, reselling, and swapping goods and subscriptions. Our mission is to help people make eco-conscious choices while saving money and reducing waste. Join us in creating a more sustainable, connected future. 
+            TradeTrail is here to make sustainability simple and accessible. By embracing circular economy principles, we provide a platform for renting, reselling, and swapping goods and subscriptions. Our mission is to help people make eco-conscious choices while
+            saving money and reducing waste. Join us in creating a more sustainable, connected future.
         </div>
     </section>
 
@@ -40,43 +43,48 @@
         { image: "secondhand.jpg", title: "Second-Hand Chain Buying", description: "Find quality pre-owned items, and give them a new life while saving resources and money", link: "#" }
     ]; %>
 
-    <% features.forEach(feature => { %>
-        <section class="feature-section">
-            <img src="/assets/<%= feature.image %>" alt="<%= feature.title %>">
-            <div class="feature-content">
-                <h2><%= feature.title %></h2>
-                <p><%= feature.description %></p>
-                <!-- <button onclick="window.location.href='<%= feature.link %>'">Explore</button> -->
-                <% if (feature.title === "Renting Items") { %>
-                    <button onclick="window.location.href='/rental'">Rent an Item</button>  
-                <% } else if (feature.title === "Second-Hand Chain Buying") { %>
-                    <button onclick="window.location.href='/secondHand'">Buy an Item</button>                      
-                <% } else { %>
-                    <button onclick="window.location.href='<%= feature.link %>'">Explore</button>
-                <% } %>
-            </div>
-        </section>
-    <% }) %>
+        <% features.forEach(feature => { %>
+            <section class="feature-section">
+                <img src="/assets/<%= feature.image %>" alt="<%= feature.title %>">
+                <div class="feature-content">
+                    <h2>
+                        <%= feature.title %>
+                    </h2>
+                    <p>
+                        <%= feature.description %>
+                    </p>
+                    <!-- <button onclick="window.location.href='<%= feature.link %>'">Explore</button> -->
+                    <% if (feature.title === "Renting Items") { %>
+                        <button onclick="window.location.href='/rental'">Rent an Item</button>
+                        <% } else if (feature.title === "Second-Hand Chain Buying") { %>
+                            <button onclick="window.location.href='/secondHand'">Buy an Item</button>
+                            <% } else { %>
+                                <button onclick="window.location.href='/subscription'">Explore</button>
+                                <% } %>
+                </div>
+            </section>
+            <% }) %>
 
-    <!-- CONTACT US SECTION -->
-    <section class="contact-us">
-        <h2>Contact Us</h2>
-        <div class="contact-details">
-            <div class="phone">
-                <p><strong>Phone:</strong></p>
-                <ul>
-                    <li>+91 123 456 7890</li>
-                    <li>+91 987 654 3210</li>
-                </ul>
-            </div>
-            <div class="mail">
-                <p><strong>Email:</strong></p>
-                <ul>
-                    <li>support@tradetrail.com</li>
-                </ul>
-            </div>
-        </div>
-    </section>    
+                <!-- CONTACT US SECTION -->
+                <section class="contact-us">
+                    <h2>Contact Us</h2>
+                    <div class="contact-details">
+                        <div class="phone">
+                            <p><strong>Phone:</strong></p>
+                            <ul>
+                                <li>+91 123 456 7890</li>
+                                <li>+91 987 654 3210</li>
+                            </ul>
+                        </div>
+                        <div class="mail">
+                            <p><strong>Email:</strong></p>
+                            <ul>
+                                <li>support@tradetrail.com</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
 
 </body>
+
 </html>
