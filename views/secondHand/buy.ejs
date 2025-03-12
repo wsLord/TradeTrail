@@ -39,7 +39,10 @@
               </div>
               <div class="product-info">
                 <h3><%= product.title %></h3>
-                <p class="price">Price: ₹<%= product.price %></p>
+                <div class="price-info">
+                  <p class="direct-price">Direct Purchase: ₹<%= product.price %></p>
+                  <p class="auction-price">Auction Starts At: ₹<%= product.min_price %></p>
+                </div>
                 <p class="description"><%= product.description %></p>
                 <p class="location"><%= product.location %></p>
                 <p class="seller">

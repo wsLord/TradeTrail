@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,9 +8,7 @@
   <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/forms.css">
   <link rel="stylesheet" href="/css/product.css">
-  <!-- <link rel="stylesheet" href="/css/navigation.css"> -->
 </head>
-
 <body>
   <%- include('../common/navigation.ejs') %>
 
@@ -26,15 +23,19 @@
         <input type="text" name="imageUrl" id="imageUrl" required>
       </div>
       <div class="form-control">
-        <label for="price">Minimum Price</label>
+        <label for="price">Direct Purchase Price</label>
         <input type="number" name="price" id="price" step="0.01" required>
       </div>
       <div class="form-control">
-        <label for="start-date">Start Date</label>
+        <label for="min_price">Minimum Auction Price</label>
+        <input type="number" name="min_price" id="min_price" step="0.01" required>
+      </div>
+      <div class="form-control">
+        <label for="startDate">Start Date</label>
         <input type="date" name="startDate" id="startDate" required>
       </div>
       <div class="form-control">
-        <label for="end-date">End Date</label>
+        <label for="endDate">End Date</label>
         <input type="date" name="endDate" id="endDate" required>
       </div>
       <div class="form-control">
@@ -50,5 +51,4 @@
     </form>
   </main>
 </body>
-
 </html>

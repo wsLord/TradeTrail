@@ -230,3 +230,27 @@ form {
         display: none;
     }
 }
+
+/* In your main CSS file */
+.verify-btn {
+    background: #28a745;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background 0.3s ease;
+}
+
+.verify-btn:hover {
+    background: #218838;
+}
+
+.pending-badge {
+    background: #ffc107;
+    color: #000;
+    padding: 3px 10px;
+    border-radius: 15px;
+    margin-right: 10px;
+}

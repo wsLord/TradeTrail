@@ -59,7 +59,23 @@ const subscriptionRoutes = require("./routes/subscriptionRoutes");
 const rentalCartRoutes = require("./routes/rentalCartRoutes");
 const secondHandCartRoutes = require("./routes/secondHandCartRoutes");
 const subscriptionCartRoutes = require("./routes/subscriptionCartRoutes");
-//const paymentRoutes = require("./routes/paymentRoutes");
+
+const cron = require('node-cron');
+const User = require('./models/userModel');
+
+// Daily cleanup at 3 AM of unverified accounts whose verification emails bounce back 
+cron.schedule('0 3 * * *', async () => {
+  try {
+    await User.deleteMany({
+      isVerified: false,
+      createdAt: { $lt: new Date(Date.now() - 24 * 60 * 60 * 1000) }
+    });
+    console.log('Cleaned up unverified accounts');
+  } catch (error) {
+    console.error('Cleanup error:', error);
+  }
+});
+
 
 
 const app = express();
@@ -92,6 +108,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 const cors = require('cors');
 app.use(cors());
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
+
+
+
 
 // Set up EJS as the view engine
 app.set("view engine", "ejs");
@@ -125,3 +145,18 @@ connectToMongoDB()
     .catch((err) => {
         console.error("Failed to connect to MongoDB. Server not started.", err);
     });
+
+    
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).render('error', { 
+    message: 'Something went wrong!',
+    error: process.env.NODE_ENV === 'development' ? err : {}
+  });
+});
+
+// 404 Handler
+app.use((req, res) => {
+  res.status(404).render('404');
+});

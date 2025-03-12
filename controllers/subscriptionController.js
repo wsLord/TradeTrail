@@ -3,6 +3,8 @@ const BidProducts = require("../models/BidProducts");
 const subscriptionCart = require("../models/subscriptionCart");
 const User = require("../models/userModel");
 
+const MIN_BID_INCREMENT = 100;
+
 exports.getHome = (req, res, next) => {
     res.render("subscriptionSwapping/subscriptionHome", {
         pageTitle: "Subscription Swapping",
@@ -82,38 +84,21 @@ exports.getAddProduct = (req, res, next) => {
     });
 };
 
-exports.postAddProduct = (req, res, next) => {
-    const title = req.body.platform_name;
-    const imageUrl = req.body.imageUrl;
-    const price = req.body.price;
-    const min_price = req.body.min_price;
-    const description = req.body.description;
-    const startDate = req.body.startDate;
-    const endDate = req.body.endDate;
-
-    // Modified: include seller field (required by Ott schema)
-    const product = new Ott({
-        platform_name: title,
-        imageUrl: imageUrl,
-        price: price,
-        min_price: min_price,
-        description: description,
-        startDate: startDate,
-        endDate: endDate,
+// 3. Modify existing postAddProduct controller
+exports.postAddProduct = (req, res) => {
+    // Store form data in session
+    req.session.tempProduct = {
+        platform_name: req.body.platform_name,
+        imageUrl: req.body.imageUrl,
+        price: req.body.price,
+        min_price: req.body.min_price,
+        description: req.body.description,
+        startDate: req.body.startDate,
+        endDate: req.body.endDate,
         seller: req.user._id
-    });
+    };
     
-    product
-        .save()
-        .then((result) => {
-            console.log("Created Product");
-            res.redirect("/subscription/buy");
-        })
-        .catch((err) => {
-            console.error(err);
-            req.flash("error", "Failed to add product.");
-            res.redirect("/subscription/sell");
-        });
+    res.redirect("/subscription/verify-credentials");
 };
 
 exports.getProducts = (req, res, next) => {
@@ -132,14 +117,16 @@ exports.getProducts = (req, res, next) => {
     }
 
     Ott.find(filter)
-        .populate("seller", "fullName")  // Add this line to populate seller details
+        .populate("seller", "fullName _id")  // Add this line to populate seller details
         .then((products) => {
             res.render("subscriptionSwapping/buy", {
                 prods: products,
+                user: req.user,
                 pageTitle: "All Products",
                 path: "/products",
                 searchQuery: searchQuery,
                 activePage: "subscription"
+                
             });
         })
         .catch((err) => {
@@ -157,6 +144,7 @@ exports.getProduct = (req, res, next) => {
             populate: { path: "bidder", select: "fullName" },
         })
         .then((product) => {
+            
             if (!product) {
                 req.flash("error", "Product not found.");
                 return res.redirect("/subscription/buy");
@@ -164,7 +152,7 @@ exports.getProduct = (req, res, next) => {
             // Calculate max bid if available
             const maxBid = product.bids
                 .filter((bid) => bid.bidAmount !== null)
-                .reduce((max, bid) => Math.max(max, bid.bidAmount), 0);
+                .reduce((max, bid) => Math.max(max, bid.bidAmount), product.min_price);
             res.render("subscriptionSwapping/auction", {
                 product: product,
                 user: req.user,
@@ -233,15 +221,49 @@ exports.getAddBidProduct = (req, res, next) => {
     });
 };
 
-exports.postAddBidProduct = (req, res, next) => {
+exports.postAddBidProduct = async (req, res, next) => {
     if (!req.user) {
         return res.status(401).json({ message: "Unauthorized: Please log in" });
     }
-
-    console.log(req.user);
-
     const prodId = req.params.productId;
     const { title, imageUrl, description, location, bidAmount } = req.body;
+
+    // NEW: Check for existing bid
+  const existingBid = await BidProducts.findOne({
+    bidder: req.user._id,
+    auction: prodId
+  });
+
+  if (existingBid) {
+    req.flash(
+      'error',
+      `You already have an active bid. Delete your previous bid (₹${existingBid.bidAmount || "product bid"}) to place a new one.`
+    );
+    return res.redirect(`/subscription/buy/${prodId}`);
+  }
+
+
+    // Get the product with current bids
+      const product = await Ott.findById(prodId)
+      .populate({
+        path: "bids",
+        match: { bidAmount: { $ne: null } }
+      });
+    
+    // Calculate current max bid
+    const currentMaxBid = product.bids.reduce(
+      (max, bid) => Math.max(max, bid.bidAmount),
+      product.price // Start with initial price
+    );
+    
+    // Validate bid amount
+    if (bidAmount && bidAmount < currentMaxBid + MIN_BID_INCREMENT) {
+      req.flash(
+        'error', 
+        `Bid must be at least ₹${currentMaxBid + MIN_BID_INCREMENT} (Current max: ₹${currentMaxBid})`
+      );
+      return res.redirect(`/subscription/buy/${prodId}`);
+    }
 
     if (!bidAmount && !title) {
         return res
@@ -278,4 +300,78 @@ exports.postAddBidProduct = (req, res, next) => {
             console.error("Error saving bid:", err);
             res.status(500).send("Internal Server Error");
         });
+};
+
+// Add this new method to subscriptionController.js
+exports.deleteBid = async (req, res, next) => {
+    try {
+      const bidId = req.params.bidId;
+      const bid = await BidProducts.findByIdAndDelete(bidId);
+      
+      // Remove bid reference from Ott product
+      await Ott.findByIdAndUpdate(
+        bid.auction,
+        { $pull: { bids: bidId } }
+      );
+      
+      req.flash('success', 'Bid deleted successfully');
+      res.redirect(`/subscription/buy/${bid.auction}`);
+    } catch (err) {
+      console.error("Error deleting bid:", err);
+      res.status(500).send("Internal Server Error");
+    }
+  };
+
+// Render credential verification page
+exports.getVerifyCredentials = (req, res) => {
+    res.render("subscriptionSwapping/verify-credentials", {
+        pageTitle: "Verify Credentials",
+        path: "/subscription/verify-credentials",
+        activePage: "subscription",
+        productId: req.query.productId,
+        action: req.query.productId ? 'update' : 'verify'
+    });
+};
+
+exports.postVerifyCredentials = async (req, res) => {
+    const { action, email, password } = req.body;
+    const productData = req.session.tempProduct || await Ott.findById(req.body.productId);
+
+    try {
+        if (action === 'verify') {
+            // Add actual verification logic here
+            if (!email || !password) {
+                req.flash('error', 'Please fill all credentials');
+                return res.redirect('back');
+            }
+            
+        const product = req.session.tempProduct ? 
+            new Ott({ ...productData, credentialsVerified: true, verificationPending: false }) :
+            await Ott.findByIdAndUpdate(
+                productData._id, 
+                { credentialsVerified: true, verificationPending: false },
+                { new: true }
+        );
+        await product.save();
+            delete req.session.tempProduct;
+            req.flash('success', 'Credentials verified successfully!');
+        } 
+        else if (action === 'skip') {
+            if (req.session.tempProduct) {
+                const product = new Ott({ 
+                    ...productData, 
+                    verificationPending: true 
+                });
+                await product.save();
+                delete req.session.tempProduct;
+            }
+            req.flash('info', 'You can verify credentials later');
+        }
+
+        res.redirect("/subscription/buy");
+    } catch (err) {
+        console.error(err);
+        req.flash("error", "Error processing request");
+        res.redirect("/subscription/sell");
+    }
 };

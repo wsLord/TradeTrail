@@ -1,6 +1,8 @@
 const express = require("express");
-const { signup, login, checkAuth } = require("../controllers/authController");
+const { signup, login, checkAuth, resendVerificationEmail } = require("../controllers/authController");
 const { protectRoute } = require("../middleware/authMiddleware");
+const User = require("../models/userModel"); 
+const { sendWelcomeEmail } = require("../services/emailService");
 
 const router = express.Router();
 
@@ -27,5 +29,34 @@ router.get("/home", protectRoute, (req, res) => {
 
 // ✅ Check authentication route
 router.get("/check", protectRoute, checkAuth);
+
+router.get('/verify-email', async (req, res) => {
+  try {
+    const user = await User.findOne({
+      verificationToken: req.query.token,
+      verificationExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).render('verification-error');
+    }
+
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    user.verificationExpires = undefined;
+    await user.save();
+
+    // Now send the welcome email
+    await sendWelcomeEmail(user.email, user.fullName);
+    
+    res.render('verification-success');
+  } catch (error) {
+    console.error('Verification error:', error);
+    res.status(500).render('verification-error');
+  }
+});
+
+router.post('/resend-verification', resendVerificationEmail);
+
 
 module.exports = router;

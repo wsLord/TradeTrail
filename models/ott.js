@@ -32,7 +32,17 @@ const OttSchema = new Schema({
     //need to add user
     bids: [{ type: mongoose.Schema.Types.ObjectId, ref: "BidProducts" }], // Store bid product references
     seller: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    quantity: { type: Number, required: true, default: 10 } // ✅ Add this line
+    quantity: { type: Number, required: true, default: 10 }, // ✅ Add this line
+    
+    credentialsVerified: {
+             type: Boolean,
+             default: false
+    },
+           
+    verificationPending: {
+             type: Boolean,
+             default: false
+    }
 });
 const ottProduct = mongoose.model("Ott", OttSchema);
 module.exports = ottProduct;

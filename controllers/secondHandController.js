@@ -2,13 +2,14 @@ const Product = require("../models/product");
 const BidProduct = require("../models/bidproduct");
 const User = require("../models/userModel");
 
+const MIN_BID_INCREMENT = 100;
+
 //homepage for second hand
 exports.getHome = (req, res, next) => {
   res.render("secondHand/secondHandHome", {
     pageTitle: "Second Hand",
     path: "/secondHand",
     activePage: "secondHand", // Added activePage
-    messages: req.flash()
   });
 };
 
@@ -18,7 +19,6 @@ exports.getAddProduct = (req, res, next) => {
     pageTitle: "Add Product",
     path: "/secondHand/sell",
     activePage: "secondHand", // Added activePage
-    messages: req.flash()
   });
 };
 
@@ -27,6 +27,7 @@ exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
+  const min_price = req.body.min_price;
   const description = req.body.description;
   const location = req.body.location;
   const startDate = req.body.startDate;
@@ -35,6 +36,7 @@ exports.postAddProduct = (req, res, next) => {
     title: title,
     imageUrl: imageUrl,
     price: price,
+    min_price: min_price,
     description: description,
     location: location,
     startDate: startDate,
@@ -78,7 +80,6 @@ exports.getProducts = (req, res, next) => {
         user: req.user,
         searchQuery: searchQuery,  // Pass searchQuery to the view
         activePage: "secondHand",  // Added activePage
-        messages: req.flash()
       });
     })
     .catch((err) => {
@@ -101,7 +102,7 @@ exports.getProduct = (req, res, next) => {
       // Calculate maximum bid from existing bids
       const maxBid = product.bids
         .filter((bid) => bid.bidAmount !== null)
-        .reduce((max, bid) => Math.max(max, bid.bidAmount), 0);
+        .reduce((max, bid) => Math.max(max, bid.bidAmount), product.min_price);
       res.render("secondHand/auction", {
         product: product,
         user: req.user,
@@ -109,7 +110,6 @@ exports.getProduct = (req, res, next) => {
         maxBid: maxBid,
         path: "/product",
         activePage: "secondHand",  // Added activePage
-        messages: req.flash()
       });
     })
     .catch((err) => {
@@ -131,13 +131,49 @@ exports.getAddBidProduct = (req, res, next) => {
 };
 
 //save new bidproduct in db
-exports.postAddBidProduct = (req, res, next) => {
+exports.postAddBidProduct = async (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ message: "Unauthorized: Please log in" });
   }
 
   const prodId = req.params.productId;
   const { title, imageUrl, description, location, bidAmount } = req.body;
+
+  // Check for existing bid by this user
+  const existingBid = await BidProduct.findOne({
+    bidder: req.user._id,
+    auction: prodId
+  });
+
+  if (existingBid) {
+    req.flash(
+      'error',
+      `You already have an active bid. Delete your previous bid (₹${existingBid.bidAmount || "product bid"}) to place a new one.`
+    );
+    return res.redirect(`/secondHand/buy/${prodId}`);
+  }
+
+  // Get the product with current bids
+  const product = await Product.findById(prodId)
+  .populate({
+    path: "bids",
+    match: { bidAmount: { $ne: null } }
+  });
+
+// Calculate current max bid
+const currentMaxBid = product.bids.reduce(
+  (max, bid) => Math.max(max, bid.bidAmount),
+  product.min_price // Start with initial price
+);
+
+// Validate bid amount
+if (bidAmount && bidAmount < currentMaxBid + MIN_BID_INCREMENT) {
+  req.flash(
+    'error', 
+    `Bid must be at least ₹${currentMaxBid + MIN_BID_INCREMENT} (Current max: ₹${currentMaxBid})`
+  );
+  return res.redirect(`/secondHand/buy/${prodId}`);
+}
 
   if (!bidAmount && !title) {
     return res
@@ -178,3 +214,31 @@ exports.postAddBidProduct = (req, res, next) => {
       res.status(500).send("Internal Server Error");
     });
 };
+
+exports.deleteBid = async (req, res, next) => {
+  try {
+    const bidId = req.params.bidId;
+    const bid = await BidProduct.findByIdAndDelete(bidId);
+    
+    // Remove bid reference from Product
+    await Product.findByIdAndUpdate(
+      bid.auction,
+      { $pull: { bids: bidId } }
+    );
+    
+    // Add session save before redirect
+    req.session.save(err => {
+      if (err) {
+        console.error("Session save error:", err);
+        return res.status(500).send("Internal Server Error");
+      }
+      req.flash('success', 'Bid deleted successfully');
+      res.redirect(`/secondHand/buy/${bid.auction}`);
+    });
+  } catch (err) {
+    console.error("Error deleting bid:", err);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+
