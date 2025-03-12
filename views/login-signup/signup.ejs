@@ -149,21 +149,34 @@
   </div>
 
   <script>
+    // Email validation function
+    function isValidEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(String(email).toLowerCase());
+    }
+  
     document.getElementById("signupForm").addEventListener("submit", async function(event) {
       event.preventDefault();
-
+  
       const firstName = document.getElementById("firstName").value.trim();
       const lastName = document.getElementById("lastName").value.trim();
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
-
+  
+      // Basic field validation
       if (!firstName || !lastName || !email || !password) {
         alert("Please fill in all fields.");
         return;
       }
-
+  
+      // Email format validation
+      if (!isValidEmail(email)) {
+        alert("Please enter a valid email address");
+        return;
+      }
+  
       const userData = { firstName, lastName, email, password };
-
+  
       try {
         const response = await fetch("/api/auth/signup", {
           method: "POST",
@@ -172,13 +185,13 @@
           },
           body: JSON.stringify(userData),
         });
-
+  
         const data = await response.json();
         console.log("Server Response:", data);
-
+  
         if (response.ok) {
-          alert("Signup successful!");
-          window.location.href = "/api/auth/home";
+          alert("Signup successful! Please check your email to verify your account");
+          window.location.href = "/api/auth/login"; // Redirect to login instead of home
         } else {
           alert(data.message || "Signup failed. Please try again.");
         }

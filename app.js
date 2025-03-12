@@ -57,6 +57,22 @@ const rentalCartRoutes = require("./routes/rentalCartRoutes");
 const secondHandCartRoutes = require("./routes/secondHandCartRoutes");
 const subscriptionCartRoutes = require("./routes/subscriptionCartRoutes");
 
+const cron = require('node-cron');
+const User = require('./models/userModel');
+
+// Daily cleanup at 3 AM of unverified accounts whose verification emails bounce back 
+cron.schedule('0 3 * * *', async () => {
+  try {
+    await User.deleteMany({
+      isVerified: false,
+      createdAt: { $lt: new Date(Date.now() - 24 * 60 * 60 * 1000) }
+    });
+    console.log('Cleaned up unverified accounts');
+  } catch (error) {
+    console.error('Cleanup error:', error);
+  }
+});
+
 
 
 const app = express();
@@ -85,6 +101,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser()); // ✅ Required for JWT authentication
 app.use(express.static(path.join(__dirname, "public")));
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 
 
@@ -120,3 +137,18 @@ connectToMongoDB()
     .catch((err) => {
         console.error("Failed to connect to MongoDB. Server not started.", err);
     });
+
+    
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).render('error', { 
+    message: 'Something went wrong!',
+    error: process.env.NODE_ENV === 'development' ? err : {}
+  });
+});
+
+// 404 Handler
+app.use((req, res) => {
+  res.status(404).render('404');
+});
