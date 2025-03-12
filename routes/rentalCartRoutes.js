@@ -6,7 +6,8 @@ const { protectRoute } = require("../middleware/authMiddleware");
 // Cart Status Route
 router.get("/", protectRoute, rentalCartController.getCart);
 router.post("/update/:productId", protectRoute, require("../controllers/rentingController").updateCart);
-
+router.get('/rental-cart', rentalCartController.getRentalCart);
 router.post('/delete-item/:id', protectRoute, rentalCartController.deleteCartItem);
 
-module.exports = router;
+module.exports=router;
+

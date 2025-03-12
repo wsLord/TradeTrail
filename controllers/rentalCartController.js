@@ -53,3 +53,9 @@ exports.deleteCartItem = (req, res, next) => {
       res.redirect('/rental/cart');
     });
 };
+exports.getRentalCart = (req, res) => {
+  res.render('rentals/rentalCart', {
+      razorpayKeyId: rzp_test_EZ3YXbVoBjMVZW  // ✅ Pass key to EJS
+  });
+};
+

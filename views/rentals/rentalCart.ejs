@@ -68,13 +68,91 @@
           <% }); %>
         </tbody>
       </table>
-      <div class="cart-total">
+      <div class="cart-total" id='amount'>
         Grand Total: ₹<%= grandTotal.toFixed(2) %>
       </div>
       <div style="clear: both;"></div>
-      <button class="checkout-button">Proceed to Checkout</button>
+      <button  onclick="makePayment()"
+      class="checkout-button">Proceed to Checkout</button>
     <% } %>
   </main>
+ 
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  function makePayment() {
+    const amountText = document.getElementById('amount').textContent;
+    const amount = parseFloat(amountText.replace('Grand Total: ₹', '').trim()); // Extract numeric value
+    console.log("Amount:", amount);
+
+    fetch('/rental/api/payment/createOrder'      , {
+
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount })
+})
+
+.then(response => {
+    //console.log("Response status:", response.status);
+    return response.json();
+})
+    .then(order => {
+      console.log(order);
+        const options = {
+            key: 'rzp_test_EZ3YXbVoBjMVZW',
+            amount: order.amount*100,
+            currency: order.currency,
+            name: 'TradeTrail',
+            description: 'Payment for Rental Items',
+            image: 'https://your-logo-url.com/logo.png',
+            order_id: order.id,
+            theme: {
+                color: '#4F7942'
+            },
+            prefill: {
+                email: 'customer@example.com',
+                contact: ''
+            },
+            handler: function(response) {
+                fetch('/rental/api/payment/verifyPayment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        ...response,
+                        amount: amount
+                    })
+                })
+                //console.log(options);
+                .then(res => res.json())
+                .then(data => {
+                  
+                    if(data.success) {
+                       console.log(data);
+                        alert('Payment successful! Your order has been confirmed.');
+                        console.log(data);
+                        window.location.href = '/rental/api/payment/payment-success';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Payment verification failed');
+                });
+            }
+        };
+        
+        const rzp = new Razorpay(options);
+        console.log(rzp);
+        rzp.open();
+    })
+    .catch(error => {
+        //console.error('Error:', error);
+        alert('Failed to create order');
+    });
+}
+
+</script>
+  
 </body>
 
 </html>

@@ -18,8 +18,9 @@ exports.getCart = (req, res, next) => {
 
             // Calculate total amount
             let totalAmount = cart.items.reduce((sum, item) => {
-                return sum + (item.product.price * item.quantity);
+                return sum + ((item?.product?.price || 0) * (item?.quantity || 0));
             }, 0);
+            
 
             res.render("subscriptionSwapping/subscriptionCart", {
                 pageTitle: "Your Cart",
