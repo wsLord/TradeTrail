@@ -149,38 +149,40 @@
   <script>
     document.getElementById("loginForm").addEventListener("submit", async function(event) {
       event.preventDefault();
-
+  
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
-
-      if (!email || !password) {
-        alert("Please fill in all fields.");
-        return;
-      }
-
-      const userData = { email, password };
-
+  
       try {
         const response = await fetch("/api/auth/login", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(userData),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
         });
-
+  
         const data = await response.json();
-        console.log("Server Response:", data);
-
+        
+        if (data.shouldResend) {
+          if (confirm("Resend verification email to " + email + "?")) {
+            const resendResponse = await fetch("/api/auth/resend-verification", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email })
+            });
+            const resendData = await resendResponse.json();
+            alert(resendData.message);
+          }
+          return;
+        }
+  
         if (response.ok) {
-          alert("Login successful!");
           window.location.href = "/api/auth/home";
         } else {
-          alert(data.message || "Login failed. Please try again.");
+          alert(data.message || "Login failed");
         }
       } catch (error) {
         console.error("Error:", error);
-        alert("An error occurred. Please try again later.");
+        alert("An error occurred");
       }
     });
   </script>
