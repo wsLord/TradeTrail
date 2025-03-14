@@ -83,35 +83,70 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 // Saving rental item in the database (Including Quantity)
-exports.postAddProduct = (req, res, next) => {
-  const { title, imageUrl, price, description, location, rate, quantity } = req.body;
+// exports.postAddProduct = (req, res, next) => {
+//   const { title, imageUrl, price, description, location, rate, quantity } = req.body;
 
-  // Validate if all required fields are filled
-  if (!title || !imageUrl || !price || !description || !location || !rate || !quantity) {
-    return res.status(400).send('All fields are required!');
+//   // Validate if all required fields are filled
+//   if (!title || !imageUrl || !price || !description || !location || !rate || !quantity) {
+//     return res.status(400).send('All fields are required!');
+//   }
+
+//   const rentalProduct = new RentalProduct({
+//     title: title,
+//     imageUrl: imageUrl,
+//     price: price,
+//     description: description,
+//     location: location,
+//     rate: rate,  // Save rate directly as per the form
+//     quantity: quantity,  // Save quantity directly
+//   });
+
+//   rentalProduct
+//     .save()
+//     .then((result) => {
+//       console.log("Rental Product Posted!");
+//       res.redirect("/rental/rent");  // Redirect to rentals page after posting
+//     })
+//     .catch((err) => {
+//       console.log(err);
+//       res.status(500).send("An error occurred while saving the rental product.");
+//     });
+// };
+exports.postAddProduct = (req, res, next) => {
+  console.log("Received Form Data:", req.body);
+  console.log("Received File:", req.file); 
+
+  const { title, price, description, location, rate, quantity } = req.body;
+  const image = req.file; 
+
+  if (!title || !image || !price || !description || !location || !rate || !quantity) {
+    console.log("Missing required fields!");
+    return res.status(400).send("All fields are required!");
   }
 
   const rentalProduct = new RentalProduct({
     title: title,
-    imageUrl: imageUrl,
+    imageUrl: "/uploads/" + image.filename, 
     price: price,
     description: description,
     location: location,
-    rate: rate,  // Save rate directly as per the form
-    quantity: quantity,  // Save quantity directly
+    rate: rate,
+    quantity: quantity,
   });
 
   rentalProduct
     .save()
-    .then((result) => {
-      console.log("Rental Product Posted!");
-      res.redirect("/rental/rent");  // Redirect to rentals page after posting
+    .then(() => {
+      console.log("Rental Product Posted Successfully!");
+      res.redirect("/rental/rent");
     })
     .catch((err) => {
-      console.log(err);
+      console.error("Error saving product:", err);
       res.status(500).send("An error occurred while saving the rental product.");
     });
 };
+
+
 
 // Get all rental items (with search)
 exports.getRentItems = (req, res, next) => {
