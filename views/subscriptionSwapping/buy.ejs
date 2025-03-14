@@ -115,7 +115,13 @@
                   <p class="seller"><b>Seller:</b> <%= product.seller.fullName %></p>
                 <% } %>
                 <div class="button-group vertical">
-                  <a href="/subscription/buy/<%= product._id %>" class="btn auction-btn">Auction</a>
+                  <% if (product.saleType === 'direct') { %>
+                    <form action="/subscription/add-to-cart/<%= product._id %>" method="POST">
+                      <button class="add-to-cart-button">Add to Cart</button>
+                    </form>
+                  <% } else { %>
+                    <a href="/subscription/buy/<%= product._id %>" class="btn auction-btn">Auction</a>
+                  <% } %>
                 </div>
               </div>
             </div>

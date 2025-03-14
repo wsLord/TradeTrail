@@ -49,7 +49,13 @@
                   <b>Seller:</b> <%= product.seller && product.seller.fullName ? product.seller.fullName : 'Unknown' %>
                 </p>
                 <div class="button-group vertical">
-                  <a href="/secondHand/buy/<%= product._id %>" class="btn auction-btn">Auction</a>
+                  <% if (product.saleType === 'direct') { %>
+                    <form action="/secondHand/add-to-cart/<%= product._id %>" method="POST">
+                      <button class="add-to-cart-button">Add to Cart</button>
+                    </form>
+                  <% } else { %>
+                    <a href="/secondHand/buy/<%= product._id %>" class="btn auction-btn">Auction</a>
+                  <% } %>
                 </div>
               </div>
             </div>

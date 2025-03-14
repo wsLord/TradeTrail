@@ -10,10 +10,6 @@ const OttSchema = new Schema({
         type: Number,
         required: true,
     },
-    min_price: {
-        type: Number,
-        required: true,
-    },
     description: {
         type: String,
         required: true,
@@ -23,16 +19,30 @@ const OttSchema = new Schema({
         required: true,
     },
 
-    startDate: {
+    min_price: { 
+        type: Number,
+        required: function() { return this.saleType === 'auction'; }
+      },
+      startDate: {
         type: Date,
-        required: true,
-    },
-    endDate: { type: Date, required: true },
+        required: function() { return this.saleType === 'auction'; }
+      },
+      endDate: { 
+        type: Date,
+        required: function() { return this.saleType === 'auction'; }
+      },
+      
     maxBid: { type: Number, default: 0 }, // Store highest bid
     //need to add user
     bids: [{ type: mongoose.Schema.Types.ObjectId, ref: "BidProducts" }], // Store bid product references
     seller: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    quantity: { type: Number, required: true, default: 10 }, // ✅ Add this line
+    quantity: { type: Number, required: true, default: 10 }, 
+
+    saleType: {
+        type: String,
+        enum: ['direct', 'auction'],
+        required: true
+      },
     
     credentialsVerified: {
              type: Boolean,

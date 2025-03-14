@@ -17,40 +17,36 @@ exports.getHome = (req, res, next) => {
 exports.getAddProduct = (req, res, next) => {
   res.render("secondHand/add-product", {
     pageTitle: "Add Product",
-    path: "/secondHand/sell",
+    path: "/secondHand/sell/add-product",
     activePage: "secondHand", // Added activePage
   });
 };
 
 //creating products for sell
-exports.postAddProduct = (req, res, next) => {
-  const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
-  const price = req.body.price;
-  const min_price = req.body.min_price;
-  const description = req.body.description;
-  const location = req.body.location;
-  const startDate = req.body.startDate;
-  const endDate = req.body.endDate;
+exports.postAddProduct = (req, res) => {
+  const { title, imageUrl, price, min_price, description, location, startDate, endDate } = req.body;
+  
   const product = new Product({
-    title: title,
-    imageUrl: imageUrl,
-    price: price,
-    min_price: min_price,
-    description: description,
-    location: location,
-    startDate: startDate,
-    endDate: endDate,
+    title,
+    imageUrl,
+    price: parseFloat(price),
+    min_price: parseFloat(min_price),
+    description,
+    location,
+    startDate,
+    endDate,
     seller: req.user._id,
+    saleType: 'auction'
   });
-  product
-    .save()
-    .then((result) => {
-      // After creation, redirect to the buy page
+
+  product.save()
+    .then(() => {
       res.redirect("/secondHand/buy");
     })
-    .catch((err) => {
+    .catch(err => {
       console.log(err);
+      req.flash("error", "Error creating auction listing");
+      res.redirect("/secondHand/sell/add-product");
     });
 };
 
@@ -241,4 +237,45 @@ exports.deleteBid = async (req, res, next) => {
   }
 };
 
+exports.getPostType = (req, res) => {
+  res.render("secondHand/post-type", {
+    pageTitle: "Choose Listing Type",
+    activePage: "secondHand"
+  });
+};
+
+exports.getDirectAddProduct = (req, res) => {
+  res.render("secondHand/direct-add-product", {
+    pageTitle: "Direct Selling",
+    activePage: "secondHand"
+  });
+};
+
+exports.postDirectAddProduct = async (req, res) => {
+  const { title, imageUrl, price, description, location, quantity } = req.body;
+
+  try {
+    const product = new Product({
+      title,
+      imageUrl,
+      price: parseFloat(price),
+      min_price: parseFloat(price), // Set to same as price
+      description,
+      location,
+      quantity: parseInt(quantity),
+      seller: req.user._id,
+      saleType: 'direct',
+      startDate: new Date(), // Add current date
+      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
+    });
+
+    await product.save();
+    req.flash('success', 'Direct listing created successfully!');
+    res.redirect("/secondHand/buy");
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Error creating direct listing");
+    res.redirect("/secondHand/sell/direct-add-product");
+  }
+};
 

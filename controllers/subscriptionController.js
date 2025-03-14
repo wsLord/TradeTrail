@@ -79,27 +79,27 @@ exports.addToCart = (req, res, next) => {
 exports.getAddProduct = (req, res, next) => {
     res.render("subscriptionSwapping/add-product", {
         pageTitle: "Add Product",
-        path: "/subscription/sell",
-        activePage: "subscription" // added for navbar active highlighting
+        path: "subscriptionSwapping/add-product",
+        activePage: "subscription"
     });
 };
 
 // 3. Modify existing postAddProduct controller
 exports.postAddProduct = (req, res) => {
-    // Store form data in session
     req.session.tempProduct = {
-        platform_name: req.body.platform_name,
-        imageUrl: req.body.imageUrl,
-        price: req.body.price,
-        min_price: req.body.min_price,
-        description: req.body.description,
-        startDate: req.body.startDate,
-        endDate: req.body.endDate,
-        seller: req.user._id
+      platform_name: req.body.platform_name,
+      imageUrl: req.body.imageUrl,
+      price: req.body.price,
+      min_price: req.body.min_price,
+      description: req.body.description,
+      startDate: req.body.startDate,
+      endDate: req.body.endDate,
+      seller: req.user._id,
+      saleType: 'auction'
     };
     
     res.redirect("/subscription/verify-credentials");
-};
+  };
 
 exports.getProducts = (req, res, next) => {
     const searchQuery = req.query.search || "";
@@ -375,3 +375,80 @@ exports.postVerifyCredentials = async (req, res) => {
         res.redirect("/subscription/sell");
     }
 };
+
+exports.getPostType = (req, res) => {
+    res.render("subscriptionSwapping/post-type", {
+      pageTitle: "Choose Listing Type",
+      activePage: "subscription"
+    });
+  };
+  
+  exports.getDirectAddProduct = (req, res) => {
+    res.render("subscriptionSwapping/direct-add-product", {
+      pageTitle: "Direct Selling",
+      activePage: "subscription"
+    });
+  };
+  
+  exports.postDirectAddProduct = async (req, res) => {
+    req.session.tempDirectProduct = {
+      platform_name: req.body.platform_name,
+      imageUrl: req.body.imageUrl,
+      price: parseFloat(req.body.price),
+      min_price: parseFloat(req.body.price),
+      description: req.body.description,
+      quantity: parseInt(req.body.quantity),
+      location: req.body.location,
+      seller: req.user._id,
+      saleType: 'direct',
+      startDate: new Date(),
+      endDate: new Date()
+    };
+    
+    res.redirect("/subscription/direct-verify");
+  };
+
+  exports.getDirectVerifyCredentials = (req, res) => {
+    res.render("subscriptionSwapping/direct-verify-credentials", {
+      pageTitle: "Verify Direct Listing",
+      path: "/subscription/direct-verify",
+      activePage: "subscription"
+    });
+  };
+  
+// Modify the postDirectVerifyCredentials controller
+exports.postDirectVerifyCredentials = async (req, res) => {
+    const { action, email, password } = req.body;
+    const productData = req.session.tempDirectProduct;
+  
+    try {
+      if (!productData) {
+        req.flash('error', 'Session expired. Please start over.');
+        return res.redirect('/subscription/sell/direct-add-product');
+      }
+  
+      if (action === 'verify') {
+        if (!email || !password) {
+          req.flash('error', 'Please fill all credentials');
+          return res.redirect('back');
+        }
+        // Add actual verification logic here
+        productData.credentialsVerified = true;
+        productData.verificationPending = false;
+      } else {
+        productData.credentialsVerified = false;
+        productData.verificationPending = true;
+      }
+  
+      const product = new Ott(productData);
+      await product.save();
+      delete req.session.tempDirectProduct;
+      
+      req.flash('success', 'Direct listing created successfully!');
+      res.redirect("/subscription/buy");
+    } catch (err) {
+      console.error(err);
+      req.flash("error", "Error creating direct listing");
+      res.redirect("/subscription/sell/direct-add-product");
+    }
+  };
