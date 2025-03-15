@@ -12,9 +12,11 @@
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^3.0.2",
+    "body-parser": "^1.20.3",
     "connect-flash": "^0.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "csurf": "^1.10.0",
     "dotenv": "^16.4.7",
     "ejs": "^3.1.10",
@@ -27,6 +29,7 @@
     "morgan": "^1.10.0",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.10.0",
+    "razorpay": "^2.9.6",
     "uuid": "^11.1.0",
     "validator": "^13.12.0"
   },

@@ -39,7 +39,10 @@ const path = require("path");
 const cookieParser = require("cookie-parser"); // Ensure cookies are parsed
 const session = require("express-session");
 const flash = require("connect-flash");
-
+ 
+const Razorpay= require('razorpay');
+const bodyParser=require('body-parser');
+const fs= require('fs');
 
 
 
@@ -56,6 +59,8 @@ const subscriptionRoutes = require("./routes/subscriptionRoutes");
 const rentalCartRoutes = require("./routes/rentalCartRoutes");
 const secondHandCartRoutes = require("./routes/secondHandCartRoutes");
 const subscriptionCartRoutes = require("./routes/subscriptionCartRoutes");
+
+const paymentRoutes = require("./routes/paymentRoutes");
 
 const cron = require('node-cron');
 const User = require('./models/userModel');
@@ -103,7 +108,10 @@ app.use(cookieParser()); // ✅ Required for JWT authentication
 app.use(express.static(path.join(__dirname, "public")));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
-
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended:true}));
+const cors = require('cors');
+app.use(cors());
 
 
 // Set up EJS as the view engine
@@ -121,7 +129,7 @@ app.use("/rental/cart", rentalCartRoutes);
 app.use("/subscription/cart", subscriptionCartRoutes);
 app.use("/secondHand/cart", secondHandCartRoutes);
 
-
+app.use("/rental/api/payment", paymentRoutes);
 app.get("/", (req, res) => {
     res.render("home"); // Renders the home.ejs file inside views/
 });

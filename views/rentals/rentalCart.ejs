@@ -1,27 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your Cart</title>
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="/css/cart.css" />
+    <link rel="stylesheet" href="/css/forms.css" />
+    <link rel="stylesheet" href="/css/rentalStyles.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your Cart</title>
-  <link rel="stylesheet" href="/css/main.css">
-  <link rel="stylesheet" href="/css/cart.css">
-  <link rel="stylesheet" href="/css/forms.css">
-  <link rel="stylesheet" href="/css/rentalStyles.css">
-</head>
-
-<body>
-  <div id="navbar">
-    <%- include('../common/navigation.ejs') %>
-  </div>
-  <main class="cart-container">
-    <div class="cart-header">
-      <h1>Your Rental Cart</h1>
-    </div>
-    <% if (cart.items.length === 0) { %>
+  <body>
+    <div id="navbar"><%- include('../common/navigation.ejs') %></div>
+    <main class="cart-container">
+      <div class="cart-header">
+        <h1>Your Rental Cart</h1>
+      </div>
+      <% if (cart.items.length === 0) { %>
       <p>Your cart is empty.</p>
-    <% } else { %>
+      <% } else { %>
       <table class="cart-items">
         <thead>
           <tr>
@@ -30,51 +27,156 @@
             <th>Unit Price</th>
             <th>Quantity</th>
             <th>Total</th>
-            <th>Remove</th> <!-- New column for delete -->
+            <th>Remove</th>
+            <!-- New column for delete -->
           </tr>
         </thead>
         <tbody>
-          <% let grandTotal = 0; %>
-          <% cart.items.forEach(item => { %>
-            <% if (item.product) { %>
-              <% const totalPrice = item.product.price * item.quantity; %>
-              <% grandTotal += totalPrice; %>
-              <tr class="cart-item">
-                <td>
-                  <img src="<%= item.product.imageUrl %>" alt="<%= item.product.title %>">
-                </td>
-                <td><%= item.product.title %></td>
-                <td>₹<%= item.product.price.toFixed(2) %></td>
-                <td>
-                  <form action="/rental/update-cart/<%= item.product._id %>" method="POST">
-                    <input type="number" name="quantity" value="<%= item.quantity %>" min="1" max="<%= item.product.quantity %>" class="quantity-input">
-                    <button type="submit">Update</button>
-                  </form>
-                </td>
-                <td>₹<%= totalPrice.toFixed(2) %></td>
-                <td>
-                    <form action="/rental/cart/delete-item/<%= item.product._id %>" method="POST">
-                        <button type="submit" class="delete-button" aria-label="Remove Item" style="background-color: black; color: white;">Delete</button>
-                      </form>
-                      
-                  </td>
-                  
-              </tr>
-            <% } else { %>
-              <tr class="cart-item">
-                <td colspan="6">Product information is unavailable.</td>
-              </tr>
-            <% } %>
-          <% }); %>
+          <% let grandTotal = 0; %> <% cart.items.forEach(item => { %> <% if
+          (item.product) { %> <% const totalPrice = item.product.price *
+          item.quantity; %> <% grandTotal += totalPrice; %>
+          <tr class="cart-item">
+            <td>
+              <img
+                src="<%= item.product.imageUrl %>"
+                alt="<%= item.product.title %>"
+              />
+            </td>
+            <td><%= item.product.title %></td>
+            <td>₹<%= item.product.price.toFixed(2) %></td>
+            <td>
+              <form
+                action="/rental/update-cart/<%= item.product._id %>"
+                method="POST"
+              >
+                <input
+                  type="number"
+                  name="quantity"
+                  value="<%= item.quantity %>"
+                  min="1"
+                  max="<%= item.product.quantity %>"
+                  class="quantity-input"
+                />
+                <button type="submit">Update</button>
+              </form>
+            </td>
+            <td>₹<%= totalPrice.toFixed(2) %></td>
+            <td>
+              <form
+                action="/rental/cart/delete-item/<%= item.product._id %>"
+                method="POST"
+              >
+                <button
+                  type="submit"
+                  class="delete-button"
+                  aria-label="Remove Item"
+                  style="background-color: black; color: white"
+                >
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+          <% } else { %>
+          <tr class="cart-item">
+            <td colspan="6">Product information is unavailable.</td>
+          </tr>
+          <% } %> <% }); %>
         </tbody>
       </table>
-      <div class="cart-total">
+      <div class="cart-total" id="amount">
         Grand Total: ₹<%= grandTotal.toFixed(2) %>
       </div>
-      <div style="clear: both;"></div>
-      <button class="checkout-button">Proceed to Checkout</button>
-    <% } %>
-  </main>
-</body>
+      <div style="clear: both"></div>
+      <button onclick="makePayment()" class="checkout-button">
+        Proceed to Checkout
+      </button>
+      <% } %>
+    </main>
 
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+      function makePayment() {
+        const amountText = document.getElementById("amount").textContent;
+        // const amount = parseFloat(
+        //   amountText.replace("Grand Total: ₹", "").trim()
+        // ); // Extract numeric value
+
+        // More robust parsing: Extract just the number part
+        const amountMatch = amountText.match(/₹\s*([\d,]+(?:\.\d+)?)/);
+        const amount = amountMatch
+          ? parseFloat(amountMatch[1].replace(/,/g, ""))
+          : 0;
+
+        console.log("Amount:", amount);
+
+        fetch("http://localhost:8000/rental/api/payment/createOrder", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount }),
+        })
+          .then((response) => {
+            //console.log("Response status:", response.status);
+            return response.json();
+          })
+          .then((order) => {
+            console.log(order);
+            const options = {
+              key: "rzp_test_qqFGXdqlANXTty",
+              amount: order.amount,
+              currency: order.currency,
+              name: "TradeTrail",
+              description: "Payment for Rental Items",
+              // image: "https://your-logo-url.com/logo.png",
+              order_id: order.id,
+              theme: {
+                color: "#4F7942",
+              },
+              prefill: {
+                email: "customer@example.com",
+                contact: "",
+              },
+              handler: function (response) {
+                // console.log(...response);
+                fetch("/rental/api/payment/verifyPayment", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    ...response,
+                    amount: amount,
+                  }),
+                })
+                  //console.log(options);
+                  .then((res) => res.json())
+                  .then((data) => {
+                    if (data.success) {
+                      console.log(data);
+                      alert(
+                        "Payment successful! Your order has been confirmed."
+                      );
+                      console.log(data);
+                      window.location.href =
+                        "/rental/api/payment/payment-success";
+                    }
+                  })
+                  .catch((error) => {
+                    console.error("Error:", error);
+                    alert("Payment verification failed");
+                  });
+              },
+            };
+
+            const rzp = new Razorpay(options);
+            console.log(rzp);
+            rzp.open();
+          })
+          .catch((error) => {
+            //console.error('Error:', error);
+            alert("Failed to create order");
+          });
+      }
+    </script>
+  </body>
 </html>
