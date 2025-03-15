@@ -86,7 +86,7 @@
     
     <section>
       <h1>Auction</h1>
-      <h2>Welcome, <%= user.fullName %>!</h2>
+      <h2>Welcome, <%= user.fullName %>!</h2></br></br>
       <div><b>Product:</b> <%= product.title %></div>
       <p><b>Seller:</b> <%= product.seller ? product.seller.fullName : "Unknown Seller" %></p>
       <p>Start: <span id="start-date"><%= product.startDate %></span></p>
@@ -94,7 +94,7 @@
       <div class="price-display">
         <p>Actual Price: ₹<span id="actual-price"><%= product.price %></span></p>
         <p>Minimum Bid: ₹<span id="min-bid"><%= product.min_price %></span></p>
-        <p>Max bid: <span id="max-bid"><%= maxBid %></span></p>
+        <p>Max bid: ₹<span id="max-bid"><%= maxBid %></span></p>
       </div>
     </section>
     

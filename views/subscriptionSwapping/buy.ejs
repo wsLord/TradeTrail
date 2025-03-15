@@ -64,6 +64,8 @@
     .verify-btn i {
         font-size: 1.1em;
     }
+
+
   </style>
 </head>
 <body>
@@ -71,7 +73,7 @@
     <%- include('../common/navigation.ejs') %>
   </div>
   <main>
-    <h1>Subscriptions</h1>
+    <h1>Subscriptions</h1></br>
     <form action="/subscription/buy" method="GET" class="search-form">
       <input 
         type="text" 
@@ -81,6 +83,7 @@
       >
       <button type="submit">Search</button>
     </form>
+    <button type="button" onclick="window.location.href='/subscription/sell'">POST A SUBSCRIPTION !</button>
     
     <% if (prods.length > 0) { %>
       <div class="rental-list">

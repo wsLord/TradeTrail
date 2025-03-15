@@ -9,31 +9,7 @@
   <link rel="stylesheet" href="/css/navigation.css">
   <link rel="stylesheet" href="/css/auction.css">
   <style>
-    /* Flash message container */
-    .alert-box {
-  position: relative;
-  max-width: 400px;
-  margin: 20px auto;
-  padding: 15px 35px 15px 20px;
-  border-radius: 4px;
-  text-align: center;
-}
-
-/* Close button */
-.close-btn {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 1.2em;
-  color: inherit;
-  background: none;
-  border: none;
-  padding: 0 5px;
-}
-
+    
 /* Message types */
 .alert-error {
   color: #721c24;
@@ -53,14 +29,6 @@
   border-radius: 4px;
 }
 
-.alert-info {
-  color: #0c5460;
-  background-color: #d1ecf1;
-  border: 1px solid #bee5eb;
-  padding: 10px;
-  margin: 20px 0;
-  border-radius: 4px;
-}
   </style>
 </head>
 <body>
@@ -86,7 +54,7 @@
     
     <section>
       <h1>Auction</h1>
-      <h2>Welcome, <%= user.fullName %>!</h2>
+      <h2>Welcome, <%= user.fullName %>!</h2></br></br>
       <div><b>Product:</b> <%= product.title %></div>
       <p><b>Seller:</b> <%= product.seller ? product.seller.fullName : "Unknown Seller" %></p>
       <p>Start: <span id="start-date"><%= product.startDate %></span></p>
@@ -121,7 +89,7 @@
           <p>You have already placed a bid of ₹<%= userBid.bidAmount %> on this auction.</p>
           <p>Please delete your existing bid before placing a new one.</p>
           <form action="/subscription/delete-bid/<%= userBid._id %>" method="POST">
-            <button type="submit" class="btn btn-delete">Delete Your Bid</button>
+            <button type="submit" class="btn-delete">Delete Your Bid</button>
           </form>
         </div>
       <% } %>

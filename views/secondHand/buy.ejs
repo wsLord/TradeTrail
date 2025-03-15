@@ -17,7 +17,7 @@
   </div>
 
   <main>
-    <h1>Second Hand Products</h1>
+    <h1>Second Hand Products</h1></br>
     <form action="/secondHand/buy" method="GET" class="search-form">
       <input 
         type="text" 
@@ -27,11 +27,12 @@
       >
       <button type="submit">Search</button>
     </form>
+    <button type="button" onclick="window.location.href='/secondHand/sell'">POST AN ITEM !</button>
     
     <% if (prods.length > 0) { %>
       <!-- Changed container class names to mimic rental search layout -->
       <div class="rental-list">
-        <% for (let product of prods) { %>
+        <% for (let product of prods) { %>`
           <div class="rental-item">
             <div class="product-card">
               <div class="card__image">
