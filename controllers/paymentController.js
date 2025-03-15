@@ -10,6 +10,43 @@ const razorpayInstance = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
+
+exports.makePayment = async (req, res) => {
+  try {
+    const { amount } = req.body; // Amount from the frontend
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ success: false, message: "Invalid amount" });
+    }
+
+    const options = {
+      amount: amount * 100, // Convert to paise (₹1 = 100 paise)
+      currency: "INR",
+      receipt: `receipt_${Date.now()}`,
+      payment_capture: 1,
+    };
+
+    const order = await razorpayInstance.orders.create(options);
+
+    res.json({
+      success: true,
+      options: {
+        key: process.env.RAZORPAY_KEY_ID,
+        amount: order.amount,
+        currency: order.currency,
+        name: "TradeTrail",
+        description: "Payment for Rental Items",
+        order_id: order.id,
+        theme: { color: "#4F7942" },
+        prefill: { email: "customer@example.com", contact: "" },
+      },
+    });
+  } catch (error) {
+    console.error("Error in makePayment:", error);
+    res.status(500).json({ success: false, message: "Failed to create order" });
+  }
+};
+
 exports.getPaymentPage = (req, res) => {
   res.render("rentals/rentalCart", {
     razorpayKeyId: process.env.RAZORPAY_KEY_ID, // Using your test key directly
@@ -48,23 +85,21 @@ exports.createOrder = async (req, res) => {
     });
   }
 };
-
 exports.verifyPayment = async (req, res) => {
   try {
     console.log("Received verification request:", req.body);
 
-    const {
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
-      amount,
-    } = req.body;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, amount } = req.body;
 
-    // Verify signature
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({ success: false, message: "Missing payment details" });
+    }
+
+    // Verify Razorpay Signature
     const sign = razorpay_order_id + "|" + razorpay_payment_id;
     const expectedSign = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(sign.toString())
+      .update(sign)
       .digest("hex");
 
     console.log("Expected signature:", expectedSign);
@@ -72,36 +107,29 @@ exports.verifyPayment = async (req, res) => {
 
     if (razorpay_signature !== expectedSign) {
       console.log("Signature verification failed!");
-      return res.status(400).json({
-        success: false,
-        error: "Invalid signature",
-      });
+      return res.status(400).json({ success: false, message: "Invalid signature" });
     }
 
-    // Create a new payment record
+    // Save the payment details in the database
     const newPayment = new payment({
       orderId: razorpay_order_id,
       paymentId: razorpay_payment_id,
       signature: razorpay_signature,
-      amount: parseFloat(amount || 0) * 100,
+      amount: parseFloat(amount || 0),
       status: "completed",
     });
 
     console.log("Saving payment:", newPayment);
     await newPayment.save();
 
-    return res.status(200).json({
-      success: true,
-      payment: newPayment,
-    });
+    return res.json({ success: true, redirectUrl: "/rental/api/payment/payment-success" });
   } catch (error) {
     console.error("Error verifying payment:", error);
-    return res.status(500).json({
-      success: false,
-      error: error.message,
-    });
+    return res.status(500).json({ success: false, message: "Payment verification failed" });
   }
 };
+
+
 
 exports.paymentSuccess = (req, res) => {
   res.render("rentals/success");

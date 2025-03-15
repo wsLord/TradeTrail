@@ -8,6 +8,7 @@ router.get('/payment-success', paymentController.paymentSuccess);
 router.get('/test', (req, res) => {
     res.send('Payment API is working!');
 });
+router.post("/makePayment", paymentController.makePayment);
 
 
 module.exports=router;

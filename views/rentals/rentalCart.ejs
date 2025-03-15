@@ -95,88 +95,61 @@
     </main>
 
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
     <script>
       function makePayment() {
-        const amountText = document.getElementById("amount").textContent;
-        // const amount = parseFloat(
-        //   amountText.replace("Grand Total: ₹", "").trim()
-        // ); // Extract numeric value
+  const amountText = document.getElementById("amount").textContent;
+  const amountMatch = amountText.match(/₹\s*([\d,]+(?:\.\d+)?)/);
+  const amount = amountMatch ? parseFloat(amountMatch[1].replace(/,/g, "")) : 0;
 
-        // More robust parsing: Extract just the number part
-        const amountMatch = amountText.match(/₹\s*([\d,]+(?:\.\d+)?)/);
-        const amount = amountMatch
-          ? parseFloat(amountMatch[1].replace(/,/g, ""))
-          : 0;
+  fetch("/rental/api/payment/makePayment", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ amount }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        const options = {
+          ...data.options,
+          handler: function (response) {
+            verifyPayment(response, amount);
+          },
+        };
 
-        console.log("Amount:", amount);
+        const rzp = new Razorpay(options);
+        rzp.open();
+      } else {
+        alert("Payment initialization failed");
+      }
+    })
+    .catch(() => alert("Failed to create order"));
+}
 
-        fetch("http://localhost:8000/rental/api/payment/createOrder", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount }),
-        })
-          .then((response) => {
-            //console.log("Response status:", response.status);
-            return response.json();
-          })
-          .then((order) => {
-            console.log(order);
-            const options = {
-              key: "rzp_test_qqFGXdqlANXTty",
-              amount: order.amount,
-              currency: order.currency,
-              name: "TradeTrail",
-              description: "Payment for Rental Items",
-              // image: "https://your-logo-url.com/logo.png",
-              order_id: order.id,
-              theme: {
-                color: "#4F7942",
-              },
-              prefill: {
-                email: "customer@example.com",
-                contact: "",
-              },
-              handler: function (response) {
-                // console.log(...response);
-                fetch("/rental/api/payment/verifyPayment", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    ...response,
-                    amount: amount,
-                  }),
-                })
-                  //console.log(options);
-                  .then((res) => res.json())
-                  .then((data) => {
-                    if (data.success) {
-                      console.log(data);
-                      alert(
+function verifyPayment(response, amount) {
+  fetch("/rental/api/payment/verifyPayment", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...response, amount }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) {
+        alert(
                         "Payment successful! Your order has been confirmed."
                       );
-                      console.log(data);
-                      window.location.href =
-                        "/rental/api/payment/payment-success";
-                    }
-                  })
-                  .catch((error) => {
-                    console.error("Error:", error);
-                    alert("Payment verification failed");
-                  });
-              },
-            };
-
-            const rzp = new Razorpay(options);
-            console.log(rzp);
-            rzp.open();
-          })
-          .catch((error) => {
-            //console.error('Error:', error);
-            alert("Failed to create order");
-          });
+        console.log("Redirecting to:", data.redirectUrl);
+        window.location.href = data.redirectUrl;
+      } else {
+        alert("Payment verification failed");
       }
+    })
+    .catch((error) => {
+      console.error("Error verifying payment:", error);
+      alert("Error verifying payment");
+    });
+}
+
     </script>
   </body>
 </html>
