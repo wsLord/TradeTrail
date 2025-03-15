@@ -108,7 +108,9 @@
                 
                 <div class="price-group">
                   <p class="price">Actual Price: ₹<%= product.price %></p>
-                  <p class="min-price">Auction Starts At: ₹<%= product.min_price %></p>
+                  <% if (product.saleType === 'auction') { %>
+                      <p class="min-price">Auction Starts At: ₹<%= product.min_price %></p>
+                  <% } %>
               </div>
                 <p class="description"><%= product.description %></p>
                 <% if (product.seller && product.seller.fullName) { %>

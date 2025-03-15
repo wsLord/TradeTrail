@@ -1,6 +1,7 @@
 const Product = require("../models/product");
 const BidProduct = require("../models/bidproduct");
 const User = require("../models/userModel");
+const Cart = require("../models/cartModel");
 
 const MIN_BID_INCREMENT = 100;
 
@@ -278,4 +279,54 @@ exports.postDirectAddProduct = async (req, res) => {
     res.redirect("/secondHand/sell/direct-add-product");
   }
 };
+
+exports.addToCart = (req, res, next) => {
+  const userId = req.user._id;
+  const productId = req.params.productId;
+  const quantityToAdd = parseInt(req.body.quantity) || 1;
+
+  Product.findById(productId)
+    .then(product => {
+      if (!product) {
+        req.flash("error", "Product not found.");
+        return res.redirect("/secondHand");
+      }
+      return Cart.findOne({ user: userId });
+    })
+    .then(cart => {
+      const newItem = {
+        productType: 'SecondHand', // Changed to SecondHand
+        productModel: 'Product',   // Changed to Product
+        product: productId,
+        quantity: quantityToAdd
+      };
+
+      if (!cart) {
+        return new Cart({
+          user: userId,
+          items: [newItem]
+        }).save();
+      }
+
+      const existingIndex = cart.items.findIndex(item => 
+        item.product.equals(productId) && 
+        item.productType === 'SecondHand' // Changed to SecondHand
+      );
+
+      if (existingIndex > -1) {
+        cart.items[existingIndex].quantity += quantityToAdd;
+      } else {
+        cart.items.push(newItem);
+      }
+
+      return cart.save();
+    })
+    .then(() => res.redirect("/cart"))
+    .catch(err => {
+      console.error(err);
+      req.flash("error", "Failed to add to cart.");
+      res.redirect(req.get("Referrer") || "/");
+    });
+};
+
 

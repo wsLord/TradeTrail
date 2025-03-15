@@ -1,6 +1,6 @@
 const Ott = require("../models/ott");
 const BidProducts = require("../models/BidProducts");
-const subscriptionCart = require("../models/subscriptionCart");
+const Cart = require("../models/cartModel"); 
 const User = require("../models/userModel");
 
 const MIN_BID_INCREMENT = 100;
@@ -13,75 +13,58 @@ exports.getHome = (req, res, next) => {
     });
 };
 
-exports.addToCart = (req, res, next) => {
-    const userId = req.user._id; // Provided by protectRoute middleware
-    const productId = req.params.productId;
-    const quantityToAdd = parseInt(req.body.quantity) || 1;
-    Ott.findById(productId)
-        .then(product => {
-            if (!product) {
-                req.flash("error", "Product not found.");
-                return res.redirect("/subscription");
-            }
-            console.log(product);
-            return subscriptionCart.findOne({ user: userId }).then(subscriptionCar => {
-                return { product, subscriptionCar };
-            });
-        })
-        .then(({ product, subscriptionCar }) => {
-            // Check if adding quantity will exceed available stock
-            if (!subscriptionCar) {
-                if (quantityToAdd > product.quantity) {
-                    req.flash("error", "Cannot add more items than available.");
-                    return res.redirect(req.get("Referrer") || "/");
-                }
-                const newSubscriptionCart = new subscriptionCart({
-                    user: userId,
-                    items: [{ product: productId, quantity: quantityToAdd }]
-                });
-                return newSubscriptionCart.save();
-            } else {
-                if (!Array.isArray(subscriptionCar.items)) {
-                    subscriptionCar.items = []; // Ensure it's an array
-                }
-                const itemIndex = subscriptionCar.items.findIndex(
-                    (item) => item.product.toString() === productId
-                );
-                if (itemIndex >= 0) {
-                    const currentQuantity = subscriptionCar.items[itemIndex].quantity;
-                    if (currentQuantity + quantityToAdd > product.quantity) {
-                        req.flash("error", "Cannot add more items than available.");
-                        return res.redirect(req.get("Referrer") || "/");
-                    }
-                    subscriptionCar.items[itemIndex].quantity += quantityToAdd;
-                } else {
-                    if (quantityToAdd > product.quantity) {
-                        req.flash("error", "Cannot add more items than available.");
-                        return res.redirect(req.get("Referrer") || "/");
-                    }
-                    subscriptionCar.items.push({ product: productId, quantity: quantityToAdd });
-                }
-                return subscriptionCar.save();
-            }
-        })
-        .then(savedCart => {
-            // If flash message was set and redirection already happened, do nothing.
-            if (res.headersSent) return;
-            res.redirect("/subscription/add-to-cart");
-        })
-        .catch(err => {
-            console.error(err);
-            req.flash("error", "Failed to add to subscriptionCart due to a server error.");
-            res.redirect(req.get("Referrer") || "/");
-        });
-};
+exports.addToCart = async (req, res) => {
+  try {
+      const userId = req.user._id;
+      const productId = req.params.productId;
+      
+      // Force quantity to 1 for subscriptions
+      const quantityToAdd = 1; // Override any incoming quantity
 
-exports.getAddProduct = (req, res, next) => {
-    res.render("subscriptionSwapping/add-product", {
-        pageTitle: "Add Product",
-        path: "subscriptionSwapping/add-product",
-        activePage: "subscription"
-    });
+      const product = await Ott.findById(productId);
+      if (!product) {
+          req.flash("error", "Product not found.");
+          return res.redirect("/subscription");
+      }
+
+      let cart = await Cart.findOne({ user: userId });
+
+      // Check if subscription already exists in cart
+      if (cart) {
+          const existingSubscription = cart.items.find(item => 
+              item.product.equals(productId) && 
+              item.productType === 'Subscription'
+          );
+
+          if (existingSubscription) {
+              req.flash("error", "You can only have one subscription of each type in your cart");
+              return res.redirect("/subscription/buy");
+          }
+      }
+
+      const newItem = {
+          productType: 'Subscription',
+          productModel: 'Ott',
+          product: productId,
+          quantity: 1 // Force quantity to 1
+      };
+
+      if (!cart) {
+          cart = await Cart.create({
+              user: userId,
+              items: [newItem]
+          });
+      } else {
+          cart.items.push(newItem);
+          await cart.save();
+      }
+
+      res.redirect("/cart");
+  } catch (err) {
+      console.error(err);
+      req.flash("error", "Failed to add to cart.");
+      res.redirect(req.get("Referrer") || "/");
+  }
 };
 
 // 3. Modify existing postAddProduct controller
@@ -169,46 +152,30 @@ exports.getProduct = (req, res, next) => {
         });
 };
 
-exports.updateCart = (req, res, next) => {
-    const productId = req.params.productId;
-    let newQuantity = parseInt(req.body.quantity);
-    const userId = req.user._id;
+exports.updateCart = async (req, res) => {
+    try {
+        const productId = req.params.productId;
+        const newQuantity = parseInt(req.body.quantity);
+        const userId = req.user._id;
 
-    // Ensure quantity is at least 1
-    if (newQuantity < 1) {
-        newQuantity = 1;
+        const cart = await Cart.findOne({ user: userId });
+        if (!cart) return res.redirect("/cart");
+
+        const item = cart.items.find(item => 
+            item.product.toString() === productId &&
+            item.productType === 'Subscription'
+        );
+
+        if (item) {
+            item.quantity = Math.max(newQuantity, 1);
+            await cart.save();
+        }
+
+        res.redirect("/cart");
+    } catch (err) {
+        console.error(err);
+        res.redirect("/cart");
     }
-
-    Ott.findById(productId)
-        .then((product) => {
-            if (!product) {
-                return res.status(404).json({ message: "Product not found" });
-            }
-            return subscriptionCart.findOne({ user: userId }).then((cart) => {
-                if (!cart) {
-                    cart = new subscriptionCart({ user: userId, items: [] });
-                }
-                if (!Array.isArray(cart.items)) {
-                    cart.items = [];
-                }
-                const itemIndex = cart.items.findIndex(
-                    (item) => item.product.toString() === productId
-                );
-                if (itemIndex > -1) {
-                    cart.items[itemIndex].quantity = newQuantity;
-                } else {
-                    cart.items.push({ product: productId, quantity: newQuantity });
-                }
-                return cart.save();
-            });
-        })
-        .then(() => {
-            res.redirect("/subscription");
-        })
-        .catch((err) => {
-            console.error(err);
-            res.status(500).json({ message: "Error updating subscription cart" });
-        });
 };
 
 exports.getAddBidProduct = (req, res, next) => {
@@ -397,7 +364,7 @@ exports.getPostType = (req, res) => {
       price: parseFloat(req.body.price),
       min_price: parseFloat(req.body.price),
       description: req.body.description,
-      quantity: parseInt(req.body.quantity),
+      quantity: 1,
       location: req.body.location,
       seller: req.user._id,
       saleType: 'direct',
@@ -452,3 +419,11 @@ exports.postDirectVerifyCredentials = async (req, res) => {
       res.redirect("/subscription/sell/direct-add-product");
     }
   };
+
+  exports.getAddProduct = (req, res) => {
+    res.render("subscriptionSwapping/add-product", {
+        pageTitle: "Add Subscription Product",
+        path: "/subscription/sell/add-product",
+        activePage: "subscription"
+    });
+};

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Unified Cart</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/cart.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/rentalStyles.css">
+  <style>
+    .cart-section {
+      margin: 2rem 0;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1rem;
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      padding: 1rem;
+      background-color: #f5f5f5;
+      border-radius: 6px;
+    }
+    .section-content {
+      display: none;
+      margin-top: 1rem;
+    }
+    .section-content.active {
+      display: block;
+    }
+    .toggle-btn {
+      font-size: 1.5rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0 1rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="navbar">
+    <%- include('../common/navigation.ejs') %>
+  </div>
+  <main class="cart-container">
+    <div class="cart-header">
+      <h1>Your Unified Cart</h1>
+    </div>
+
+    <% const sections = {
+      Rental: cart.items.filter(item => item.productType === 'Rental'),
+      Subscription: cart.items.filter(item => item.productType === 'Subscription'),
+      SecondHand: cart.items.filter(item => item.productType === 'SecondHand')
+    };
+    let grandTotal = 0;
+    %>
+
+    <% Object.entries(sections).forEach(([sectionName, items]) => { %>
+      <div class="cart-section">
+        <div class="section-header" onclick="toggleSection('<%= sectionName %>')">
+          <h2><%= sectionName %> (<%= items.length %>)</h2>
+          <button class="toggle-btn" data-section="<%= sectionName %>">+</button>
+        </div>
+        <div class="section-content" id="<%= sectionName %>-content">
+          <% if (items.length === 0) { %>
+            <p>No <%= sectionName %> items in cart</p>
+          <% } else { %>
+            <table class="cart-items">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Title</th>
+                  <% if (sectionName === 'Subscription') { %>
+                    <th>Platform</th>
+                  <% } %>
+                  <th>Unit Price</th>
+                  <th>Quantity</th>
+                  <th>Total</th>
+                  <th>Remove</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% items.forEach(item => { 
+                  const totalPrice = item.product.price * item.quantity;
+                  grandTotal += totalPrice;
+                %>
+                  <tr class="cart-item">
+                    <td>
+                      <img src="<%= item.product.imageUrl %>" alt="<%= item.product.title %>" style="max-width: 100px;">
+                    </td>
+                    <td><%= item.product.title || item.product.platform_name %></td>
+                    <% if (sectionName === 'Subscription') { %>
+                      <td><%= item.product.platform_name %></td>
+                    <% } %>
+                    <td>₹<%= item.product.price.toFixed(2) %></td>
+                    <td>
+                      <form action="/cart/update/<%= item._id %>" method="POST">
+                        <input type="number" name="quantity" value="<%= item.quantity %>" 
+                               min="1" max="<%= item.product.quantity %>" class="quantity-input">
+                        <button type="submit">Update</button>
+                      </form>
+                    </td>
+                    <td>₹<%= totalPrice.toFixed(2) %></td>
+                    <td>
+                      <form action="/cart/delete/<%= item._id %>" method="POST">
+                        <button type="submit" class="delete-button" 
+                                style="background-color: black; color: white;">Delete</button>
+                      </form>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          <% } %>
+        </div>
+      </div>
+    <% }); %>
+
+    <% if (cart.items.length > 0) { %>
+      <div class="cart-total">
+        <h3>Grand Total: ₹<%= grandTotal.toFixed(2) %></h3>
+      </div>
+      <div style="clear: both;"></div>
+      <button class="checkout-button">Proceed to Checkout</button>
+    <% } %>
+  </main>
+
+  <script>
+    function toggleSection(sectionName) {
+      const content = document.getElementById(`${sectionName}-content`);
+      const btn = document.querySelector(`[data-section="${sectionName}"]`);
+      content.classList.toggle('active');
+      btn.textContent = content.classList.contains('active') ? '-' : '+';
+    }
+
+    // Expand first non-empty section
+    document.querySelectorAll('.cart-section').forEach(section => {
+      if (section.querySelector('.cart-item')) {
+        const sectionName = section.querySelector('h2').textContent.split(' ')[0];
+        toggleSection(sectionName);
+      }
+    });
+  </script>
+</body>
+</html>

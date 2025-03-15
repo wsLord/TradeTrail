@@ -4,11 +4,10 @@ const Cart = require("../models/cartModel");
 
 // Add-to-Cart Controller Method
 exports.addToCart = (req, res, next) => {
-  const userId = req.user._id; // Provided by protectRoute middleware
+  const userId = req.user._id;
   const productId = req.params.productId;
   const quantityToAdd = parseInt(req.body.quantity) || 1;
 
-  // First, find the product to check available quantity
   RentalProduct.findById(productId)
     .then(product => {
       if (!product) {
@@ -20,46 +19,42 @@ exports.addToCart = (req, res, next) => {
       });
     })
     .then(({ product, cart }) => {
-      // Check if adding quantity will exceed available stock
       if (!cart) {
-        if (quantityToAdd > product.quantity) {
-          req.flash("error", "Cannot add more items than available.");
-          return res.redirect(req.get("Referrer") || "/");
-        }
         const newCart = new Cart({
           user: userId,
-          items: [{ product: productId, quantity: quantityToAdd }]
+          items: [{
+            productType: 'Rental',
+            productModel: 'RentalProduct',
+            product: productId,
+            quantity: quantityToAdd
+          }]
         });
         return newCart.save();
       } else {
-        const itemIndex = cart.items.findIndex(
-          (item) => item.product.toString() === productId
+        const itemIndex = cart.items.findIndex(item => 
+          item.product.toString() === productId && 
+          item.productType === 'Rental'
         );
+        
         if (itemIndex >= 0) {
-          const currentQuantity = cart.items[itemIndex].quantity;
-          if (currentQuantity + quantityToAdd > product.quantity) {
-            req.flash("error", "Cannot add more items than available.");
-            return res.redirect(req.get("Referrer") || "/");
-          }
           cart.items[itemIndex].quantity += quantityToAdd;
         } else {
-          if (quantityToAdd > product.quantity) {
-            req.flash("error", "Cannot add more items than available.");
-            return res.redirect(req.get("Referrer") || "/");
-          }
-          cart.items.push({ product: productId, quantity: quantityToAdd });
+          cart.items.push({
+            productType: 'Rental',
+            productModel: 'RentalProduct',
+            product: productId,
+            quantity: quantityToAdd
+          });
         }
         return cart.save();
       }
     })
     .then(savedCart => {
-      // If flash message was set and redirection already happened, do nothing.
-      if (res.headersSent) return;
-      res.redirect("/rental/cart");
+      res.redirect("/cart");
     })
     .catch(err => {
       console.error(err);
-      req.flash("error", "Failed to add to cart due to a server error.");
+      req.flash("error", "Failed to add to cart.");
       res.redirect(req.get("Referrer") || "/");
     });
 };

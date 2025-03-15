@@ -12,6 +12,10 @@ router.post("/sell/direct-add-product", protectRoute, secondHandController.postD
 router.get("/sell/add-product", protectRoute, secondHandController.getAddProduct);
 router.post("/sell/add-product", protectRoute, secondHandController.postAddProduct);
 
+router.post("/add-to-cart/:productId", protectRoute, secondHandController.addToCart);
+
+
+
 // Product browsing and bidding
 router.get("/buy", protectRoute, secondHandController.getProducts);
 router.get("/buy/:productId", protectRoute, secondHandController.getProduct);

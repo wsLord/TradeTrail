@@ -36,7 +36,13 @@ const OttSchema = new Schema({
     //need to add user
     bids: [{ type: mongoose.Schema.Types.ObjectId, ref: "BidProducts" }], // Store bid product references
     seller: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    quantity: { type: Number, required: true, default: 10 }, 
+    quantity: { 
+      type: Number, 
+      required: true, 
+      default: 1, 
+      min: [1, 'Quantity cannot be less than 1'], 
+      max: [1, 'Cannot have more than one subscription'] 
+    },
 
     saleType: {
         type: String,

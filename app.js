@@ -52,10 +52,11 @@ const secondHandRoutes = require("./routes/secondHandRoutes");
 const rentingRoutes = require("./routes/rentingRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const subscriptionRoutes = require("./routes/subscriptionRoutes");
+const cartRoutes = require('./routes/cartRoutes');
 
-const rentalCartRoutes = require("./routes/rentalCartRoutes");
-const secondHandCartRoutes = require("./routes/secondHandCartRoutes");
-const subscriptionCartRoutes = require("./routes/subscriptionCartRoutes");
+// const rentalCartRoutes = require("./routes/rentalCartRoutes");
+// const secondHandCartRoutes = require("./routes/secondHandCartRoutes");
+// const subscriptionCartRoutes = require("./routes/subscriptionCartRoutes");
 
 const cron = require('node-cron');
 const User = require('./models/userModel');
@@ -116,15 +117,21 @@ app.use("/secondHand", secondHandRoutes);
 app.use("/rental", rentingRoutes);
 app.use("/", profileRoutes);
 app.use("/subscription", subscriptionRoutes);
+app.use('/cart', cartRoutes);
 
-app.use("/rental/cart", rentalCartRoutes);
-app.use("/subscription/cart", subscriptionCartRoutes);
-app.use("/secondHand/cart", secondHandCartRoutes);
+
+// app.use("/rental/cart", rentalCartRoutes);
+// app.use("/subscription/cart", subscriptionCartRoutes);
+// app.use("/secondHand/cart", secondHandCartRoutes);
 
 
 app.get("/", (req, res) => {
-    res.render("home"); // Renders the home.ejs file inside views/
+  res.render("home", {
+    pageTitle: "Home",
+    activePage: "home" 
+}); 
 });
+
 
 
 // Connect to MongoDB **before** starting the server

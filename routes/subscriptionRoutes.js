@@ -12,6 +12,7 @@ router.post("/sell/direct-add-product", protectRoute, subscriptionController.pos
 router.get("/sell/add-product", protectRoute, subscriptionController.getAddProduct);
 router.post("/sell/add-product", protectRoute, subscriptionController.postAddProduct);
 
+
 // Verification routes
 router.get("/verify-credentials", protectRoute, subscriptionController.getVerifyCredentials);
 router.post("/verify-credentials", protectRoute, subscriptionController.postVerifyCredentials);

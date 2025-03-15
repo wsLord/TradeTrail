@@ -5,13 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= pageTitle %></title>
   <link rel="stylesheet" href="/css/main.css">
-  <!-- Added styles to match rental search page -->
   <link rel="stylesheet" href="/css/forms.css">
   <link rel="stylesheet" href="/css/rentalStyles.css">
   <link rel="stylesheet" href="/css/navigation.css">
 </head>
 <body>
-  <!-- Using same navbar container as rental page -->
   <div id="navbar">
     <%- include('../common/navigation.ejs') %>
   </div>
@@ -29,7 +27,6 @@
     </form>
     
     <% if (prods.length > 0) { %>
-      <!-- Changed container class names to mimic rental search layout -->
       <div class="rental-list">
         <% for (let product of prods) { %>
           <div class="rental-item">
@@ -41,7 +38,9 @@
                 <h3><%= product.title %></h3>
                 <div class="price-info">
                   <p class="direct-price">Direct Purchase: ₹<%= product.price %></p>
-                  <p class="auction-price">Auction Starts At: ₹<%= product.min_price %></p>
+                  <% if (product.saleType === 'auction') { %>
+                    <p class="auction-price">Auction Starts At: ₹<%= product.min_price %></p>
+                  <% } %>
                 </div>
                 <p class="description"><%= product.description %></p>
                 <p class="location"><%= product.location %></p>
