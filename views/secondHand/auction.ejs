@@ -103,6 +103,7 @@
       <% 
          // Check if the current user already placed a bid on this product.
          const userBid = product.bids.find(bid => String(bid.bidder._id) === String(user._id));
+         const minBidValue = monetaryBidsCount === 0 ? product.min_price : maxBid + MIN_BID_INCREMENT;
       %>
       <% if (!userBid) { %>
         <!-- Bid form shown only if the user hasn't placed a bid -->
@@ -112,9 +113,14 @@
             id="bidAmount" 
             name="bidAmount" 
             placeholder="Enter bid amount" 
-            min="<%= maxBid + 100 %>" 
+            min="<%= minBidValue %>" 
             required>
-          <small>Minimum bid: ₹<%= maxBid + 100 %></small>
+            <small>
+              Minimum bid: ₹<%= minBidValue %>
+              <% if (monetaryBidsCount > 0) { %>
+                  (Current max: ₹<%= maxBid %>)
+              <% } %>
+          </small>
           <button type="submit">Bid</button>
         </form>
       <% } else { %>

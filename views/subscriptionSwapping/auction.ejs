@@ -110,9 +110,13 @@
             id="bidAmount" 
             name="bidAmount" 
             placeholder="Enter bid amount" 
-            min="<%= maxBid + 100 %>" 
+            min="<%= monetaryBidsCount === 0 ? product.min_price : maxBid + 100 %>"
             required>
-          <small>Minimum bid: ₹<%= maxBid + 100 %></small>
+            <small>
+              Minimum bid: ₹<%= monetaryBidsCount === 0 ? 
+                  product.min_price : 
+                  maxBid + 100 %>
+          </small>
           <button type="submit">Bid</button>
         </form>
       <% } else { %>

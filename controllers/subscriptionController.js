@@ -119,37 +119,41 @@ exports.getProducts = (req, res, next) => {
 
 
 exports.getProduct = (req, res, next) => {
-    const prodId = req.params.productId;
-    Ott.findById(prodId)
-        .populate("seller", "fullName")
-        .populate({
-            path: "bids",
-            populate: { path: "bidder", select: "fullName" },
-        })
-        .then((product) => {
-            
-            if (!product) {
-                req.flash("error", "Product not found.");
-                return res.redirect("/subscription/buy");
-            }
-            // Calculate max bid if available
-            const maxBid = product.bids
-                .filter((bid) => bid.bidAmount !== null)
-                .reduce((max, bid) => Math.max(max, bid.bidAmount), product.min_price);
-            res.render("subscriptionSwapping/auction", {
-                product: product,
-                user: req.user,
-                pageTitle: "Auction",
-                maxBid: maxBid,
-                path: "/product",
-                activePage: "subscription" // added for navbar active highlighting
-            });
-        })
-        .catch((err) => {
-            console.log(err);
-            req.flash("error", "Error retrieving product.");
-            res.redirect("/subscription/buy");
-        });
+  const prodId = req.params.productId;
+  Ott.findById(prodId)
+      .populate("seller", "fullName")
+      .populate({
+          path: "bids",
+          populate: { path: "bidder", select: "fullName" },
+      })
+      .then((product) => {
+          if (!product) {
+              req.flash("error", "Product not found.");
+              return res.redirect("/subscription/buy");
+          }
+          
+          // Calculate max bid correctly
+          const monetaryBids = product.bids.filter(bid => bid.bidAmount !== null);
+          const maxBid = monetaryBids.reduce(
+              (max, bid) => Math.max(max, bid.bidAmount),
+              product.min_price // Start with min_price as base
+          );
+
+          res.render("subscriptionSwapping/auction", {
+              product: product,
+              user: req.user,
+              pageTitle: "Auction",
+              maxBid: maxBid,
+              monetaryBidsCount: monetaryBids.length,
+              path: "/product",
+              activePage: "subscription"
+          });
+      })
+      .catch((err) => {
+          console.log(err);
+          req.flash("error", "Error retrieving product.");
+          res.redirect("/subscription/buy");
+      });
 };
 
 exports.updateCart = async (req, res) => {
@@ -189,84 +193,93 @@ exports.getAddBidProduct = (req, res, next) => {
 };
 
 exports.postAddBidProduct = async (req, res, next) => {
-    if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized: Please log in" });
-    }
-    const prodId = req.params.productId;
-    const { title, imageUrl, description, location, bidAmount } = req.body;
+  if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized: Please log in" });
+  }
+  const prodId = req.params.productId;
+  const { title, imageUrl, description, location, bidAmount } = req.body;
 
-    // NEW: Check for existing bid
+  // Check for existing bid
   const existingBid = await BidProducts.findOne({
-    bidder: req.user._id,
-    auction: prodId
+      bidder: req.user._id,
+      auction: prodId
   });
 
   if (existingBid) {
-    req.flash(
-      'error',
-      `You already have an active bid. Delete your previous bid (₹${existingBid.bidAmount || "product bid"}) to place a new one.`
-    );
-    return res.redirect(`/subscription/buy/${prodId}`);
-  }
-
-
-    // Get the product with current bids
-      const product = await Ott.findById(prodId)
-      .populate({
-        path: "bids",
-        match: { bidAmount: { $ne: null } }
-      });
-    
-    // Calculate current max bid
-    const currentMaxBid = product.bids.reduce(
-      (max, bid) => Math.max(max, bid.bidAmount),
-      product.price // Start with initial price
-    );
-    
-    // Validate bid amount
-    if (bidAmount && bidAmount < currentMaxBid + MIN_BID_INCREMENT) {
       req.flash(
-        'error', 
-        `Bid must be at least ₹${currentMaxBid + MIN_BID_INCREMENT} (Current max: ₹${currentMaxBid})`
+          'error',
+          `You already have an active bid. Delete your previous bid (₹${existingBid.bidAmount || "product bid"}) to place a new one.`
       );
       return res.redirect(`/subscription/buy/${prodId}`);
-    }
+  }
 
-    if (!bidAmount && !title) {
-        return res
-            .status(400)
-            .send("Error: Provide either a bid amount or a product.");
-    }
+  // Get product with monetary bids
+  const product = await Ott.findById(prodId)
+      .populate({
+          path: "bids",
+          match: { bidAmount: { $ne: null } }
+      });
 
-    const bidProduct = new BidProducts({
-        title: title || null,
-        imageUrl: imageUrl || null,
-        description: description || null,
-        location: location || null,
-        bidAmount: bidAmount ? Number(bidAmount) : null,
-        bidder: req.user._id,
-        auction: prodId,
-    });
+  // Calculate current max bid and count of monetary bids
+  const monetaryBids = product.bids.filter(bid => bid.bidAmount !== null);
+  const currentMaxBid = monetaryBids.reduce(
+      (max, bid) => Math.max(max, bid.bidAmount),
+      product.min_price // Start with min_price instead of product.price
+  );
+  const monetaryBidsCount = monetaryBids.length;
 
-    bidProduct
-        .save()
-        .then((savedBidProduct) => {
-            return Promise.all([
-                Ott.findByIdAndUpdate(
-                    prodId, { $push: { bids: savedBidProduct._id } }, { new: true }
-                ),
-                User.findByIdAndUpdate(
-                    req.user._id, { $addToSet: { cart: prodId } }
-                ),
-            ]);
-        })
-        .then(() => {
-            res.redirect(`/subscription/buy/${prodId}`);
-        })
-        .catch((err) => {
-            console.error("Error saving bid:", err);
-            res.status(500).send("Internal Server Error");
-        });
+  // Validate bid amount
+  if (bidAmount) {
+      const minRequired = monetaryBidsCount === 0 
+          ? product.min_price 
+          : currentMaxBid + MIN_BID_INCREMENT;
+
+      if (bidAmount < minRequired) {
+          req.flash(
+              'error',
+              monetaryBidsCount === 0 
+                  ? `First bid must be at least ₹${product.min_price}`
+                  : `Bid must be at least ₹${currentMaxBid + MIN_BID_INCREMENT} (Current max: ₹${currentMaxBid})`
+          );
+          return res.redirect(`/subscription/buy/${prodId}`);
+      }
+  }
+
+  if (!bidAmount && !title) {
+      return res.status(400).send("Error: Provide either a bid amount or a product.");
+  }
+
+  const bidProduct = new BidProducts({
+      title: title || null,
+      imageUrl: imageUrl || null,
+      description: description || null,
+      location: location || null,
+      bidAmount: bidAmount ? Number(bidAmount) : null,
+      bidder: req.user._id,
+      auction: prodId,
+  });
+
+  bidProduct.save()
+      .then((savedBidProduct) => {
+          return Promise.all([
+              Ott.findByIdAndUpdate(
+                  prodId, 
+                  { $push: { bids: savedBidProduct._id } }, 
+                  { new: true }
+              ),
+              User.findByIdAndUpdate(
+                  req.user._id, 
+                  { $addToSet: { cart: prodId } }
+              ),
+          ]);
+      })
+      .then(() => {
+          res.redirect(`/subscription/buy/${prodId}`);
+      })
+      .catch((err) => {
+          console.error("Error saving bid:", err);
+          res.status(500).send("Internal Server Error");
+      });
 };
 
 // Add this new method to subscriptionController.js

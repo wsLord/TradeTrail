@@ -3,60 +3,79 @@ const RentalBooking = require("../models/rentalBooking");
 const Cart = require("../models/cartModel");
 
 // Add-to-Cart Controller Method
-exports.addToCart = (req, res, next) => {
-  const userId = req.user._id;
-  const productId = req.params.productId;
-  const quantityToAdd = parseInt(req.body.quantity) || 1;
+exports.addToCart = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const productId = req.params.productId;
+    const quantityToAdd = parseInt(req.body.quantity) || 1;
 
-  RentalProduct.findById(productId)
-    .then(product => {
-      if (!product) {
-        req.flash("error", "Product not found.");
-        return res.redirect(req.get("Referrer") || "/");
-      }
-      return Cart.findOne({ user: userId }).then(cart => {
-        return { product, cart };
+    const product = await RentalProduct.findById(productId);
+    if (!product) {
+      req.flash("error", "Product not found.");
+      return res.redirect(req.get("Referrer") || "/");
+    }
+
+    // Check available stock
+    const cart = await Cart.findOne({ user: userId });
+    let existingQuantity = 0;
+
+    if (cart) {
+      const existingItem = cart.items.find(
+        (item) =>
+          item.product.toString() === productId &&
+          item.productType === "Rental"
+      );
+      existingQuantity = existingItem ? existingItem.quantity : 0;
+    }
+
+    const totalRequested = existingQuantity + quantityToAdd;
+    if (totalRequested > product.quantity) {
+      req.flash(
+        "error",
+        // `Cannot add to cart. Only ${product.quantity - existingQuantity} item(s) available.`
+        `Cannot add more than the quantity available.`
+      );
+      return res.redirect(req.get("Referrer") || "/rental/rent");
+    }
+
+    // Add/Update cart
+    if (!cart) {
+      const newCart = new Cart({
+        user: userId,
+        items: [{
+          productType: "Rental",
+          productModel: "RentalProduct",
+          product: productId,
+          quantity: quantityToAdd,
+        }],
       });
-    })
-    .then(({ product, cart }) => {
-      if (!cart) {
-        const newCart = new Cart({
-          user: userId,
-          items: [{
-            productType: 'Rental',
-            productModel: 'RentalProduct',
-            product: productId,
-            quantity: quantityToAdd
-          }]
-        });
-        return newCart.save();
+      await newCart.save();
+    } else {
+      const itemIndex = cart.items.findIndex(
+        (item) =>
+          item.product.toString() === productId &&
+          item.productType === "Rental"
+      );
+
+      if (itemIndex >= 0) {
+        cart.items[itemIndex].quantity += quantityToAdd;
       } else {
-        const itemIndex = cart.items.findIndex(item => 
-          item.product.toString() === productId && 
-          item.productType === 'Rental'
-        );
-        
-        if (itemIndex >= 0) {
-          cart.items[itemIndex].quantity += quantityToAdd;
-        } else {
-          cart.items.push({
-            productType: 'Rental',
-            productModel: 'RentalProduct',
-            product: productId,
-            quantity: quantityToAdd
-          });
-        }
-        return cart.save();
+        cart.items.push({
+          productType: "Rental",
+          productModel: "RentalProduct",
+          product: productId,
+          quantity: quantityToAdd,
+        });
       }
-    })
-    .then(savedCart => {
-      res.redirect("/cart");
-    })
-    .catch(err => {
-      console.error(err);
-      req.flash("error", "Failed to add to cart.");
-      res.redirect(req.get("Referrer") || "/");
-    });
+      await cart.save();
+    }
+
+    res.redirect("/cart");
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Failed to add to cart.");
+    res.redirect(req.get("Referrer") || "/");
+  }
 };
 
 // Homepage for Renting
