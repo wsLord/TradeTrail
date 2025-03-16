@@ -82,36 +82,6 @@ exports.getAddProduct = (req, res, next) => {
   });
 };
 
-// Saving rental item in the database (Including Quantity)
-// exports.postAddProduct = (req, res, next) => {
-//   const { title, imageUrl, price, description, location, rate, quantity } = req.body;
-
-//   // Validate if all required fields are filled
-//   if (!title || !imageUrl || !price || !description || !location || !rate || !quantity) {
-//     return res.status(400).send('All fields are required!');
-//   }
-
-//   const rentalProduct = new RentalProduct({
-//     title: title,
-//     imageUrl: imageUrl,
-//     price: price,
-//     description: description,
-//     location: location,
-//     rate: rate,  // Save rate directly as per the form
-//     quantity: quantity,  // Save quantity directly
-//   });
-
-//   rentalProduct
-//     .save()
-//     .then((result) => {
-//       console.log("Rental Product Posted!");
-//       res.redirect("/rental/rent");  // Redirect to rentals page after posting
-//     })
-//     .catch((err) => {
-//       console.log(err);
-//       res.status(500).send("An error occurred while saving the rental product.");
-//     });
-// };
 exports.postAddProduct = (req, res, next) => {
   console.log("Received Form Data:", req.body);
   console.log("Received File:", req.files);
@@ -266,40 +236,6 @@ exports.getProductDetails = (req, res, next) => {
       res.status(500).send("Error fetching product details");
     });
 };
-
-// exports.getProductDetails = (req, res, next) => {
-//   const productId = req.params.productId;
-//   let fetchedProduct;
-
-//   RentalProduct.findById(productId)
-//     .then((product) => {
-//       if (!product) {
-//         return res.status(404).send("Product not found");
-//       }
-//       fetchedProduct = product;
-      
-//       // Ensure imageUrls is an array, even if there is a single image
-//       fetchedProduct.imageUrls = Array.isArray(product.imageUrls) ? product.imageUrls : [product.imageUrl];
-
-//       // Find an active booking for this product
-//       return RentalBooking.findOne({ product: productId, status: "active" });
-//     })
-//     .then((booking) => {
-//       if (booking) {
-//         fetchedProduct.currentBooking = booking;
-//       }
-//       res.render("rentals/product-details", {
-//         pageTitle: fetchedProduct.title,
-//         product: fetchedProduct,
-//         activePage: "rental",
-//       });
-//     })
-//     .catch((err) => {
-//       console.error(err);
-//       res.status(500).send("Error fetching product details");
-//     });
-// };
-
 
 exports.updateCart = (req, res, next) => {
   const productId = req.params.productId;
