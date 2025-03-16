@@ -1,30 +1,18 @@
 const multer = require("multer");
 const path = require("path");
 
-// Set storage engine
+// Storage configuration
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Save files in "uploads" folder
-  },
-  filename: (req, file, cb) => {
-    cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname));
-  },
+    destination: (req, file, cb) => {
+        cb(null, "uploads/"); // Ensure this folder exists
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
+    },
 });
 
-// File filter (optional, to accept only specific file types)
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = ["image/jpeg", "image/png", "image/gif", "application/pdf"];
-  if (allowedTypes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error("Only images and PDFs are allowed"), false);
-  }
-};
+// Multer middlewares for different cases
+const uploadSingle = multer({ storage: storage }).single("image"); // Single file
+const uploadMultiple = multer({ storage: storage }).array("images", 10); // Multiple files
 
-// Initialize multer
-const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
-});
-
-module.exports = upload;
+module.exports = { uploadSingle, uploadMultiple };

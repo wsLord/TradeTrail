@@ -5,9 +5,9 @@ const rentalProductSchema = new mongoose.Schema({
     type: String,
     required: true, // The title is required.
   },
-  imageUrl: {
-    type: String,
-    required: true, // The image URL is required.
+  imageUrls: {
+    type: [String], // Array of image paths
+    required: true,
   },
   rate: {
     type: String,

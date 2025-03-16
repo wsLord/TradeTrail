@@ -1,4 +1,4 @@
-const RentalProduct = require('../models/rentalProduct');
+const RentalProduct = require("../models/rentalProduct");
 const RentalBooking = require("../models/rentalBooking");
 const Cart = require("../models/cartModel");
 
@@ -10,12 +10,12 @@ exports.addToCart = (req, res, next) => {
 
   // First, find the product to check available quantity
   RentalProduct.findById(productId)
-    .then(product => {
+    .then((product) => {
       if (!product) {
         req.flash("error", "Product not found.");
         return res.redirect(req.get("Referrer") || "/");
       }
-      return Cart.findOne({ user: userId }).then(cart => {
+      return Cart.findOne({ user: userId }).then((cart) => {
         return { product, cart };
       });
     })
@@ -28,7 +28,7 @@ exports.addToCart = (req, res, next) => {
         }
         const newCart = new Cart({
           user: userId,
-          items: [{ product: productId, quantity: quantityToAdd }]
+          items: [{ product: productId, quantity: quantityToAdd }],
         });
         return newCart.save();
       } else {
@@ -52,12 +52,12 @@ exports.addToCart = (req, res, next) => {
         return cart.save();
       }
     })
-    .then(savedCart => {
+    .then((savedCart) => {
       // If flash message was set and redirection already happened, do nothing.
       if (res.headersSent) return;
       res.redirect("/rental/cart");
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
       req.flash("error", "Failed to add to cart due to a server error.");
       res.redirect(req.get("Referrer") || "/");
@@ -69,7 +69,7 @@ exports.getHome = (req, res, next) => {
   res.render("rentals/rentalHome", {
     pageTitle: "Renting",
     path: "/rental",
-    activePage: "rental"
+    activePage: "rental",
   });
 };
 
@@ -78,7 +78,7 @@ exports.getAddProduct = (req, res, next) => {
   res.render("rentals/post-product", {
     pageTitle: "Post Product",
     path: "/rental/post",
-    activePage: "rental"
+    activePage: "rental",
   });
 };
 
@@ -114,19 +114,38 @@ exports.getAddProduct = (req, res, next) => {
 // };
 exports.postAddProduct = (req, res, next) => {
   console.log("Received Form Data:", req.body);
-  console.log("Received File:", req.file); 
+  console.log("Received File:", req.files);
 
   const { title, price, description, location, rate, quantity } = req.body;
-  const image = req.file; 
+  // const images = req.files;
+  // Check if files were uploaded
+  if (!req.files || req.files.length === 0) {
+    console.log("No files uploaded!");
+    return res.status(400).send("At least one image is required.");
+  }
 
-  if (!title || !image || !price || !description || !location || !rate || !quantity) {
+  // const imageUrls = req.files.map((file) => file.path);
+  const imageUrls = req.files.map(file => `/uploads/${file.filename}`); 
+
+    console.log("Saved File Paths:", imageUrls);  // Debugging
+
+  if (
+    !title ||
+    !imageUrls.length ||
+    !price ||
+    !description ||
+    !location ||
+    !rate ||
+    !quantity
+  ) {
     console.log("Missing required fields!");
     return res.status(400).send("All fields are required!");
   }
 
+
   const rentalProduct = new RentalProduct({
     title: title,
-    imageUrl: "/uploads/" + image.filename, 
+    imageUrls: imageUrls,
     price: price,
     description: description,
     location: location,
@@ -142,39 +161,39 @@ exports.postAddProduct = (req, res, next) => {
     })
     .catch((err) => {
       console.error("Error saving product:", err);
-      res.status(500).send("An error occurred while saving the rental product.");
+      res
+        .status(500)
+        .send("An error occurred while saving the rental product.");
     });
 };
 
-
-
 // Get all rental items (with search)
 exports.getRentItems = (req, res, next) => {
-  const searchQuery = req.query.search || '';
+  const searchQuery = req.query.search || "";
   const query = {};
 
   if (searchQuery) {
-      query.$or = [
-          { title: { $regex: searchQuery, $options: 'i' } },
-          { description: { $regex: searchQuery, $options: 'i' } },
-          { location: { $regex: searchQuery, $options: 'i' } }
-      ];
+    query.$or = [
+      { title: { $regex: searchQuery, $options: "i" } },
+      { description: { $regex: searchQuery, $options: "i" } },
+      { location: { $regex: searchQuery, $options: "i" } },
+    ];
   }
 
   RentalProduct.find(query)
-      .then((products) => {
-          res.render("rentals/rent-items", {
-              pageTitle: "Available Rentals",
-              path: "/rental/rent",
-              products: products,
-              searchQuery: searchQuery,
-              activePage: "rental"
-          });
-      })
-      .catch((err) => {
-          console.log(err);
-          res.status(500).send("An error occurred while fetching rental items.");
+    .then((products) => {
+      res.render("rentals/rent-items", {
+        pageTitle: "Available Rentals",
+        path: "/rental/rent",
+        products: products,
+        searchQuery: searchQuery,
+        activePage: "rental",
       });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).send("An error occurred while fetching rental items.");
+    });
 };
 
 // Controller method to handle the buying action and decrementing quantity
@@ -187,14 +206,16 @@ exports.buyProduct = (req, res, next) => {
       if (product) {
         // If the product has sufficient stock, decrement the quantity
         if (product.quantity > 0) {
-          product.quantity -= 1;  // Decrement the quantity by 1
-          return product.save();   // Save the updated product data to the DB
+          product.quantity -= 1; // Decrement the quantity by 1
+          return product.save(); // Save the updated product data to the DB
         } else {
-          res.status(400).json({ success: false, message: 'Product is out of stock' });
+          res
+            .status(400)
+            .json({ success: false, message: "Product is out of stock" });
           return null;
         }
       } else {
-        res.status(404).json({ success: false, message: 'Product not found' });
+        res.status(404).json({ success: false, message: "Product not found" });
       }
     })
     .then((updatedProduct) => {
@@ -205,7 +226,12 @@ exports.buyProduct = (req, res, next) => {
     })
     .catch((err) => {
       console.error(err);
-      res.status(500).json({ success: false, message: 'An error occurred while processing the purchase' });
+      res
+        .status(500)
+        .json({
+          success: false,
+          message: "An error occurred while processing the purchase",
+        });
     });
 };
 
@@ -214,15 +240,17 @@ exports.getProductDetails = (req, res, next) => {
   let fetchedProduct;
 
   RentalProduct.findById(productId)
-    .then(product => {
+    .then((product) => {
       if (!product) {
         return res.status(404).send("Product not found");
       }
+      console.log(product);
+      
       fetchedProduct = product;
       // Find an active booking for this product
       return RentalBooking.findOne({ product: productId, status: "active" });
     })
-    .then(booking => {
+    .then((booking) => {
       if (booking) {
         // Attach the booking information dynamically
         fetchedProduct.currentBooking = booking;
@@ -230,14 +258,48 @@ exports.getProductDetails = (req, res, next) => {
       res.render("rentals/product-details", {
         pageTitle: fetchedProduct.title,
         product: fetchedProduct,
-        activePage: "rental"
+        activePage: "rental",
       });
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
       res.status(500).send("Error fetching product details");
     });
 };
+
+// exports.getProductDetails = (req, res, next) => {
+//   const productId = req.params.productId;
+//   let fetchedProduct;
+
+//   RentalProduct.findById(productId)
+//     .then((product) => {
+//       if (!product) {
+//         return res.status(404).send("Product not found");
+//       }
+//       fetchedProduct = product;
+      
+//       // Ensure imageUrls is an array, even if there is a single image
+//       fetchedProduct.imageUrls = Array.isArray(product.imageUrls) ? product.imageUrls : [product.imageUrl];
+
+//       // Find an active booking for this product
+//       return RentalBooking.findOne({ product: productId, status: "active" });
+//     })
+//     .then((booking) => {
+//       if (booking) {
+//         fetchedProduct.currentBooking = booking;
+//       }
+//       res.render("rentals/product-details", {
+//         pageTitle: fetchedProduct.title,
+//         product: fetchedProduct,
+//         activePage: "rental",
+//       });
+//     })
+//     .catch((err) => {
+//       console.error(err);
+//       res.status(500).send("Error fetching product details");
+//     });
+// };
+
 
 exports.updateCart = (req, res, next) => {
   const productId = req.params.productId;
@@ -300,15 +362,14 @@ exports.rentProduct = (req, res, next) => {
     rentalEnd: rentalEnd,
   });
 
-  booking.save()
+  booking
+    .save()
     .then(() => {
       // Optionally, update the product's available quantity or status
       res.redirect("/rental/cart"); // or redirect to a confirmation page
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
       res.status(500).send("Error processing your rental.");
     });
 };
-
-

@@ -479,4 +479,76 @@ body {
     font-size: 16px;
  } 
 
-
+/* hihi */
+.image-slider-container {
+    position: relative;
+    width: 100%;
+    max-width: 300px; /* Adjust as needed */
+    overflow: hidden;
+    border-radius: 8px;
+  }
+  
+  .image-slider img {
+    width: 100%;
+    height: auto;
+    max-height: 250px; /* Ensure it doesn't exceed a specific height */
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  
+  .image-slider-container button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+  }
+  
+  nav {
+    position: relative;  /* Ensure navbar stays above images */
+    z-index: 10;
+    background-color: #4CAF50; /* Adjust to match your theme */
+    padding: 10px;
+  }
+  
+  main {
+    margin-top: 60px; /* Prevent content from being hidden under the navbar */
+  }
+  
+  
+      .image-slider-container {
+        position: relative;
+        width: 100%;
+        max-width: 300px; /* Adjust this based on your layout */
+        overflow: hidden;
+        border-radius: 8px;
+      }
+  
+      /* Image Wrapper */
+      .image-slider {
+        display: flex;
+        transition: transform 0.5s ease-in-out;
+      }
+  
+      /* Individual Image */
+      .image-slider img {
+        width: 100%;
+        flex-shrink: 0;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+  
+      /* Navigation Buttons */
+      .prev, .next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: rgba(0, 0, 0, 0.6);
+        color: white;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+        border-radius: 50%;
+        z-index: 2;
+      }
+      .prev { left: 5px; }
+      .next { right: 5px; }
