@@ -24,17 +24,16 @@ exports.getAddProduct = (req, res, next) => {
 
 //creating products for sell
 exports.postAddProduct = (req, res, next) => {
-  const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
-  const price = req.body.price;
-  const min_price = req.body.min_price;
-  const description = req.body.description;
-  const location = req.body.location;
-  const startDate = req.body.startDate;
-  const endDate = req.body.endDate;
+  const { title, price, min_price, description, location, startDate, endDate } = req.body;
+  // Format image URL for consistency
+  const imageUrls = req.files.map(file => `/uploads/${file.filename}`); 
+
+  console.log("Saved File Paths:", imageUrls);  // Debugging
+
+
   const product = new Product({
     title: title,
-    imageUrl: imageUrl,
+    imageUrls: imageUrls,
     price: price,
     min_price: min_price,
     description: description,

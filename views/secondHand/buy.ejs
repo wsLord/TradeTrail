@@ -5,13 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= pageTitle %></title>
   <link rel="stylesheet" href="/css/main.css">
-  <!-- Added styles to match rental search page -->
   <link rel="stylesheet" href="/css/forms.css">
   <link rel="stylesheet" href="/css/rentalStyles.css">
   <link rel="stylesheet" href="/css/navigation.css">
 </head>
 <body>
-  <!-- Using same navbar container as rental page -->
+  <!-- Navbar -->
   <div id="navbar">
     <%- include('../common/navigation.ejs') %>
   </div>
@@ -30,14 +29,26 @@
     <button type="button" onclick="window.location.href='/secondHand/sell'">POST AN ITEM !</button>
     
     <% if (prods.length > 0) { %>
-      <!-- Changed container class names to mimic rental search layout -->
       <div class="rental-list">
-        <% for (let product of prods) { %>`
+        <% prods.forEach((product, index) => { %>
           <div class="rental-item">
             <div class="product-card">
-              <div class="card__image">
-                <img src="<%= product.imageUrl %>" alt="<%= product.title %>">
+
+              <!-- Image Slider Container -->
+              <div class="image-slider-container">
+                <button class="prev" onclick="prevImage(<%= index %>)">&#10094;</button>
+                <div class="image-slider" id="slider-<%= index %>">
+                  <% if (product.imageUrls && product.imageUrls.length > 0) { %>
+                    <% product.imageUrls.forEach(image => { %>
+                      <img src="<%= image %>" alt="<%= product.title %>">
+                    <% }); %>
+                  <% } else { %>
+                    <img src="/images/default-placeholder.png" alt="No Image Available">
+                  <% } %>
+                </div>
+                <button class="next" onclick="nextImage(<%= index %>)">&#10095;</button>
               </div>
+
               <div class="product-info">
                 <h3><%= product.title %></h3>
                 <div class="price-info">
@@ -53,13 +64,42 @@
                   <a href="/secondHand/buy/<%= product._id %>" class="btn auction-btn">Auction</a>
                 </div>
               </div>
+
             </div>
           </div>
-        <% } %>
+        <% }); %>
       </div>
     <% } else { %>
       <h1>No Products Found!</h1>
     <% } %>
   </main>
+
+  <script>
+    function nextImage(index) {
+      let slider = document.getElementById(`slider-${index}`);
+      let images = slider.getElementsByTagName("img");
+      let totalImages = images.length;
+      let currentIndex = parseInt(slider.dataset.index || "0");
+
+      if (currentIndex < totalImages - 1) {
+        currentIndex++;
+        slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+        slider.dataset.index = currentIndex;
+      }
+    }
+
+    function prevImage(index) {
+      let slider = document.getElementById(`slider-${index}`);
+      let currentIndex = parseInt(slider.dataset.index || "0");
+
+      if (currentIndex > 0) {
+        currentIndex--;
+        slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+        slider.dataset.index = currentIndex;
+      }
+    }
+  </script>
+
 </body>
 </html>
+
