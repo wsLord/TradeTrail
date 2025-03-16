@@ -115,7 +115,7 @@
             min="<%= maxBid + 100 %>" 
             required>
           <small>Minimum bid: ₹<%= maxBid + 100 %></small>
-          <button type="submit">Bid</button>
+          <button type="button" onclick="makePayment(event)">Bid</button>
         </form>
       <% } else { %>
         <!-- If a bid exists, prompt the user to delete it first -->
@@ -229,4 +229,82 @@
         this.parentElement.style.display = 'none';
       });
     });
+  </script>
+  
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
+  <script>
+  function makePayment(event) {
+
+  const inputElement = document.getElementById("bidAmount");
+  const maxBidElement = document.getElementById("max-bid");
+
+  if (!inputElement || !maxBidElement) {
+    console.error("Required input fields not found!");
+    return;
+  }
+
+  const amount = parseFloat(inputElement.value.trim());
+  const maxBidAmount = parseFloat(maxBidElement.innerText.trim());
+  const minBidAmount = maxBidAmount + 100;
+
+  if (isNaN(amount) || amount <= 0) {
+    alert("Please enter a valid bid amount.");
+    return;
+  }
+
+  if (amount < minBidAmount) {
+    alert(`Your bid must be at least ₹${minBidAmount}.`);
+    return;
+  }
+
+  const productId = "<%= product._id %>"; // Get productId from EJS
+
+  fetch("/secondHand/api/payment/makePayment", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ amount: amount * 100, productId }), // Include productId
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      const options = {
+        ...data.options,
+        handler: function (response) {
+          verifyPayment(response, amount, productId); // Pass productId
+        },
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.open();
+    } else {
+      alert("Payment initialization failed");
+    }
+  })
+  .catch(() => alert("Failed to create order"));
+}
+
+function verifyPayment(response, amount, productId) {
+  fetch("/secondHand/api/payment/verifyPayment", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...response, amount, productId }), // Send productId
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert("Payment successful! Your bid has been placed.");
+      document.getElementById('bidForm').submit();
+      // window.location.href = data.redirectUrl;
+    } else {
+      alert("Payment verification failed.");
+    }
+  })
+  .catch(error => {
+    console.error("Error verifying payment:", error);
+    alert("Error verifying payment.");
+  });
+}
+
+
   </script>

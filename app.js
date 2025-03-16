@@ -65,6 +65,8 @@ const paymentRoutes = require("./routes/paymentRoutes");
 const cron = require('node-cron');
 const User = require('./models/userModel');
 
+const paymentSecondRoutes=require("./routes/paymentsecondhandRoutes");
+
 // Daily cleanup at 3 AM of unverified accounts whose verification emails bounce back 
 cron.schedule('0 3 * * *', async () => {
   try {
@@ -108,6 +110,7 @@ app.use(cookieParser()); // ✅ Required for JWT authentication
 app.use(express.static(path.join(__dirname, "public")));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 const cors = require('cors');
@@ -130,6 +133,8 @@ app.use("/subscription/cart", subscriptionCartRoutes);
 app.use("/secondHand/cart", secondHandCartRoutes);
 
 app.use("/rental/api/payment", paymentRoutes);
+
+app.use("/secondHand/api/payment", paymentSecondRoutes);
 app.get("/", (req, res) => {
     res.render("home"); // Renders the home.ejs file inside views/
 });
