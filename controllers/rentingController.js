@@ -3,65 +3,99 @@ const RentalBooking = require("../models/rentalBooking");
 const Cart = require("../models/cartModel");
 
 // Add-to-Cart Controller Method
-exports.addToCart = (req, res, next) => {
-  const userId = req.user._id; // Provided by protectRoute middleware
-  const productId = req.params.productId;
-  const quantityToAdd = parseInt(req.body.quantity) || 1;
+exports.addToCart = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const productId = req.params.productId;
+    const { rentalStart, rentalEnd } = req.body;
 
-  // First, find the product to check available quantity
-  RentalProduct.findById(productId)
-    .then((product) => {
-      if (!product) {
-        req.flash("error", "Product not found.");
-        return res.redirect(req.get("Referrer") || "/");
-      }
-      return Cart.findOne({ user: userId }).then((cart) => {
-        return { product, cart };
+
+    // Validate dates
+    if (!rentalStart || !rentalEnd) {
+      req.flash("error", "Please select rental dates");
+      return res.redirect(`/rental/details/${productId}`);
+    }
+
+    const product = await RentalProduct.findById(productId);
+    if (!product) {
+      req.flash("error", "Product not found.");
+      return res.redirect("/rental/rent");
+    }
+
+    // Check product availability
+    if (product.quantity < 1) {
+      req.flash("error", "This product is currently out of stock");
+      return res.redirect(`/rental/details/${productId}`);
+    }
+
+    // Check existing cart quantity
+    const cart = await Cart.findOne({ user: userId });
+    let existingQuantity = 0;
+
+    if (cart) {
+      const existingItem = cart.items.find(
+        item => item.product.toString() === productId && 
+                item.productType === "Rental"
+      );
+      existingQuantity = existingItem ? existingItem.quantity : 0;
+    }
+
+    const totalRequested = existingQuantity + 1; // Since we're adding 1 item
+
+    if (totalRequested > product.quantity) {
+      req.flash(
+        "error",
+        // `Cannot add more items. Only ${product.quantity - existingQuantity} available in stock.`
+        `Cannot add more than the quantity available.`
+      );
+      return res.redirect(`/rental/details/${productId}`);
+    }
+
+    // Calculate rental duration
+    const startDate = new Date(rentalStart);
+    const endDate = new Date(rentalEnd);
+    const diffTime = Math.abs(endDate - startDate);
+    
+    let units;
+    switch(product.rate) {
+      case 'hour': units = diffTime / (1000 * 60 * 60); break;
+      case 'day': units = diffTime / (1000 * 60 * 60 * 24); break;
+      case 'week': units = diffTime / (1000 * 60 * 60 * 24 * 7); break;
+      case 'month': units = diffTime / (1000 * 60 * 60 * 24 * 30); break;
+    }
+    const calculatedPrice = Math.ceil(units) * product.price;
+
+    // Update cart logic
+    const updatedCart = cart || new Cart({ user: userId });
+    
+    const existingItemIndex = updatedCart.items.findIndex(
+      item => item.product.toString() === productId && 
+              item.productType === "Rental"
+    );
+
+    if (existingItemIndex > -1) {
+      updatedCart.items[existingItemIndex].quantity += 1;
+    } else {
+      updatedCart.items.push({
+        productType: "Rental",
+        productModel: "RentalProduct",
+        product: productId,
+        quantity: 1,
+        rentalStart: startDate,
+        rentalEnd: endDate,
+        calculatedPrice,
+        securityDeposit: product.securityDeposit
       });
-    })
-    .then(({ product, cart }) => {
-      // Check if adding quantity will exceed available stock
-      if (!cart) {
-        if (quantityToAdd > product.quantity) {
-          req.flash("error", "Cannot add more items than available.");
-          return res.redirect(req.get("Referrer") || "/");
-        }
-        const newCart = new Cart({
-          user: userId,
-          items: [{ product: productId, quantity: quantityToAdd }],
-        });
-        return newCart.save();
-      } else {
-        const itemIndex = cart.items.findIndex(
-          (item) => item.product.toString() === productId
-        );
-        if (itemIndex >= 0) {
-          const currentQuantity = cart.items[itemIndex].quantity;
-          if (currentQuantity + quantityToAdd > product.quantity) {
-            req.flash("error", "Cannot add more items than available.");
-            return res.redirect(req.get("Referrer") || "/");
-          }
-          cart.items[itemIndex].quantity += quantityToAdd;
-        } else {
-          if (quantityToAdd > product.quantity) {
-            req.flash("error", "Cannot add more items than available.");
-            return res.redirect(req.get("Referrer") || "/");
-          }
-          cart.items.push({ product: productId, quantity: quantityToAdd });
-        }
-        return cart.save();
-      }
-    })
-    .then((savedCart) => {
-      // If flash message was set and redirection already happened, do nothing.
-      if (res.headersSent) return;
-      res.redirect("/rental/cart");
-    })
-    .catch((err) => {
-      console.error(err);
-      req.flash("error", "Failed to add to cart due to a server error.");
-      res.redirect(req.get("Referrer") || "/");
-    });
+    }
+
+    await updatedCart.save();
+    res.redirect("/cart");
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Failed to add to cart.");
+    res.redirect("/rental/rent");
+  }
+
 };
 
 // Homepage for Renting
@@ -83,10 +117,7 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
-  console.log("Received Form Data:", req.body);
-  console.log("Received File:", req.files);
-
-  const { title, price, description, location, rate, quantity } = req.body;
+  const { title, price, description, location, rate, quantity, securityDeposit  } = req.body;
   // const images = req.files;
   // Check if files were uploaded
   if (!req.files || req.files.length === 0) {
@@ -96,20 +127,9 @@ exports.postAddProduct = (req, res, next) => {
 
   // const imageUrls = req.files.map((file) => file.path);
   const imageUrls = req.files.map(file => `/uploads/${file.filename}`); 
+ if (!title || !imageUrls || !price || !description || !location || !rate || !quantity || !securityDeposit) {
+    return res.status(400).send('All fields are required!');
 
-    console.log("Saved File Paths:", imageUrls);  // Debugging
-
-  if (
-    !title ||
-    !imageUrls.length ||
-    !price ||
-    !description ||
-    !location ||
-    !rate ||
-    !quantity
-  ) {
-    console.log("Missing required fields!");
-    return res.status(400).send("All fields are required!");
   }
 
 
@@ -119,8 +139,10 @@ exports.postAddProduct = (req, res, next) => {
     price: price,
     description: description,
     location: location,
-    rate: rate,
+    rate: rate,  // Save rate directly as per the form
     quantity: quantity,
+    securityDeposit: securityDeposit,  // Save quantity directly
+
   });
 
   rentalProduct

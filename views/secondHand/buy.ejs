@@ -10,7 +10,6 @@
   <link rel="stylesheet" href="/css/navigation.css">
 </head>
 <body>
-  <!-- Navbar -->
   <div id="navbar">
     <%- include('../common/navigation.ejs') %>
   </div>
@@ -53,7 +52,9 @@
                 <h3><%= product.title %></h3>
                 <div class="price-info">
                   <p class="direct-price">Direct Purchase: ₹<%= product.price %></p>
-                  <p class="auction-price">Auction Starts At: ₹<%= product.min_price %></p>
+                  <% if (product.saleType === 'auction') { %>
+                    <p class="auction-price">Auction Starts At: ₹<%= product.min_price %></p>
+                  <% } %>
                 </div>
                 <p class="description"><%= product.description %></p>
                 <p class="location"><%= product.location %></p>
@@ -61,7 +62,13 @@
                   <b>Seller:</b> <%= product.seller && product.seller.fullName ? product.seller.fullName : 'Unknown' %>
                 </p>
                 <div class="button-group vertical">
-                  <a href="/secondHand/buy/<%= product._id %>" class="btn auction-btn">Auction</a>
+                  <% if (product.saleType === 'direct') { %>
+                    <form action="/secondHand/add-to-cart/<%= product._id %>" method="POST">
+                      <button class="add-to-cart-button">Add to Cart</button>
+                    </form>
+                  <% } else { %>
+                    <a href="/secondHand/buy/<%= product._id %>" class="btn auction-btn">Auction</a>
+                  <% } %>
                 </div>
               </div>
 
@@ -101,5 +108,6 @@
   </script>
 
 </body>
+
 </html>
 

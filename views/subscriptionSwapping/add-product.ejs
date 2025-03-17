@@ -15,7 +15,7 @@
   <%- include('../common/navigation.ejs') %>
   
   <main>
-    <form class="product-form" action="/subscription/sell" method="POST">
+    <form class="product-form" action="/subscription/sell/add-product" method="POST">
       <div class="form-control">
         <label for="platform_name">Platform Name</label>
         <select name="platform_name" id="platform_name" required onchange="handlePlatformChange()">
@@ -35,7 +35,7 @@
       </div>
       
       <div class="form-control">
-        <label for="price">Direct Purchase Price</label>
+        <label for="price">Actual Price</label>
         <input type="number" name="price" id="price" step="0.01" required>
       </div>
       <div class="form-control">

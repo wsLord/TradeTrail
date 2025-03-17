@@ -13,7 +13,9 @@
   <%- include('../common/navigation.ejs') %>
 
   <main>
-    <form class="product-form" action="/secondHand/sell" method="POST" enctype="multipart/form-data">
+
+    <form class="product-form" action="/secondHand/sell/add-product" method="POST" enctype="multipart/form-data">
+
       <div class="form-control">
         <label for="title">Title</label>
         <input type="text" name="title" id="title" required>
@@ -23,7 +25,7 @@
         <input type="file" name="images" id="images" accept="image/*" multiple required>
     </div>
       <div class="form-control">
-        <label for="price">Direct Purchase Price</label>
+        <label for="price">Actual Price</label>
         <input type="number" name="price" id="price" step="0.01" required>
       </div>
       <div class="form-control">
@@ -47,7 +49,7 @@
         <textarea name="location" id="location" rows="5" required></textarea>
       </div>
 
-      <button class="btn" type="submit">Add Product</button>
+      <button class="btn" type="submit">Create Auction</button>
     </form>
   </main>
 </body>
