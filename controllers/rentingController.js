@@ -125,11 +125,9 @@ exports.postAddProduct = (req, res, next) => {
     return res.status(400).send("At least one image is required.");
   }
 
-  // const imageUrls = req.files.map((file) => file.path);
   const imageUrls = req.files.map(file => `/uploads/${file.filename}`); 
  if (!title || !imageUrls || !price || !description || !location || !rate || !quantity || !securityDeposit) {
     return res.status(400).send('All fields are required!');
-
   }
 
 
