@@ -10,9 +10,9 @@ router.get("/", secondHandController.getHome);
 // Sell routes
 router.get("/sell", protectRoute, secondHandController.getPostType);
 router.get("/sell/direct-add-product", protectRoute, secondHandController.getDirectAddProduct);
-router.post("/sell/direct-add-product", protectRoute, secondHandController.postDirectAddProduct);
+router.post("/sell/direct-add-product",uploadMultiple, protectRoute, secondHandController.postDirectAddProduct);
 router.get("/sell/add-product", protectRoute, secondHandController.getAddProduct);
-router.post("/sell/add-product", protectRoute, secondHandController.postAddProduct);
+router.post("/sell/add-product",uploadMultiple, protectRoute, secondHandController.postAddProduct);
 
 router.post("/add-to-cart/:productId", protectRoute, secondHandController.addToCart);
 

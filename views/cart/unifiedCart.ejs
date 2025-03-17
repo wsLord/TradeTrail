@@ -137,9 +137,10 @@
                       <td>
                         <div class="price-breakdown">
                           ₹<%= item.product.price %>/<%= item.product.rate %>
-                          <% if (item.product.rate === 'day' && diffDays > 1) { %>
-                            × <%= diffDays %> days
+                          <% if (item.product.rate === 'day' && (item.diffDays || 0) > 1) { %>
+                              × <%= item.diffDays || 1 %> days
                           <% } %>
+                          
                         </div>
                       </td>
                     <% } else if (sectionName === 'Subscription') { %>
@@ -147,9 +148,10 @@
                     <% } %>
 
                     <td>
-                      ₹<%= sectionName === 'Rental' ? 
-                        item.calculatedPrice.toFixed(2) : 
-                        item.product.price.toFixed(2) %>
+                      
+                        ₹<%= sectionName === 'Rental' ? (item.calculatedPrice || 0).toFixed(2) : 
+(item.product?.price || 0).toFixed(2) %>
+
                       <% if (sectionName === 'Rental') { %>
                         <div class="security-deposit">
                           + ₹<%= item.securityDeposit %> deposit
@@ -174,7 +176,9 @@
                       <% if (sectionName === 'Rental') { %>
                         <div class="price-breakdown">
                           (₹<%= totalPrice.toFixed(2) %> + 
-                          ₹<%= itemDeposit.toFixed(2) %> deposit)
+                          
+                          ₹<%= (itemDeposit || 0).toFixed(2) %> deposit)
+
                         </div>
                       <% } %>
                     </td>
