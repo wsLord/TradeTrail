@@ -16,16 +16,17 @@
     <%- include('../common/navigation.ejs') %>
 
     <main>
-        <form class="product-form" action="/rental/post" method="POST">
+        <form class="product-form" action="/rental/post" method="POST" enctype="multipart/form-data">
             <div class="form-control">
                 <label for="title">Title</label>
                 <input type="text" name="title" id="title" required>
             </div>
-
+            
             <div class="form-control">
-                <label for="imageUrl">Upload image</label>
-                <input type="text" name="imageUrl" id="imageUrl" required>
+                <label for="image">Upload Images</label>
+                <input type="file" name="images" id="images" accept="image/*" multiple required>
             </div>
+            
 
             <!-- Dropdown for rate options -->
             <div class="form-control">
@@ -65,8 +66,7 @@
                 <textarea name="location" id="location" rows="5" required></textarea>
             </div>
 
-            
-
+        
             <button class="btn" type="submit">Add Product</button>
         </form>
     </main>

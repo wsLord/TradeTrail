@@ -9,12 +9,12 @@ body {
 
 /* Renting Container */
 .renting-container {
-    padding: 50px 20px;
+    padding: 60px 20px;
 }
 
 .renting-container h1 {
     font-size: 32px;
-    color: #3E6B48;
+    color: black;
     margin-bottom: 10px;
     margin-top: 40pt;
 }
@@ -34,7 +34,7 @@ body {
 
 .option {
     background-color: white;
-    padding: 50px;
+    padding: 90px 60px;
     border-radius: 10px;
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
     width: 300px;
@@ -42,7 +42,7 @@ body {
 
 .option h2 {
     color: #3E6B48;
-    font-size: 22px;
+    font-size: 23px;
 }
 
 .option p {
@@ -55,7 +55,7 @@ body {
 .option button {
     background-color: #3E6B48;
     color: white;
-    padding: 10px 15px;
+    padding: 14px 30px;
     border: none;
     cursor: pointer;
     border-radius: 5px;
@@ -72,7 +72,7 @@ body {
     flex-wrap: wrap;
     justify-content: center;
     gap: 150px;
-    padding: 20px;
+    padding: 50px 20px;
 }
 
 .rental-item {
@@ -80,7 +80,7 @@ body {
     padding: 20px; /* Padding inside the box */
     border-radius: 10px;
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-    width: 250px;
+    width: 300px;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -154,7 +154,7 @@ body {
 
 /* Add to Cart Button Specific Styles */
 .add-to-cart-button {
-    background-color: #FFD700;
+    background-color: #b3cf99;
     color: #333; /* Dark text for better contrast on yellow */
     padding: 12px 20px;
     border-radius: 5px;
@@ -165,7 +165,7 @@ body {
 }
 
 .add-to-cart-button:hover {
-    background-color: #FFC300;
+    background-color: #a3c585;
     transform: scale(1.02);
 }
 
@@ -184,11 +184,11 @@ body {
 
 /* Search Form Styles */
 .search-form {
-    max-width: 600px;
+    max-width: 700px;
     margin: 20px auto;
     display: flex;
     gap: 10px;
-    padding: 0 15px;
+    /* padding: 0 5px; */
 }
 
 .search-form input {
@@ -207,6 +207,7 @@ body {
     border-radius: 25px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    font-size: 16px;
 }
 
 .search-form button:hover {
@@ -386,6 +387,10 @@ body {
     border-bottom: 1px solid #ddd;
     text-align: left;
   }
+
+  .cart-item td button{
+    background-color: #4f703b; /* Update button */
+  }
   
   .cart-items th {
     background-color: #f5f5f5;
@@ -454,6 +459,7 @@ body {
     background-color: #3E6B48 !important; /* Green background */
     color: white !important;
     border: none !important;
+    padding: 10px 15px;
 }
 
 .auction-btn:hover {
@@ -489,8 +495,88 @@ body {
   }
 
 
-  
-  
-  
+ button{
+    padding: 15px 40px;
+    background-color: #2d4d34;
+    margin-bottom: 10px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 16px;
+ } 
 
-
+/* hihi */
+.image-slider-container {
+    position: relative;
+    width: 100%;
+    max-width: 300px; /* Adjust as needed */
+    overflow: hidden;
+    border-radius: 8px;
+  }
+  
+  .image-slider img {
+    width: 100%;
+    height: auto;
+    max-height: 250px; /* Ensure it doesn't exceed a specific height */
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  
+  .image-slider-container button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+  }
+  
+  nav {
+    position: relative;  /* Ensure navbar stays above images */
+    z-index: 10;
+    background-color: #4CAF50; /* Adjust to match your theme */
+    padding: 10px;
+  }
+  
+  main {
+    margin-top: 60px; /* Prevent content from being hidden under the navbar */
+  }
+  
+  
+      .image-slider-container {
+        position: relative;
+        width: 100%;
+        max-width: 300px; /* Adjust this based on your layout */
+        overflow: hidden;
+        border-radius: 8px;
+      }
+  
+      /* Image Wrapper */
+      .image-slider {
+        display: flex;
+        transition: transform 0.5s ease-in-out;
+      }
+  
+      /* Individual Image */
+      .image-slider img {
+        width: 100%;
+        flex-shrink: 0;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+  
+      /* Navigation Buttons */
+      .prev, .next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: rgba(0, 0, 0, 0.6);
+        color: white;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+        border-radius: 50%;
+        z-index: 2;
+      }
+      .prev { left: 5px; }
+      .next { right: 5px; }

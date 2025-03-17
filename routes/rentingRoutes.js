@@ -3,6 +3,7 @@ const router = express.Router();
 const rentingController = require("../controllers/rentingController");
 const cartController = require("../controllers/rentalCartController");
 const { protectRoute } = require("../middleware/authMiddleware");
+const { uploadMultiple } = require("../middleware/multerConfig");
 
 // Route to render the homepage for renting (options: post or rent an item)
 router.get("/", rentingController.getHome);
@@ -11,7 +12,7 @@ router.get("/", rentingController.getHome);
 router.get("/post", rentingController.getAddProduct);
 
 // Route to handle the form submission for posting a rental product
-router.post("/post", rentingController.postAddProduct);
+router.post("/post", uploadMultiple, rentingController.postAddProduct);
 
 // Product details route
 router.get('/details/:productId', rentingController.getProductDetails);

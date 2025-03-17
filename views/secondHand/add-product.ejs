@@ -13,15 +13,17 @@
   <%- include('../common/navigation.ejs') %>
 
   <main>
-    <form class="product-form" action="/secondHand/sell/add-product" method="POST">
+
+    <form class="product-form" action="/secondHand/sell/add-product" method="POST" enctype="multipart/form-data">
+
       <div class="form-control">
         <label for="title">Title</label>
         <input type="text" name="title" id="title" required>
       </div>
       <div class="form-control">
-        <label for="imageUrl">Upload image</label>
-        <input type="text" name="imageUrl" id="imageUrl" required>
-      </div>
+        <label for="image">Upload Images</label>
+        <input type="file" name="images" id="images" accept="image/*" multiple required>
+    </div>
       <div class="form-control">
         <label for="price">Actual Price</label>
         <input type="number" name="price" id="price" step="0.01" required>

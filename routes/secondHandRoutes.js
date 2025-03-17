@@ -1,9 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const { protectRoute } = require("../middleware/authMiddleware");
+const { uploadMultiple } = require("../middleware/multerConfig");
 const secondHandController = require("../controllers/secondHandController");
 
 router.get("/", secondHandController.getHome);
+
 
 // Sell routes
 router.get("/sell", protectRoute, secondHandController.getPostType);
@@ -24,5 +26,6 @@ router.get("/buy/:productId", protectRoute, secondHandController.getProduct);
 router.post("/delete-bid/:bidId", protectRoute, secondHandController.deleteBid);
 router.get("/buy/:productId/add-bid-product", protectRoute, secondHandController.getAddBidProduct);
 router.post("/buy/:productId/add-bid-product", protectRoute, secondHandController.postAddBidProduct);
+
 
 module.exports = router;

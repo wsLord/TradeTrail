@@ -24,20 +24,20 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 //creating products for sell
-exports.postAddProduct = (req, res) => {
-  const { title, imageUrl, price, min_price, description, location, startDate, endDate } = req.body;
-  
-  const product = new Product({
+exports.postAddProduct = (req, res, next) => {
+  const { title, imageUrls, price, min_price, description, location, startDate, endDate } = req.body;
+  // Format image URL for consistency
+  const imageUrls = req.files.map(file => `/uploads/${file.filename}`); 
+
+   const product = new Product({
     title,
-    imageUrl,
+    imageUrls,
     price: parseFloat(price),
     min_price: parseFloat(min_price),
     description,
     location,
     startDate,
     endDate,
-    seller: req.user._id,
-    saleType: 'auction'
   });
 
   product.save()

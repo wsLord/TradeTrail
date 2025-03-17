@@ -14,8 +14,8 @@ const productSchema = new Schema({
     type: String,
     required: true,
   },
-  imageUrl: {
-    type: String,
+  imageUrls: {
+    type: [String], // Array of image paths
     required: true,
   },
   saleType: {
