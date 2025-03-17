@@ -23,7 +23,17 @@ router.get("/rent", rentingController.getRentItems);
 router.post("/buy/:productId", rentingController.buyProduct);
 
 // Protected route for Add-to-Cart
-router.post("/add-to-cart/:productId", protectRoute, rentingController.addToCart);
+// router.post("/add-to-cart/:productId", protectRoute, rentingController.addToCart);
+
+router.post("/add-to-cart/:productId", protectRoute, (req, res) => {
+    // Modified to handle rental dates
+    req.body = {
+      ...req.body,
+      rentalStart: req.body.rentalStart,
+      rentalEnd: req.body.rentalEnd
+    };
+    rentingController.addToCart(req, res);
+  });
 
 // Protected route for Cart Status
 router.get("/cart", protectRoute, cartController.getCart);

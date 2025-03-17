@@ -22,7 +22,11 @@ const cartItemSchema = new Schema({
     required: true,
     min: 1,
     default: 1
-  }
+  },
+  rentalStart: Date,
+  rentalEnd: Date,
+  calculatedPrice: Number,
+  securityDeposit: Number
 });
 
 const cartSchema = new Schema({

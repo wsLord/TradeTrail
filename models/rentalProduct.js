@@ -19,6 +19,7 @@ const rentalProductSchema = new mongoose.Schema({
     required: true, // The price is required.
     min: 1, // Ensure that the price is at least 1.
   },
+  securityDeposit: { type: Number, required: true, min: 0 },
   description: {
     type: String,
     required: true, // Description is required.
