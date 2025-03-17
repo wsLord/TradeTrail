@@ -19,10 +19,11 @@ const secondHandRoutes = require("./routes/secondHandRoutes");
 const rentingRoutes = require("./routes/rentingRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const subscriptionRoutes = require("./routes/subscriptionRoutes");
+const cartRoutes = require('./routes/cartRoutes');
 
-const rentalCartRoutes = require("./routes/rentalCartRoutes");
-const secondHandCartRoutes = require("./routes/secondHandCartRoutes");
-const subscriptionCartRoutes = require("./routes/subscriptionCartRoutes");
+// const rentalCartRoutes = require("./routes/rentalCartRoutes");
+// const secondHandCartRoutes = require("./routes/secondHandCartRoutes");
+// const subscriptionCartRoutes = require("./routes/subscriptionCartRoutes");
 
 const cron = require("node-cron");
 const User = require("./models/userModel");
@@ -46,20 +47,19 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // Multer setup
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Ensure this folder exists
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
-  },
-});
-const upload = multer({ storage: storage });
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, "uploads/"); // Ensure this folder exists
+//   },
+//   filename: (req, file, cb) => {
+//     cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
+//   },
+// });
+// const upload = multer({ storage: storage });
 
 // Middlewares
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(upload.single("image")); // Handle single file upload
 
 // Static folder to serve uploaded images
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -100,14 +100,22 @@ app.use("/secondHand", secondHandRoutes);
 app.use("/rental", rentingRoutes);
 app.use("/", profileRoutes);
 app.use("/subscription", subscriptionRoutes);
+app.use('/cart', cartRoutes);
 
-app.use("/rental/cart", rentalCartRoutes);
-app.use("/subscription/cart", subscriptionCartRoutes);
-app.use("/secondHand/cart", secondHandCartRoutes);
+
+// app.use("/rental/cart", rentalCartRoutes);
+// app.use("/subscription/cart", subscriptionCartRoutes);
+// app.use("/secondHand/cart", secondHandCartRoutes);
 
 app.get("/", (req, res) => {
-  res.render("home"); // Renders the home.ejs file inside views/
+  res.render("home", {
+    pageTitle: "Home",
+    activePage: "home" 
+}); 
 });
+
+
+
 
 // Connect to MongoDB **before** starting the server
 connectToMongoDB()

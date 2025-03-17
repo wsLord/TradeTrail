@@ -466,6 +466,34 @@ body {
     background-color: #3E6B48 !important; /* Darker green on hover */
 }
 
+/* public/css/rentalStyles.css */
+.price-summary {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 15px 0;
+  }
+  
+  .price-summary p {
+    margin: 5px 0;
+    font-size: 1.1em;
+  }
+  
+  .total-price {
+    font-weight: bold;
+    color: #28a745;
+    font-size: 1.2em !important;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+  }
+
 
  button{
     padding: 15px 40px;
@@ -479,4 +507,76 @@ body {
     font-size: 16px;
  } 
 
-
+/* hihi */
+.image-slider-container {
+    position: relative;
+    width: 100%;
+    max-width: 300px; /* Adjust as needed */
+    overflow: hidden;
+    border-radius: 8px;
+  }
+  
+  .image-slider img {
+    width: 100%;
+    height: auto;
+    max-height: 250px; /* Ensure it doesn't exceed a specific height */
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  
+  .image-slider-container button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+  }
+  
+  nav {
+    position: relative;  /* Ensure navbar stays above images */
+    z-index: 10;
+    background-color: #4CAF50; /* Adjust to match your theme */
+    padding: 10px;
+  }
+  
+  main {
+    margin-top: 60px; /* Prevent content from being hidden under the navbar */
+  }
+  
+  
+      .image-slider-container {
+        position: relative;
+        width: 100%;
+        max-width: 300px; /* Adjust this based on your layout */
+        overflow: hidden;
+        border-radius: 8px;
+      }
+  
+      /* Image Wrapper */
+      .image-slider {
+        display: flex;
+        transition: transform 0.5s ease-in-out;
+      }
+  
+      /* Individual Image */
+      .image-slider img {
+        width: 100%;
+        flex-shrink: 0;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+  
+      /* Navigation Buttons */
+      .prev, .next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: rgba(0, 0, 0, 0.6);
+        color: white;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+        border-radius: 50%;
+        z-index: 2;
+      }
+      .prev { left: 5px; }
+      .next { right: 5px; }

@@ -21,14 +21,10 @@
                 <label for="title">Title</label>
                 <input type="text" name="title" id="title" required>
             </div>
-
-            <!-- <div class="form-control">
-                <label for="imageUrl">Upload image</label>
-                <input type="text" name="imageUrl" id="imageUrl" required>
-            </div> -->
+            
             <div class="form-control">
-                <label for="image">Upload Image</label>
-                <input type="file" name="image" id="image" accept="image/*" required>
+                <label for="image">Upload Images</label>
+                <input type="file" name="images" id="images" accept="image/*" multiple required>
             </div>
             
 
@@ -56,6 +52,11 @@
             </div>
 
             <div class="form-control">
+                <label for="securityDeposit">Security Deposit</label>
+                <input type="number" name="securityDeposit" id="securityDeposit" min="0" required>
+            </div>
+
+            <div class="form-control">
                 <label for="description">Description</label>
                 <textarea name="description" id="description" rows="5" required></textarea>
             </div>
@@ -65,8 +66,7 @@
                 <textarea name="location" id="location" rows="5" required></textarea>
             </div>
 
-            
-
+        
             <button class="btn" type="submit">Add Product</button>
         </form>
     </main>

@@ -8,13 +8,85 @@
   <link rel="stylesheet" href="/css/forms.css">
   <link rel="stylesheet" href="/css/rentalStyles.css">
   <style>
-    /* Example inline CSS for section title */
+    .rental-calendar {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .price-summary-card {
+      background: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    .calculation-breakdown {
+      margin-top: 10px;
+      padding: 10px;
+      background: #e9ecef;
+      border-radius: 4px;
     .section-title {
       font-size: 1.2em;
       color: #333;
       text-decoration: underline;
       margin-bottom: 10px;
     }
+    .slider {
+  position: relative;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.slide {
+  display: none;
+  width: 100%;
+  height: auto;
+}
+
+.active {
+  display: block;
+}
+
+.prev, .next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.prev { left: 10px; }
+.next { right: 10px; }
+
+/* added to have same size */
+.slider {
+  position: relative;
+  max-width: 100%;
+  height: 300px; /* Set a fixed height */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5; /* Optional: Background color to handle empty space */
+}
+
+.slide {
+  display: none;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Ensures images maintain aspect ratio */
+}
+
+.active {
+  display: block;
+}
+
+
   </style>
 </head>
 <body>
@@ -24,44 +96,92 @@
 
   <main class="product-details-container">
     <div class="details-grid">
-      <!-- Left Column: Product Image & Title -->
       <div class="product-image-column">
-        <img src="<%= product.imageUrl %>" alt="<%= product.title %>" class="details-image">
+        <div class="slider">
+          <% product.imageUrls.forEach((image, index) => { %>
+            <img src="<%= image %>" class="slide <% if(index === 0) { %> active <% } %>" alt="Product Image">
+          <% }) %>
+          <button class="prev" onclick="changeSlide(-1)">&#10094;</button>
+          <button class="next" onclick="changeSlide(1)">&#10095;</button>
+        </div>
         <h1><%= product.title %></h1>
+        <div class="price-summary-card">
+          <h3>Pricing Details</h3>
+          <p>Rate: ₹<%= product.price %>/<%= product.rate %></p>
+          <p>Security Deposit: ₹<%= product.securityDeposit %></p>
+          <div class="calculation-breakdown" id="calculationDetails">
+            <!-- JavaScript will populate this -->
+          </div>
+          <h4 class="total-price">Total Estimate: ₹<span id="totalPrice">0</span></h4>
+        </div>
       </div>
       
-      <!-- Right Column: Product Info -->
       <div class="product-info-column">
-        <h2 class="section-title">Description</h2>
+        <h2 class="section-title">Product Details</h2>
         <p class="description"><%= product.description %></p>
         
-        <% if (product.currentBooking) { %>
-          <p>Currently rented until: <%= new Date(product.currentBooking.rentalEnd).toLocaleDateString('en-IN') %></p>
-        <% } else { %>
-          <p>This product is available for rent.</p>
-        <% } %>
-        
-        <div class="details-meta">
-          <p><strong>Price:</strong> <%= product.price %> per <%= product.rate %></p>
+        <div class="product-meta">
           <p><strong>Location:</strong> <%= product.location %></p>
-          <p><strong>Available Quantity:</strong> <%= product.quantity %></p>
+          <p><strong>Available Stock:</strong> <%= product.quantity %></p>
+          <% if (product.currentBooking) { %>
+            <p class="availability-notice">
+              Next available after: <%= new Date(product.currentBooking.rentalEnd).toLocaleDateString('en-IN') %>
+            </p>
+          <% } %>
         </div>
-        
-        <!-- Rental Form -->
-        <form action="/rental/rent/<%= product.id %>" method="POST">
-            <label for="rentalEnd">Return By:</label>
-            <input type="date" name="rentalEnd" required>
-            <button type="submit" class="buy-now-button">Rent Now</button>
-        </form>
-        
-        <!-- Add to Cart Action -->
-        <div class="details-actions">
-          <form action="/rental/add-to-cart/<%= product.id %>" method="POST" class="inline-form">
-            <button type="submit" class="add-to-cart-button">Add to Cart</button>
+
+
+        <div class="rental-calendar">
+          <form action="/rental/add-to-cart/<%= product.id %>" method="POST">
+            <div class="form-group">
+              <label for="rentalStart">Start Date:</label>
+              <input type="date" 
+                     name="rentalStart" 
+                     id="rentalStart"
+                     required 
+                     min="<%= new Date().toISOString().split('T')[0] %>"
+            </div>
+            
+            <div class="form-group">
+              <label for="rentalEnd">End Date:</label>
+              <input type="date" 
+                     name="rentalEnd" 
+                     id="rentalEnd"
+                     required 
+                     min="<%= new Date().toISOString().split('T')[0] %>"
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="add-to-cart-button">
+                Add to Cart (₹<span id="dynamicPrice">0</span>)
+              </button>
+              <button type="submit" formaction="/rental/rent/<%= product.id %>" 
+                      class="buy-now-button">
+                Rent Now (₹<span id="dynamicPrice2">0</span>)
+              </button>
+            </div>
           </form>
         </div>
       </div>
     </div>
   </main>
+
+<span id="rateValue" style="display:none;"><%= product.rate %></span>
+<span id="priceValue" style="display:none;"><%= product.price %></span>
+<span id="depositValue" style="display:none;"><%= product.securityDeposit %></span>
+
+<script src="/assets/rentalDetails.js"></script>
+<script>
+
+    let slideIndex = 0;
+    const slides = document.querySelectorAll(".slide");
+  
+    function changeSlide(n) {
+      slides[slideIndex].classList.remove("active");
+      slideIndex = (slideIndex + n + slides.length) % slides.length;
+      slides[slideIndex].classList.add("active");
+    }
+  </script>
+
 </body>
 </html>

@@ -5,9 +5,9 @@ const rentalProductSchema = new mongoose.Schema({
     type: String,
     required: true, // The title is required.
   },
-  imageUrl: {
-    type: String,
-    required: true, // The image URL is required.
+  imageUrls: {
+    type: [String], // Array of image paths
+    required: true,
   },
   rate: {
     type: String,
@@ -19,6 +19,7 @@ const rentalProductSchema = new mongoose.Schema({
     required: true, // The price is required.
     min: 1, // Ensure that the price is at least 1.
   },
+  securityDeposit: { type: Number, required: true, min: 0 },
   description: {
     type: String,
     required: true, // Description is required.

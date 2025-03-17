@@ -15,7 +15,7 @@
   <%- include('../common/navigation.ejs') %>
   
   <main>
-    <form class="product-form" action="/subscription/sell" method="POST">
+    <form class="product-form" action="/subscription/sell/add-product" method="POST">
       <div class="form-control">
         <label for="platform_name">Platform Name</label>
         <select name="platform_name" id="platform_name" required onchange="handlePlatformChange()">
@@ -40,6 +40,7 @@
                 <span class="tooltip-text">The price at which the subscription was originally purchased</span>
             </span>
         </label>
+
         <input type="number" name="price" id="price" step="0.01" required>
       </div>
     

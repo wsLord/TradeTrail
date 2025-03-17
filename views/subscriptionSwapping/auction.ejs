@@ -54,8 +54,10 @@
     
     <section>
       <h1>Auction</h1>
-      <h2>Welcome, <%= user.fullName %>!</h2></br></br>
-      <div><b>Product:</b> <%= product.title %></div>
+
+      <h2>Welcome, <%= user.fullName %>!</h2>
+      <div><b>Product:</b> <%= product.platform_name %></div>
+
       <p><b>Seller:</b> <%= product.seller ? product.seller.fullName : "Unknown Seller" %></p>
       <p>Start: <span id="start-date"><%= product.startDate %></span></p>
       <p>End: <span id="end-date"><%= product.endDate %></span></p>
@@ -78,9 +80,13 @@
             id="bidAmount" 
             name="bidAmount" 
             placeholder="Enter bid amount" 
-            min="<%= maxBid + 100 %>" 
+            min="<%= monetaryBidsCount === 0 ? product.min_price : maxBid + 100 %>"
             required>
-          <small>Minimum bid: ₹<%= maxBid + 100 %></small>
+            <small>
+              Minimum bid: ₹<%= monetaryBidsCount === 0 ? 
+                  product.min_price : 
+                  maxBid + 100 %>
+          </small>
           <button type="submit">Bid</button>
         </form>
       <% } else { %>
