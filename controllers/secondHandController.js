@@ -25,7 +25,7 @@ exports.getAddProduct = (req, res, next) => {
 
 //creating products for sell
 exports.postAddProduct = (req, res, next) => {
-  const { title, imageUrls, price, min_price, description, location, startDate, endDate } = req.body;
+  const { title, price, min_price, description, location, startDate, endDate } = req.body;
   // Format image URL for consistency
   const imageUrls = req.files.map(file => `/uploads/${file.filename}`); 
 
