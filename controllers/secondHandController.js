@@ -27,7 +27,8 @@ exports.getAddProduct = (req, res, next) => {
 exports.postAddProduct = (req, res, next) => {
   const { title, price, min_price, description, location, startDate, endDate } = req.body;
   // Format image URL for consistency
-  const imageUrls = req.files.map(file => `/uploads/${file.filename}`); 
+  // const imageUrls = req.files.map(file => `/uploads/${file.filename}`); 
+  const imageUrls = req.files.map(file => file.path); 
 
    const product = new Product({
     title,
@@ -273,7 +274,7 @@ exports.getDirectAddProduct = (req, res) => {
 
 exports.postDirectAddProduct = async (req, res) => {
   const { title, price, description, location, quantity } = req.body;
-  const imageUrls = req.files.map(file => `/uploads/${file.filename}`); 
+  const imageUrls = req.files.map(file => file.path); 
 
   try {
     const product = new Product({
