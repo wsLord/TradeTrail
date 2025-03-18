@@ -151,6 +151,75 @@
   align-items: center; /* Added for vertical alignment */
 }
 
+.auction-status-box {
+  background: #ffffff;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.status-icon {
+  font-size: 2rem;
+  background: #f5f5f5;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.status-content h3 {
+  color: #2d2d2d;
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.status-content p {
+  color: #666;
+  margin: 0.3rem 0 0;
+  font-size: 0.95rem;
+}
+
+.bidding-closed-message {
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+}
+
+/* Disabled state styling */
+[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.disabled-section {
+  opacity: 0.6;
+  pointer-events: none;
+  position: relative;
+}
+
+.disabled-section::after {
+  content: "Bidding Closed";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  color: #666;
+  font-weight: 500;
+}
+
   
   </style>
 </head>
@@ -369,20 +438,53 @@
       const now = new Date().getTime();
       const distance = endDate - now;
 
-      if (distance < 0) {
-        clearInterval(timerInterval);
-        document.querySelector('.timer-container').innerHTML = `
-          <div class="time-segment">
-            <span>❌</span>
-            <div class="time-numbers">
-              <span>Auction</span>
-              <small>Closed</small>
-            </div>
-          </div>`;
-        timerMessage.innerHTML = "⛔ Bidding closed! Final bids being evaluated";
-        timerMessage.style.background = "#ffcdd2";
-        return;
-      }
+<!-- Update the JavaScript timer section -->
+if (distance <= 0) {
+  clearInterval(timerInterval);
+  const timerContainer = document.querySelector('.timer-container');
+  const countdownTimer = document.querySelector('.countdown-timer');
+  
+  // Update timer display
+  timerContainer.innerHTML = `
+    <div class="auction-status-box">
+      <div class="status-icon">🏁</div>
+      <div class="status-content">
+        <h3>Auction Closed</h3>
+        <p>Thank you for participating!</p>
+      </div>
+    </div>
+  `;
+  
+  // Update timer message
+  timerMessage.innerHTML = "⛔ Bidding has concluded • Results pending";
+  timerMessage.style.background = "#f5f5f5";
+  timerMessage.style.color = "#666";
+  timerMessage.style.border = "1px solid #ddd";
+  
+  // Disable bid form
+  const bidForm = document.getElementById('bidForm');
+  if (bidForm) {
+    bidForm.querySelector('button').disabled = true;
+    bidForm.querySelector('input').disabled = true;
+    bidForm.querySelector('input').placeholder = "Bidding Closed";
+    bidForm.style.opacity = "0.6";
+  }
+  
+  // Disable product bid button
+  const productBidBtn = document.querySelector('[href="/subscription/buy/<%= product._id %>/add-bid-product"]');
+  if (productBidBtn) {
+    productBidBtn.style.pointerEvents = "none";
+    productBidBtn.style.opacity = "0.6";
+  }
+  
+  // Disable bid deletion and update tables
+  document.querySelectorAll('.delete-btn').forEach(btn => btn.disabled = true);
+  document.querySelectorAll('table tbody tr').forEach(row => {
+    if (row.textContent.includes("No bids yet")) {
+      row.innerHTML = `<td colspan="5" class="bidding-closed-message">Bidding Closed</td>`;
+    }
+  });
+}
 
       const days = Math.floor(distance / (1000 * 60 * 60 * 24));
       const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -410,7 +512,7 @@
       }
     }
 
+    let timerInterval = setInterval(updateTimer, 1000);
     updateTimer();
-    const timerInterval = setInterval(updateTimer, 1000);
   });
   </script>
