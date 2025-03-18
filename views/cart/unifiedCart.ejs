@@ -115,7 +115,11 @@
                 %>
                   <tr class="cart-item">
                     <td>
-                      <img src="<%= item.product.imageUrl %>" alt="<%= item.product.title %>" style="max-width: 100px;">
+                      <% if (item.productType === 'Rental' || item.productType === 'SecondHand') { %>
+                        <img src="<%= item.product.imageUrls[0] %>" alt="<%= item.product.title %>" style="max-width: 100px;">
+                      <% } else if (item.productType === 'Subscription') { %>
+                        <img src="<%= item.product.imageUrl %>" alt="<%= item.product.platform_name %>" style="max-width: 100px;">
+                      <% } %>
                     </td>
                     <td><%= item.product.title || item.product.platform_name %></td>
                     
