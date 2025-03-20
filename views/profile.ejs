@@ -14,263 +14,339 @@
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #F5F8F2; /* Same as homepage */
+            background-color: #F5F8F2;
             text-align: center;
         }
-
-    
-        /* .profile-card {
-            background: #fff;
-            color: #333;
-            padding: 30px 25px;
-            border-radius: 15px;
-            width: 1000px;
-            margin: 30px auto;
-            text-align: center;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s ease;
-        }
-    
-        .profile-pic {
-            width: 180px;
-            height: 180px;
-            border-radius: 5%;
-            object-fit: cover;
-            border: 4px solid #c7ddb5;
-            margin-top: 40px;
-            padding: 10px;
-            transition: all 0.3s ease;
-        }
-    
-        .profile-pic:hover {
-            opacity: 0.9;
-            transform: scale(1.05);
-            cursor: pointer;
-        }
-    
-        h3 {
-            margin: 40px;
-            font-weight: 600;
-            font-size: 32px;
-            color: black;
-        }
-    
-        p {
-            margin: 8px;
-            margin-left: 300px;
-            font-size: 20px;
-            line-height: 1.6;
-            text-align: left;
-        }
-    
-        p strong {
-            color: #555;
-        } */
 
         .profile-card {
             background: #fff;
             color: #333;
-            padding: 30px 25px;
+            padding: 40px 35px;
             border-radius: 15px;
-            width: 1000px;
-            margin: 30px auto;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s ease;
-
-            display: flex; 
+            width: 90%;
+            max-width: 1000px;
+            margin: 40px auto;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            display: flex;
             justify-content: space-between;
-            align-items: center; 
-            text-align: left; 
+            align-items: flex-start;
+            text-align: left;
+            transition: all 0.3s ease;
         }
 
         .profile-content {
             flex: 1;
-            padding-right: 30px; 
-            margin-bottom: 30px;
-        }
-
-        .profile-pic {
-            width: 220px;
-            height: 220px;
-            margin-right: 80px;
-            border-radius: 5%;
-            object-fit: cover;
-            border: 4px solid #c7ddb5;
-            padding: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .profile-pic:hover {
-            opacity: 0.9;
-            transform: scale(1.05);
-            cursor: pointer;
+            padding-right: 50px;
         }
 
         h3 {
-            margin: 30px 30%;
-            font-weight: 600;
-            font-size: 32px;
-            color: black;
+            margin: 0 0 30px 0;
+            font-size: 36px;
+            color: #2c3e50;
+            text-align: center;
+            width: 100%;
+            position: relative;
+        }
+
+        h3::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: #3E6B48;
+            margin: 15px auto 0;
         }
 
         p {
-            margin: 10px;
-            margin-left: 20%;
-            font-size: 20px;
+            margin: 15px 0;
+            font-size: 18px;
             line-height: 1.6;
+            color: #34495e;
         }
 
         p strong {
-            color: #555;
+            color: #2c3e50;
+            min-width: 100px;
+            display: inline-block;
+        }
+
+        .edit-btn {
+            background: linear-gradient(135deg, #3E6B48, #2d5035);
+            color: white;
+            padding: 12px 35px;
+            border: none;
+            cursor: pointer;
+            border-radius: 30px;
+            font-size: 17px;
+            letter-spacing: 0.5px;
+            margin-top: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(62, 107, 72, 0.2);
+            display: block;
+            width: fit-content;
+            margin: 25px auto 0;
+        }
+
+        .edit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(62, 107, 72, 0.3);
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: #34495e;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control {
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            padding: 10px 15px;
+            transition: border-color 0.3s ease;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .form-control:focus {
+            border-color: #3E6B48;
+            box-shadow: none;
+        }
+
+        .btn-primary {
+            background: #3E6B48;
+            border: none;
+            padding: 10px 25px;
+            margin-right: 15px;
+            border-radius: 8px;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
         }
 
         .badge-card {
             background: #fff;
             color: #333;
-            padding: 30px 25px;
+            padding: 30px;
             border-radius: 15px;
-            width: 1000px;
+            width: 90%;
+            max-width: 1000px;
             margin: 30px auto;
-            text-align: center;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s ease;
-        }
-
-    
-        .edit-btn {
-            background-color: #3E6B48;
-            color: white;
-            padding: 14px 30px;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-            font-size: 16px;
-            margin-bottom: 30px;
-        }
-    
-        .edit-btn:hover {
-            background-color: #2d5035;
-        }
-    
-        .popover {
-            background: #fff;
-            color: #333;
-            border-radius: 10px;
-            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-        }
-    
-        .popover-body {
-            padding: 15px;
-            font-size: 14px;
-        }
-    
-        @media (max-width: 450px) {
-            .profile-card {
-                width: 90%;
-                padding: 25px 20px;
-            }
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
         }
 
         .badges-container {
             display: flex;
-            gap: 10px;
-            flex-wrap: wrap; /* Makes sure badges wrap to next line in case of too many */
-            justify-content: space-around;
-            align-items: center;
-            max-width: 800px;
-            margin: 10px auto;
-            margin-top: 20px;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 20px 0;
         }
 
         .badge-img {
-            width: 180px;
-            height: 200px;
+            width: 160px;
+            height: 180px;
             object-fit: cover;
-            border-radius: 8px; 
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s ease;
         }
 
         .badge-img:hover {
-            transform: scale(1.1); 
-            cursor: pointer;
+            transform: scale(1.05);
         }
 
+        .profile-pic {
+            width: 220px;
+            height: 220px;
+            border-radius: 15px;
+            object-fit: cover;
+            border: 4px solid #c7ddb5;
+            padding: 10px;
+            transition: all 0.3s ease;
+        }
 
+        .profile-pic-section {
+            position: relative;
+            margin-left: 30px;
+        }
+
+        .upload-overlay {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 15px;
+            border-radius: 25px;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .upload-overlay:hover {
+            background: white;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .profile-card {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                padding: 30px 20px;
+            }
+
+            .profile-content {
+                padding-right: 0;
+                margin-bottom: 30px;
+            }
+
+            .profile-pic {
+                width: 200px;
+                height: 200px;
+                margin: 0;
+            }
+
+            p {
+                text-align: center;
+            }
+
+            .edit-btn {
+                width: 100%;
+                max-width: 200px;
+            }
+
+            .form-control {
+                max-width: 100%;
+            }
+        }
     </style>
-    
 </head>
 
 <body>
-
     <%- include('./common/navigation.ejs') %>
 
-        <main>
-
-            <div class="profile-card" style="margin-top: 90px;">
-                <div class="profile-content">
-                    <h3><%= user.name %></h3>
+    <main>
+        <div class="profile-card">
+            <div class="profile-content">
+                <h3><%= user.fullName %></h3>
+                
+                <!-- View Mode -->
+                <div id="viewMode">
                     <p><strong>Email:</strong> <%= user.email %></p>
-                    <p><strong>City:</strong> <%= user.city %></p>
-                    <p><strong>State:</strong> <%= user.state %></p>
-                    <p><strong>Country:</strong> <%= user.country %></p>
-                    <p><strong>Phone:</strong> <%= user.phone %></p>
-                    <p><strong>Rating:</strong> <%= user.rating %></p>
+                    <p><strong>City:</strong> <span id="cityText"><%= user.city || 'Not specified' %></span></p>
+                    <p><strong>State:</strong> <span id="stateText"><%= user.state || 'Not specified' %></span></p>
+                    <p><strong>Country:</strong> <span id="countryText"><%= user.country || 'Not specified' %></span></p>
+                    <p><strong>Phone:</strong> <span id="phoneText"><%= user.phone || 'Not specified' %></span></p>
+                    <button class="edit-btn" onclick="toggleEditMode()">Edit Profile</button>
                 </div>
-                <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-                    alt="Profile Picture" class="profile-pic" id="profilePic" data-toggle="popover">
+
+                <!-- Edit Mode -->
+                <form id="editMode" style="display: none;" action="/profile" method="POST">
+                    <div class="form-group">
+                        <label>City:</label>
+                        <input type="text" class="form-control" name="city" value="<%= user.city || '' %>">
+                    </div>
+                    <div class="form-group">
+                        <label>State:</label>
+                        <input type="text" class="form-control" name="state" value="<%= user.state || '' %>">
+                    </div>
+                    <div class="form-group">
+                        <label>Country:</label>
+                        <input type="text" class="form-control" name="country" value="<%= user.country || '' %>">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone:</label>
+                        <input type="tel" class="form-control" name="phone" value="<%= user.phone || '' %>">
+                    </div>
+                    <div style="margin-top: 25px;">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <button type="button" class="btn btn-secondary" onclick="toggleEditMode()">Cancel</button>
+                    </div>
+                </form>
             </div>
             
+            <!-- Profile Picture Section -->
+            <div class="profile-pic-section">
+                <img src="<%= user.profilePic %>" 
+                     alt="Profile Picture" 
+                     class="profile-pic" 
+                     id="profilePic"
+                     onclick="document.getElementById('fileInput').click()">
+                <div class="upload-overlay" onclick="document.getElementById('fileInput').click()">
+                    📷 Update Photo
+                </div>
+                <input type="file" 
+                       id="fileInput" 
+                       style="display: none;" 
+                       accept="image/*"
+                       onchange="uploadProfilePic(this.files[0])">
+            </div>
+        </div>
 
-            <div class="badge-card">
-                <p style="margin: 5px;"><strong>Badges:</strong></p>
-                <div class="badges-container">
+        <div class="badge-card">
+            <p style="margin: 5px; font-size: 20px; color: #2c3e50;"><strong>Badges Earned</strong></p>
+            <div class="badges-container">
+                <% if (user.badges && user.badges.length > 0) { %>
                     <% user.badges.forEach(function(badge) { %>
                         <img src="<%= badge %>" alt="Badge" class="badge-img">
                     <% }); %>
-                </div>
-                
+                <% } else { %>
+                    <p style="color: #95a5a6;">No badges earned yet!</p>
+                <% } %>
             </div>
+        </div>
+    </main>
 
-            <button class="edit-btn">Edit</button>
-            
+    <script>
+        // Toggle between view and edit modes
+        function toggleEditMode() {
+            const viewMode = document.getElementById('viewMode');
+            const editMode = document.getElementById('editMode');
+            viewMode.style.display = viewMode.style.display === 'none' ? 'block' : 'none';
+            editMode.style.display = editMode.style.display === 'none' ? 'block' : 'none';
+        }
 
-        </main>
-
-        <script>
-            // $(document).ready(function() {
-            //     $('#profilePic').popover({
-            //         trigger: 'hover',
-            //         placement: 'bottom',
-            //         html: true,
-            //         content: '<button class="btn btn-primary btn-sm">Update Profile Picture</button>'
-            //     });
-            // });
-            // <script>
-            $(document).ready(function() {
-                $('#profileLink').popover({
-                    trigger: 'click',
-                    placement: 'bottom',
-                    html: true,
-                    content: `
-                <div class="popover-content">
-                    <p><strong>Name:</strong> <%= user.name %></p>
-                    <p><strong>Email:</strong> <%= user.email %></p>
-                    <p><strong>City:</strong> <%= user.city %></p>
-                    <button class="btn btn-primary btn-sm" id="editProfile">Edit Profile</button>
+        // Handle profile picture upload with loading state
+        async function uploadProfilePic(file) {
+            const loader = document.createElement('div');
+            loader.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                    background: rgba(255, 255, 255, 0.9); z-index: 9999; display: flex; 
+                    align-items: center; justify-content: center;">
+                    <div class="spinner-border text-success" style="width: 3rem; height: 3rem;"></div>
                 </div>
-            `
-                });
+            `;
+            document.body.appendChild(loader);
 
-                // Close popover when clicking outside
-                $(document).on('click', function(e) {
-                    if (!$(e.target).closest('#profileLink, .popover').length) {
-                        $('#profileLink').popover('hide');
-                    }
+            try {
+                const formData = new FormData();
+                formData.append('image', file);
+                
+                const response = await fetch('/profile/picture', {
+                    method: 'POST',
+                    body: formData
                 });
-            });
-        </script>
-
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('profilePic').src = data.profilePic;
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert('Error uploading image');
+            } finally {
+                document.body.removeChild(loader);
+            }
+        }
+    </script>
 </body>
 
 </html>
