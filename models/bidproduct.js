@@ -9,11 +9,13 @@ const bidProductSchema = Schema({
   location: { type: String },
   bidAmount: { type: Number }, // New field for numeric bids
   bidder: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // Reference to the user who placed the bid
+
   auction: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Product",
     required: true,
   },
+  createdAt: { type: Date, default: Date.now }
 });
 
 bidProductSchema.pre("save", function (next) {
