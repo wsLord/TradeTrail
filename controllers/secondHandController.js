@@ -1,6 +1,7 @@
 const Product = require("../models/product");
 const BidProduct = require("../models/bidproduct");
 const User = require("../models/userModel");
+const Cart = require("../models/cartModel");
 
 const MIN_BID_INCREMENT = 100;
 
@@ -17,40 +18,39 @@ exports.getHome = (req, res, next) => {
 exports.getAddProduct = (req, res, next) => {
   res.render("secondHand/add-product", {
     pageTitle: "Add Product",
-    path: "/secondHand/sell",
+    path: "/secondHand/sell/add-product",
     activePage: "secondHand", // Added activePage
   });
 };
 
 //creating products for sell
 exports.postAddProduct = (req, res, next) => {
-  const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
-  const price = req.body.price;
-  const min_price = req.body.min_price;
-  const description = req.body.description;
-  const location = req.body.location;
-  const startDate = req.body.startDate;
-  const endDate = req.body.endDate;
-  const product = new Product({
-    title: title,
-    imageUrl: imageUrl,
-    price: price,
-    min_price: min_price,
-    description: description,
-    location: location,
-    startDate: startDate,
-    endDate: endDate,
+  const { title, price, min_price, description, location, startDate, endDate } = req.body;
+  // Format image URL for consistency
+  // const imageUrls = req.files.map(file => `/uploads/${file.filename}`); 
+  const imageUrls = req.files.map(file => file.path); 
+
+   const product = new Product({
+    title,
+    imageUrls,
+    price: parseFloat(price),
+    min_price: parseFloat(min_price),
+    description,
+    location,
+    startDate,
+    endDate,
     seller: req.user._id,
+    saleType: 'auction',
   });
-  product
-    .save()
-    .then((result) => {
-      // After creation, redirect to the buy page
+
+  product.save()
+    .then(() => {
       res.redirect("/secondHand/buy");
     })
-    .catch((err) => {
+    .catch(err => {
       console.log(err);
+      req.flash("error", "Error creating auction listing");
+      res.redirect("/secondHand/sell/add-product");
     });
 };
 
@@ -92,29 +92,39 @@ exports.getProducts = (req, res, next) => {
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
   Product.findById(prodId)
-    // .populate("bids") // Populate bid products
-    .populate("seller", "fullName")
-    .populate({
-      path: "bids",
-      populate: { path: "bidder", select: "fullName" }, // Fetch bidder details
-    })
-    .then((product) => {
-      // Calculate maximum bid from existing bids
-      const maxBid = product.bids
-        .filter((bid) => bid.bidAmount !== null)
-        .reduce((max, bid) => Math.max(max, bid.bidAmount), product.min_price);
-      res.render("secondHand/auction", {
-        product: product,
-        user: req.user,
-        pageTitle: "Auction",
-        maxBid: maxBid,
-        path: "/product",
-        activePage: "secondHand",  // Added activePage
+      .populate("seller", "fullName")
+      .populate({
+          path: "bids",
+          populate: { path: "bidder", select: "fullName" },
+      })
+      .then((product) => {
+          if (!product) {
+              req.flash("error", "Product not found.");
+              return res.redirect("/secondHand/buy");
+          }
+          
+          const monetaryBids = product.bids.filter(bid => bid.bidAmount !== null);
+          const maxBid = monetaryBids.reduce(
+              (max, bid) => Math.max(max, bid.bidAmount),
+              product.min_price
+          );
+
+          res.render("secondHand/auction", {
+              product: product,
+              user: req.user,
+              pageTitle: "Auction",
+              maxBid: maxBid,
+              monetaryBidsCount: monetaryBids.length,
+              MIN_BID_INCREMENT: MIN_BID_INCREMENT,
+              path: "/product",
+              activePage: "secondHand"
+          });
+      })
+      .catch((err) => {
+          console.log(err);
+          req.flash("error", "Error retrieving product.");
+          res.redirect("/secondHand/buy");
       });
-    })
-    .catch((err) => {
-      console.log(err);
-    });
 };
 
 //add product bid page
@@ -133,86 +143,93 @@ exports.getAddBidProduct = (req, res, next) => {
 //save new bidproduct in db
 exports.postAddBidProduct = async (req, res, next) => {
   if (!req.user) {
-    return res.status(401).json({ message: "Unauthorized: Please log in" });
+      return res.status(401).json({ message: "Unauthorized: Please log in" });
   }
 
   const prodId = req.params.productId;
   const { title, imageUrl, description, location, bidAmount } = req.body;
 
-  // Check for existing bid by this user
+  // Check for existing bid
   const existingBid = await BidProduct.findOne({
-    bidder: req.user._id,
-    auction: prodId
+      bidder: req.user._id,
+      auction: prodId
   });
 
   if (existingBid) {
-    req.flash(
-      'error',
-      `You already have an active bid. Delete your previous bid (₹${existingBid.bidAmount || "product bid"}) to place a new one.`
-    );
-    return res.redirect(`/secondHand/buy/${prodId}`);
+      req.flash(
+          'error',
+          `You already have an active bid. Delete your previous bid (₹${existingBid.bidAmount || "product bid"}) to place a new one.`
+      );
+      return res.redirect(`/secondHand/buy/${prodId}`);
   }
 
-  // Get the product with current bids
+  // Get product with monetary bids
   const product = await Product.findById(prodId)
-  .populate({
-    path: "bids",
-    match: { bidAmount: { $ne: null } }
-  });
+      .populate({
+          path: "bids",
+          match: { bidAmount: { $ne: null } }
+      });
 
-// Calculate current max bid
-const currentMaxBid = product.bids.reduce(
-  (max, bid) => Math.max(max, bid.bidAmount),
-  product.min_price // Start with initial price
-);
-
-// Validate bid amount
-if (bidAmount && bidAmount < currentMaxBid + MIN_BID_INCREMENT) {
-  req.flash(
-    'error', 
-    `Bid must be at least ₹${currentMaxBid + MIN_BID_INCREMENT} (Current max: ₹${currentMaxBid})`
+  // Calculate current max bid and count
+  const monetaryBids = product.bids.filter(bid => bid.bidAmount !== null);
+  const currentMaxBid = monetaryBids.reduce(
+      (max, bid) => Math.max(max, bid.bidAmount),
+      product.min_price // Start with min_price
   );
-  return res.redirect(`/secondHand/buy/${prodId}`);
-}
+  const monetaryBidsCount = monetaryBids.length;
+
+  // Validate bid amount
+  if (bidAmount) {
+      const minRequired = monetaryBidsCount === 0 
+          ? product.min_price 
+          : currentMaxBid + MIN_BID_INCREMENT;
+
+      if (bidAmount < minRequired) {
+          req.flash(
+              'error',
+              monetaryBidsCount === 0 
+                  ? `First bid must be at least ₹${product.min_price}`
+                  : `Bid must be at least ₹${currentMaxBid + MIN_BID_INCREMENT} (Current max: ₹${currentMaxBid})`
+          );
+          return res.redirect(`/secondHand/buy/${prodId}`);
+      }
+  }
 
   if (!bidAmount && !title) {
-    return res
-      .status(400)
-      .send("Error: Provide either a bid amount or a product.");
+      return res.status(400).send("Error: Provide either a bid amount or a product.");
   }
 
   const bidProduct = new BidProduct({
-    title: title || null,
-    imageUrl: imageUrl || null,
-    description: description || null,
-    location: location || null,
-    bidAmount: bidAmount ? Number(bidAmount) : null,
-    bidder: req.user._id,
-    auction: prodId,
+      title: title || null,
+      imageUrl: imageUrl || null,
+      description: description || null,
+      location: location || null,
+      bidAmount: bidAmount ? Number(bidAmount) : null,
+      bidder: req.user._id,
+      auction: prodId,
   });
 
-  bidProduct
-    .save()
-    .then((savedBidProduct) => {
-      return Promise.all([
-        Product.findByIdAndUpdate(
-          prodId,
-          { $push: { bids: savedBidProduct._id } },
-          { new: true }
-        ),
-        User.findByIdAndUpdate(
-          req.user._id,
-          { $addToSet: { cart: prodId } } // Adds product to bidder's cart
-        ),
-      ]);
-    })
-    .then(() => {
-      res.redirect(`/secondHand/buy/${prodId}`);
-    })
-    .catch((err) => {
-      console.error("Error saving bid:", err);
-      res.status(500).send("Internal Server Error");
-    });
+  bidProduct.save()
+      .then((savedBidProduct) => {
+          return Promise.all([
+              Product.findByIdAndUpdate(
+                  prodId, 
+                  { $push: { bids: savedBidProduct._id } }, 
+                  { new: true }
+              ),
+              User.findByIdAndUpdate(
+                  req.user._id, 
+                  { $addToSet: { cart: prodId } }
+              ),
+          ]);
+      })
+      .then(() => {
+          res.redirect(`/secondHand/buy/${prodId}`);
+      })
+      .catch((err) => {
+          console.error("Error saving bid:", err);
+          res.status(500).send("Internal Server Error");
+      });
 };
 
 exports.deleteBid = async (req, res, next) => {
@@ -238,6 +255,124 @@ exports.deleteBid = async (req, res, next) => {
   } catch (err) {
     console.error("Error deleting bid:", err);
     res.status(500).send("Internal Server Error");
+  }
+};
+
+exports.getPostType = (req, res) => {
+  res.render("secondHand/post-type", {
+    pageTitle: "Choose Listing Type",
+    activePage: "secondHand"
+  });
+};
+
+exports.getDirectAddProduct = (req, res) => {
+  res.render("secondHand/direct-add-product", {
+    pageTitle: "Direct Selling",
+    activePage: "secondHand"
+  });
+};
+
+exports.postDirectAddProduct = async (req, res) => {
+  const { title, price, description, location, quantity } = req.body;
+  const imageUrls = req.files.map(file => file.path); 
+
+  try {
+    const product = new Product({
+      title,
+      imageUrls,
+      price: parseFloat(price),
+      min_price: parseFloat(price), // Set to same as price
+      description,
+      location,
+      quantity: parseInt(quantity),
+      seller: req.user._id,
+      saleType: 'direct',
+      startDate: new Date(), // Add current date
+      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
+    });
+
+    await product.save();
+    req.flash('success', 'Direct listing created successfully!');
+    res.redirect("/secondHand/buy");
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Error creating direct listing");
+    res.redirect("/secondHand/sell/direct-add-product");
+  }
+};
+
+exports.addToCart = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const productId = req.params.productId;
+    const quantityToAdd = parseInt(req.body.quantity) || 1;
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      req.flash("error", "Product not found.");
+      return res.redirect("/secondHand");
+    }
+
+    // Check available stock
+    const cart = await Cart.findOne({ user: userId });
+    let existingQuantity = 0;
+
+    if (cart) {
+      const existingItem = cart.items.find(
+        (item) =>
+          item.product.toString() === productId &&
+          item.productType === "SecondHand"
+      );
+      existingQuantity = existingItem ? existingItem.quantity : 0;
+    }
+
+    const totalRequested = existingQuantity + quantityToAdd;
+    if (totalRequested > product.quantity) {
+      req.flash(
+        "error",
+        // `Only ${product.quantity - existingQuantity} item(s) available.`
+        `Cannot add more than the quantity available.`
+      );
+      return res.redirect(req.get("Referrer") || "/secondHand");
+    }
+
+    // Add/Update cart
+    if (!cart) {
+      const newCart = new Cart({
+        user: userId,
+        items: [{
+          productType: "SecondHand",
+          productModel: "Product",
+          product: productId,
+          quantity: quantityToAdd,
+        }],
+      });
+      await newCart.save();
+    } else {
+      const itemIndex = cart.items.findIndex(
+        (item) =>
+          item.product.toString() === productId &&
+          item.productType === "SecondHand"
+      );
+
+      if (itemIndex >= 0) {
+        cart.items[itemIndex].quantity += quantityToAdd;
+      } else {
+        cart.items.push({
+          productType: "SecondHand",
+          productModel: "Product",
+          product: productId,
+          quantity: quantityToAdd,
+        });
+      }
+      await cart.save();
+    }
+
+    res.redirect("/cart");
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Failed to add to cart.");
+    res.redirect(req.get("Referrer") || "/");
   }
 };
 

@@ -1,67 +1,101 @@
-const RentalProduct = require('../models/rentalProduct');
+const RentalProduct = require("../models/rentalProduct");
 const RentalBooking = require("../models/rentalBooking");
 const Cart = require("../models/cartModel");
 
 // Add-to-Cart Controller Method
-exports.addToCart = (req, res, next) => {
-  const userId = req.user._id; // Provided by protectRoute middleware
-  const productId = req.params.productId;
-  const quantityToAdd = parseInt(req.body.quantity) || 1;
+exports.addToCart = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const productId = req.params.productId;
+    const { rentalStart, rentalEnd } = req.body;
 
-  // First, find the product to check available quantity
-  RentalProduct.findById(productId)
-    .then(product => {
-      if (!product) {
-        req.flash("error", "Product not found.");
-        return res.redirect(req.get("Referrer") || "/");
-      }
-      return Cart.findOne({ user: userId }).then(cart => {
-        return { product, cart };
+
+    // Validate dates
+    if (!rentalStart || !rentalEnd) {
+      req.flash("error", "Please select rental dates");
+      return res.redirect(`/rental/details/${productId}`);
+    }
+
+    const product = await RentalProduct.findById(productId);
+    if (!product) {
+      req.flash("error", "Product not found.");
+      return res.redirect("/rental/rent");
+    }
+
+    // Check product availability
+    if (product.quantity < 1) {
+      req.flash("error", "This product is currently out of stock");
+      return res.redirect(`/rental/details/${productId}`);
+    }
+
+    // Check existing cart quantity
+    const cart = await Cart.findOne({ user: userId });
+    let existingQuantity = 0;
+
+    if (cart) {
+      const existingItem = cart.items.find(
+        item => item.product.toString() === productId && 
+                item.productType === "Rental"
+      );
+      existingQuantity = existingItem ? existingItem.quantity : 0;
+    }
+
+    const totalRequested = existingQuantity + 1; // Since we're adding 1 item
+
+    if (totalRequested > product.quantity) {
+      req.flash(
+        "error",
+        // `Cannot add more items. Only ${product.quantity - existingQuantity} available in stock.`
+        `Cannot add more than the quantity available.`
+      );
+      return res.redirect(`/rental/details/${productId}`);
+    }
+
+    // Calculate rental duration
+    const startDate = new Date(rentalStart);
+    const endDate = new Date(rentalEnd);
+    const diffTime = Math.abs(endDate - startDate);
+    
+    let units;
+    switch(product.rate) {
+      case 'hour': units = diffTime / (1000 * 60 * 60); break;
+      case 'day': units = diffTime / (1000 * 60 * 60 * 24); break;
+      case 'week': units = diffTime / (1000 * 60 * 60 * 24 * 7); break;
+      case 'month': units = diffTime / (1000 * 60 * 60 * 24 * 30); break;
+    }
+    const calculatedPrice = Math.ceil(units) * product.price;
+
+    // Update cart logic
+    const updatedCart = cart || new Cart({ user: userId });
+    
+    const existingItemIndex = updatedCart.items.findIndex(
+      item => item.product.toString() === productId && 
+              item.productType === "Rental"
+    );
+
+    if (existingItemIndex > -1) {
+      updatedCart.items[existingItemIndex].quantity += 1;
+    } else {
+      updatedCart.items.push({
+        productType: "Rental",
+        productModel: "RentalProduct",
+        product: productId,
+        quantity: 1,
+        rentalStart: startDate,
+        rentalEnd: endDate,
+        calculatedPrice,
+        securityDeposit: product.securityDeposit
       });
-    })
-    .then(({ product, cart }) => {
-      // Check if adding quantity will exceed available stock
-      if (!cart) {
-        if (quantityToAdd > product.quantity) {
-          req.flash("error", "Cannot add more items than available.");
-          return res.redirect(req.get("Referrer") || "/");
-        }
-        const newCart = new Cart({
-          user: userId,
-          items: [{ product: productId, quantity: quantityToAdd }]
-        });
-        return newCart.save();
-      } else {
-        const itemIndex = cart.items.findIndex(
-          (item) => item.product.toString() === productId
-        );
-        if (itemIndex >= 0) {
-          const currentQuantity = cart.items[itemIndex].quantity;
-          if (currentQuantity + quantityToAdd > product.quantity) {
-            req.flash("error", "Cannot add more items than available.");
-            return res.redirect(req.get("Referrer") || "/");
-          }
-          cart.items[itemIndex].quantity += quantityToAdd;
-        } else {
-          if (quantityToAdd > product.quantity) {
-            req.flash("error", "Cannot add more items than available.");
-            return res.redirect(req.get("Referrer") || "/");
-          }
-          cart.items.push({ product: productId, quantity: quantityToAdd });
-        }
-        return cart.save();
-      }
-    })
-    .then(savedCart => {
-      // If flash message was set and redirection already happened, do nothing.
-      if (res.headersSent) return;
-      res.redirect("/rental/cart");
-    })
-    .catch(err => {
-      console.error(err);
-      req.flash("error", "Failed to add to cart due to a server error.");
-      res.redirect(req.get("Referrer") || "/");
-    });
+    }
+
+    await updatedCart.save();
+    res.redirect("/cart");
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Failed to add to cart.");
+    res.redirect("/rental/rent");
+  }
+
 };
 
 // Homepage for Renting
@@ -69,7 +103,7 @@ exports.getHome = (req, res, next) => {
   res.render("rentals/rentalHome", {
     pageTitle: "Renting",
     path: "/rental",
-    activePage: "rental"
+    activePage: "rental",
   });
 };
 
@@ -78,68 +112,77 @@ exports.getAddProduct = (req, res, next) => {
   res.render("rentals/post-product", {
     pageTitle: "Post Product",
     path: "/rental/post",
-    activePage: "rental"
+    activePage: "rental",
   });
 };
 
-// Saving rental item in the database (Including Quantity)
 exports.postAddProduct = (req, res, next) => {
-  const { title, imageUrl, price, description, location, rate, quantity } = req.body;
+  const { title, price, description, location, rate, quantity, securityDeposit  } = req.body;
 
-  // Validate if all required fields are filled
-  if (!title || !imageUrl || !price || !description || !location || !rate || !quantity) {
+  if (!req.files || req.files.length === 0) {
+    console.log("No files uploaded!");
+    return res.status(400).send("At least one image is required.");
+  }
+
+  const imageUrls = req.files.map(file => file.path); // Get Cloudinary image URLs
+ if (!title || !imageUrls || !price || !description || !location || !rate || !quantity || !securityDeposit) {
     return res.status(400).send('All fields are required!');
   }
 
+
   const rentalProduct = new RentalProduct({
     title: title,
-    imageUrl: imageUrl,
+    imageUrls: imageUrls,
     price: price,
     description: description,
     location: location,
     rate: rate,  // Save rate directly as per the form
-    quantity: quantity,  // Save quantity directly
+    quantity: quantity,
+    securityDeposit: securityDeposit,  // Save quantity directly
+
   });
 
   rentalProduct
     .save()
-    .then((result) => {
-      console.log("Rental Product Posted!");
-      res.redirect("/rental/rent");  // Redirect to rentals page after posting
+    .then(() => {
+      console.log("Rental Product Posted Successfully!");
+      res.redirect("/rental/rent");
     })
     .catch((err) => {
-      console.log(err);
-      res.status(500).send("An error occurred while saving the rental product.");
+      console.error("Error saving product:", err);
+      res
+        .status(500)
+        .send("An error occurred while saving the rental product.");
     });
 };
 
 // Get all rental items (with search)
 exports.getRentItems = (req, res, next) => {
-  const searchQuery = req.query.search || '';
+  const searchQuery = req.query.search || "";
   const query = {};
 
   if (searchQuery) {
-      query.$or = [
-          { title: { $regex: searchQuery, $options: 'i' } },
-          { description: { $regex: searchQuery, $options: 'i' } },
-          { location: { $regex: searchQuery, $options: 'i' } }
-      ];
+    query.$or = [
+      { title: { $regex: searchQuery, $options: "i" } },
+      { description: { $regex: searchQuery, $options: "i" } },
+      { location: { $regex: searchQuery, $options: "i" } },
+    ];
   }
 
   RentalProduct.find(query)
-      .then((products) => {
-          res.render("rentals/rent-items", {
-              pageTitle: "Available Rentals",
-              path: "/rental/rent",
-              products: products,
-              searchQuery: searchQuery,
-              activePage: "rental"
-          });
-      })
-      .catch((err) => {
-          console.log(err);
-          res.status(500).send("An error occurred while fetching rental items.");
+    .then((products) => {
+      res.render("rentals/rent-items", {
+        pageTitle: "Available Rentals",
+        path: "/rental/rent",
+        products: products,
+        searchQuery: searchQuery,
+        activePage: "rental",
       });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).send("An error occurred while fetching rental items.");
+    });
 };
 
 // Controller method to handle the buying action and decrementing quantity
@@ -152,14 +195,16 @@ exports.buyProduct = (req, res, next) => {
       if (product) {
         // If the product has sufficient stock, decrement the quantity
         if (product.quantity > 0) {
-          product.quantity -= 1;  // Decrement the quantity by 1
-          return product.save();   // Save the updated product data to the DB
+          product.quantity -= 1; // Decrement the quantity by 1
+          return product.save(); // Save the updated product data to the DB
         } else {
-          res.status(400).json({ success: false, message: 'Product is out of stock' });
+          res
+            .status(400)
+            .json({ success: false, message: "Product is out of stock" });
           return null;
         }
       } else {
-        res.status(404).json({ success: false, message: 'Product not found' });
+        res.status(404).json({ success: false, message: "Product not found" });
       }
     })
     .then((updatedProduct) => {
@@ -170,7 +215,12 @@ exports.buyProduct = (req, res, next) => {
     })
     .catch((err) => {
       console.error(err);
-      res.status(500).json({ success: false, message: 'An error occurred while processing the purchase' });
+      res
+        .status(500)
+        .json({
+          success: false,
+          message: "An error occurred while processing the purchase",
+        });
     });
 };
 
@@ -179,15 +229,17 @@ exports.getProductDetails = (req, res, next) => {
   let fetchedProduct;
 
   RentalProduct.findById(productId)
-    .then(product => {
+    .then((product) => {
       if (!product) {
         return res.status(404).send("Product not found");
       }
+      console.log(product);
+      
       fetchedProduct = product;
       // Find an active booking for this product
       return RentalBooking.findOne({ product: productId, status: "active" });
     })
-    .then(booking => {
+    .then((booking) => {
       if (booking) {
         // Attach the booking information dynamically
         fetchedProduct.currentBooking = booking;
@@ -195,10 +247,10 @@ exports.getProductDetails = (req, res, next) => {
       res.render("rentals/product-details", {
         pageTitle: fetchedProduct.title,
         product: fetchedProduct,
-        activePage: "rental"
+        activePage: "rental",
       });
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
       res.status(500).send("Error fetching product details");
     });
@@ -265,15 +317,14 @@ exports.rentProduct = (req, res, next) => {
     rentalEnd: rentalEnd,
   });
 
-  booking.save()
+  booking
+    .save()
     .then(() => {
       // Optionally, update the product's available quantity or status
       res.redirect("/rental/cart"); // or redirect to a confirmation page
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
       res.status(500).send("Error processing your rental.");
     });
 };
-
-

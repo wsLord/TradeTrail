@@ -25,14 +25,8 @@
             <a href="/secondHand" onclick="return showWarning()">Second-Hand Buying</a>
         </li>
         <li class="<%= typeof activePage !== 'undefined' && activePage === 'cart' ? 'active' : '' %>">
-            <a href="/rental/cart">Rental Cart</a>
-        </li>
-        <li class="<%= typeof activePage !== 'undefined' && activePage === 'subCart' ? 'active' : '' %>">
-            <a href="/subscription/cart">Subscription Cart</a>
-        </li>
-        <li class="<%= typeof activePage !== 'undefined' && activePage === 'secondHandCart' ? 'active' : '' %>">
-          <a href="/secondHand/cart">Second-Hand Cart</a>
-        </li>        
+          <a href="/cart">Cart</a>
+        </li>   
         <li class="<%= typeof activePage !== 'undefined' && activePage === 'profile' ? 'active' : '' %>">
             <a href="/profile" id="profileLink" data-toggle="popover">Profile</a>
         </li>

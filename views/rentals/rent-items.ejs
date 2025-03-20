@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/forms.css">
   <link rel="stylesheet" href="/css/rentalStyles.css">
+
 </head>
 <body>
   <!-- Include Navbar -->
@@ -15,7 +16,7 @@
   </div>
 
   <main>
-    <h1>Rental Products</h1>
+    <h1>Rental Products</h1></br>
     <form action="/rental/rent" method="GET" class="search-form">
       <input 
         type="text" 
@@ -23,17 +24,31 @@
         placeholder="Search products by title, description, or location..."
         value="<%= searchQuery || '' %>"
       >
-      <button type="submit">Search</button>
+      <button type="submit">Search</button> 
     </form>
+    <button type="button" onclick="window.location.href='/rental/post'">POST AN ITEM !</button>
     
     <% if (products && products.length > 0) { %>
       <div class="rental-list">
-        <% products.forEach(product => { %>
+        <% products.forEach((product, index) => { %>
           <div class="rental-item">
             <div class="product-card">
-              <div class="card__image">
-                <img src="<%= product.imageUrl %>" alt="<%= product.title %>">
+              
+              <!-- Image Slider Container -->
+              <div class="image-slider-container">
+                <button class="prev" onclick="prevImage(<%= index %>)">&#10094;</button>
+                <div class="image-slider" id="slider-<%= index %>">
+                  <% if (product.imageUrls && product.imageUrls.length > 0) { %>
+                    <% product.imageUrls.forEach(image => { %>
+                      <img src="<%= image %>" alt="<%= product.title %>">
+                    <% }); %>
+                  <% } else { %>
+                    <img src="/images/default-placeholder.png" alt="No Image Available">
+                  <% } %>
+                </div>
+                <button class="next" onclick="nextImage(<%= index %>)">&#10095;</button>
               </div>
+
               <div class="product-info">
                 <h3><%= product.title %></h3>
                 <p class="price">Price: <%= product.price %> per <%= product.rate %></p>
@@ -45,6 +60,7 @@
                   </form>
                 </div>
               </div>
+
             </div>
           </div>
         <% }); %>
@@ -53,5 +69,31 @@
       <h1>No Products Found!</h1>
     <% } %>
   </main>
+
+  <script>
+    function nextImage(index) {
+      let slider = document.getElementById(`slider-${index}`);
+      let images = slider.getElementsByTagName("img");
+      let totalImages = images.length;
+      let currentIndex = parseInt(slider.dataset.index || "0");
+
+      if (currentIndex < totalImages - 1) {
+        currentIndex++;
+        slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+        slider.dataset.index = currentIndex;
+      }
+    }
+
+    function prevImage(index) {
+      let slider = document.getElementById(`slider-${index}`);
+      let currentIndex = parseInt(slider.dataset.index || "0");
+
+      if (currentIndex > 0) {
+        currentIndex--;
+        slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+        slider.dataset.index = currentIndex;
+      }
+    }
+  </script>
 </body>
 </html>

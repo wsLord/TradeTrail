@@ -64,6 +64,8 @@
     .verify-btn i {
         font-size: 1.1em;
     }
+
+
   </style>
 </head>
 <body>
@@ -71,7 +73,7 @@
     <%- include('../common/navigation.ejs') %>
   </div>
   <main>
-    <h1>Subscriptions</h1>
+    <h1>Subscriptions</h1></br>
     <form action="/subscription/buy" method="GET" class="search-form">
       <input 
         type="text" 
@@ -81,6 +83,7 @@
       >
       <button type="submit">Search</button>
     </form>
+    <button type="button" onclick="window.location.href='/subscription/sell'">POST A SUBSCRIPTION !</button>
     
     <% if (prods.length > 0) { %>
       <div class="rental-list">
@@ -108,14 +111,22 @@
                 
                 <div class="price-group">
                   <p class="price">Actual Price: ₹<%= product.price %></p>
-                  <p class="min-price">Auction Starts At: ₹<%= product.min_price %></p>
+                  <% if (product.saleType === 'auction') { %>
+                      <p class="min-price">Auction Starts At: ₹<%= product.min_price %></p>
+                  <% } %>
               </div>
                 <p class="description"><%= product.description %></p>
                 <% if (product.seller && product.seller.fullName) { %>
                   <p class="seller"><b>Seller:</b> <%= product.seller.fullName %></p>
                 <% } %>
                 <div class="button-group vertical">
-                  <a href="/subscription/buy/<%= product._id %>" class="btn auction-btn">Auction</a>
+                  <% if (product.saleType === 'direct') { %>
+                    <form action="/subscription/add-to-cart/<%= product._id %>" method="POST">
+                      <button class="add-to-cart-button">Add to Cart</button>
+                    </form>
+                  <% } else { %>
+                    <a href="/subscription/buy/<%= product._id %>" class="btn auction-btn">Auction</a>
+                  <% } %>
                 </div>
               </div>
             </div>
