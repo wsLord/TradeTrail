@@ -50,6 +50,25 @@
       padding-left: 20px;
       border-left: 3px solid #007bff;
     }
+    .section-checkout {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      text-align: right;
+    }
+    .checkout-section-btn {
+      background-color: #2f9146;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .checkout-section-btn:hover {
+      background-color: #156225;
+    }
   </style>
 </head>
 
@@ -66,12 +85,12 @@
       Rental: cart.items.filter(item => item.productType === 'Rental'),
       Subscription: cart.items.filter(item => item.productType === 'Subscription'),
       SecondHand: cart.items.filter(item => item.productType === 'SecondHand')
-    };
-    let grandTotal = 0;
-    let depositTotal = 0;
-    %>
+    }; %>
 
-    <% Object.entries(sections).forEach(([sectionName, items]) => { %>
+    <% Object.entries(sections).forEach(([sectionName, items]) => { 
+      let sectionTotal = 0;
+      let sectionDeposit = 0;
+    %>
       <div class="cart-section">
         <div class="section-header" onclick="toggleSection('<%= sectionName %>')">
           <h2><%= sectionName %> (<%= items.length %>)</h2>
@@ -106,12 +125,12 @@
                   if (sectionName === 'Rental') {
                     totalPrice = item.calculatedPrice * item.quantity;
                     itemDeposit = item.securityDeposit;
-                    depositTotal += itemDeposit;
+                    sectionDeposit += itemDeposit;
                   } else {
                     totalPrice = item.product.price * item.quantity;
                   }
                   
-                  grandTotal += totalPrice;
+                  sectionTotal += totalPrice;
                 %>
                   <tr class="cart-item">
                     <td>
@@ -145,7 +164,6 @@
                           <% if (item.product.rate === 'day' && (item.diffDays || 0) > 1) { %>
                               × <%= item.diffDays || 1 %> days
                           <% } %>
-                          
                         </div>
                       </td>
                     <% } else if (sectionName === 'Subscription') { %>
@@ -153,10 +171,8 @@
                     <% } %>
 
                     <td>
-                      
-                        ₹<%= sectionName === 'Rental' ? (item.calculatedPrice || 0).toFixed(2) : 
-(item.product?.price || 0).toFixed(2) %>
-
+                      ₹<%= sectionName === 'Rental' ? (item.calculatedPrice || 0).toFixed(2) : 
+                        (item.product?.price || 0).toFixed(2) %>
                       <% if (sectionName === 'Rental') { %>
                         <div class="security-deposit">
                           + ₹<%= item.securityDeposit %> deposit
@@ -181,9 +197,7 @@
                       <% if (sectionName === 'Rental') { %>
                         <div class="price-breakdown">
                           (₹<%= totalPrice.toFixed(2) %> + 
-                          
                           ₹<%= (itemDeposit || 0).toFixed(2) %> deposit)
-
                         </div>
                       <% } %>
                     </td>
@@ -198,21 +212,19 @@
                 <% }); %>
               </tbody>
             </table>
+
+            <!-- Section Checkout Button -->
+            <div class="section-checkout">
+              <button class="checkout-section-btn" 
+                      data-section="<%= sectionName %>"
+                      data-total="<%= (sectionTotal + (sectionName === 'Rental' ? sectionDeposit : 0)).toFixed(2) %>">
+                Checkout <%= sectionName %> - ₹<%= (sectionTotal + (sectionName === 'Rental' ? sectionDeposit : 0)).toFixed(2) %>
+              </button>
+            </div>
           <% } %>
         </div>
       </div>
     <% }); %>
-
-    <% if (cart.items.length > 0) { %>
-      <div class="cart-total">
-        <% if (depositTotal > 0) { %>
-          <h4>Total Security Deposits: ₹<%= depositTotal.toFixed(2) %></h4>
-        <% } %>
-        <h3>Grand Total: ₹<%= grandTotal.toFixed(2) %></h3>
-      </div>
-      <div style="clear: both;"></div>
-      <button class="checkout-button">Proceed to Checkout</button>
-    <% } %>
   </main>
 
   <script>
@@ -229,6 +241,58 @@
         const sectionName = section.querySelector('h2').textContent.split(' ')[0];
         toggleSection(sectionName);
       }
+    });
+
+    // Razorpay Checkout Handlers
+    document.querySelectorAll('.checkout-section-btn').forEach(button => {
+      button.addEventListener('click', async (e) => {
+        const section = button.dataset.section;
+        const amount = button.dataset.total;
+        
+        try {
+          const response = await fetch(`/payment/${section.toLowerCase()}/checkout`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ amount })
+          });
+
+          const { success, order } = await response.json();
+          
+          if (success) {
+            const options = {
+              key: '<%= process.env.RAZORPAY_KEY_ID %>',
+              amount: order.amount,
+              currency: "INR",
+              name: "TradeTrail",
+              description: `${section} Payment`,
+              order_id: order.id,
+              handler: async function(response) {
+                const verificationResponse = await fetch(`/payment/${section.toLowerCase()}/verify`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                  },
+                  body: JSON.stringify(response)
+                });
+
+                const { success: verificationSuccess } = await verificationResponse.json();
+                if (verificationSuccess) {
+                  window.location.href = `/payment/success/${section.toLowerCase()}`;
+                }
+              }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+          }
+        } catch (error) {
+          console.error('Checkout error:', error);
+        }
+      });
     });
   </script>
 </body>
