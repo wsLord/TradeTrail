@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="/css/forms.css">
   <link rel="stylesheet" href="/css/navigation.css">
   <link rel="stylesheet" href="/css/auction.css">
+  <link rel="stylesheet" href="/css/chatbot.css">
   <style>
     
 /* Message types */
@@ -192,6 +193,7 @@
 </head>
 <body>
   <%- include('../common/navigation.ejs') %>
+  <%- include('../common/chatbot.ejs') %>
   <main>
     <!-- Flash messages block -->
     <% if (messages.error && messages.error.length > 0) { %>

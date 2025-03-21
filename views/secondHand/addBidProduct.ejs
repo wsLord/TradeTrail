@@ -9,11 +9,13 @@
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/forms.css">
     <link rel="stylesheet" href="/css/product.css">
+    <link rel="stylesheet" href="/css/chatbot.css">
     <link rel="stylesheet" href="/css/navigation.css">
 </head>
 
 <body>
     <%- include('../common/navigation.ejs') %>
+    <%- include('../common/chatbot.ejs') %>
 
     <main>
         <form class="product-form" action="/secondHand/buy/<%= productId %>/add-bid-product" method="POST">
