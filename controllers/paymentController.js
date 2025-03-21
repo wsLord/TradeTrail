@@ -10,23 +10,28 @@ const razorpayInstance = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
+console.log(process.env.RAZORPAY_KEY_ID);
 
 exports.makePayment = async (req, res) => {
+  console.log('hit');
   try {
     const { amount } = req.body; // Amount from the frontend
+    console.log("te" , req.body);
 
     if (!amount || amount <= 0) {
       return res.status(400).json({ success: false, message: "Invalid amount" });
     }
 
     const options = {
-      amount: amount * 100, // Convert to paise (₹1 = 100 paise)
+      amount: amount*100 , // Convert to paise (₹1 = 100 paise)
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
       payment_capture: 1,
     };
+    console.log(options);
 
     const order = await razorpayInstance.orders.create(options);
+    console.log("order", order);
 
     res.json({
       success: true,
@@ -35,12 +40,13 @@ exports.makePayment = async (req, res) => {
         amount: order.amount,
         currency: order.currency,
         name: "TradeTrail",
-        description: "Payment for Rental Items",
+        description: "Payment",
         order_id: order.id,
         theme: { color: "#4F7942" },
         prefill: { email: "customer@example.com", contact: "" },
       },
     });
+
   } catch (error) {
     console.error("Error in makePayment:", error);
     res.status(500).json({ success: false, message: "Failed to create order" });
@@ -48,44 +54,46 @@ exports.makePayment = async (req, res) => {
 };
 
 exports.getPaymentPage = (req, res) => {
-  res.render("rentals/rentalCart", {
+  res.render("cart/unifiedCart", {
     razorpayKeyId: process.env.RAZORPAY_KEY_ID, // Using your test key directly
   });
 };
 
-exports.createOrder = async (req, res) => {
-  try {
-    const { amount } = req.body; // Amount in INR (e.g., 100.50)
+// exports.createOrder = async (req, res) => {
+//   console.log('hit')
+//   try {
+//     const { amount } = req.body; // Amount in INR (e.g., 100.50)
+//     console.log(amount);
+//     // Convert to paise (smallest currency unit) by multiplying by 100
+//     const amountInPaise = Math.round(amount * 100);
 
-    // Convert to paise (smallest currency unit) by multiplying by 100
-    const amountInPaise = Math.round(amount * 100);
+//     const options = {
+//       amount: amountInPaise, // Already in paise
+//       currency: "INR",
+//       receipt: `receipt_${Date.now()}`,
+//     };
 
-    const options = {
-      amount: amountInPaise, // Already in paise
-      currency: "INR",
-      receipt: `receipt_${Date.now()}`,
-    };
+//     console.log("Creating order with options:", options);
+//     const order = await razorpayInstance.orders.create(options);
+//     console.log("Order created:", order);
 
-    console.log("Creating order with options:", options);
-    const order = await razorpayInstance.orders.create(options);
-    console.log("Order created:", order);
-
-    res.status(200).json({
-      success: true,
-      id: order.id,
-      amount: order.amount,
-      currency: order.currency,
-    });
-  } catch (error) {
-    console.error("Error creating Razorpay order:", error);
-    res.status(500).json({
-      success: false,
-      message: "Order creation failed",
-      error: error.message,
-    });
-  }
-};
+//     res.status(200).json({
+//       success: true,
+//       id: order.id,
+//       amount: order.amount,
+//       currency: order.currency,
+//     });
+//   } catch (error) {
+//     console.error("Error creating Razorpay order:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Order creation failed",
+//       error: error.message,
+//     });
+//   }
+// };
 exports.verifyPayment = async (req, res) => {
+  console.log('verify');
   try {
     console.log("Received verification request:", req.body);
 
@@ -122,7 +130,7 @@ exports.verifyPayment = async (req, res) => {
     console.log("Saving payment:", newPayment);
     await newPayment.save();
 
-    return res.json({ success: true, redirectUrl: "/rental/api/payment/payment-success" });
+    return res.json({ success: true, redirectUrl: "/api/payment/payment-success" });
   } catch (error) {
     console.error("Error verifying payment:", error);
     return res.status(500).json({ success: false, message: "Payment verification failed" });
@@ -132,5 +140,5 @@ exports.verifyPayment = async (req, res) => {
 
 
 exports.paymentSuccess = (req, res) => {
-  res.render("rentals/success");
+  res.render("cart/success");
 };

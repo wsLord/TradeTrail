@@ -117,7 +117,7 @@ app.use("/subscription", subscriptionRoutes);
 app.use('/cart', cartRoutes);
 
 
-app.use("/rental/api/payment", paymentRoutes);
+app.use("/api/payment", paymentRoutes);
 // app.use("/rental/cart", rentalCartRoutes);
 // app.use("/subscription/cart", subscriptionCartRoutes);
 // app.use("/secondHand/cart", secondHandCartRoutes);
