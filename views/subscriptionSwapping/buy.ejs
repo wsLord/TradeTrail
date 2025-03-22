@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="/css/forms.css">
   <link rel="stylesheet" href="/css/rentalStyles.css">
   <link rel="stylesheet" href="/css/navigation.css">
+  <link rel="icon" type="image/png" href="/assets/logo2.png">
+
   <style>
     /* Verification badges */
     .verified-badge {
@@ -83,11 +85,22 @@
       >
       <button type="submit">Search</button>
     </form>
-    <button type="button" onclick="window.location.href='/subscription/sell'">POST A SUBSCRIPTION !</button>
+    <!-- <button type="button" onclick="window.location.href='/subscription/sell'">POST A SUBSCRIPTION !</button> -->
     
     <% if (prods.length > 0) { %>
       <div class="rental-list">
+
+        <div class="rental-item">
+          <a href="/subscription/sell" class="post-button">
+            <div class="circle">
+                +
+            </div>
+            <span class="post-text">POST A PLATFORM</span>
+        </a>
+        </div>
+
         <% for (let product of prods) { %>
+          
           <div class="rental-item">
             <div class="product-card">
               <div class="card__image">
