@@ -10,9 +10,11 @@ const axios = require("axios");
 
 // Initialize Razorpay with your test keys
 const razorpayInstance = new Razorpay({
+  
   key_id: process.env.RAZORPAY_KEY_ID, // Using your test key directly
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
+// console.log(process.env.RAZORPAY_KEY_ID);
 
 exports.makePayment = async (req, res) => {
   try {

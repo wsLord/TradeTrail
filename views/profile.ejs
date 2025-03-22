@@ -292,6 +292,24 @@
             </div>
         </div>
 
+        <div class="auction-products-card">
+            <h3>Your Auction Products</h3>
+            <% if (auctionProducts.length > 0) { %>
+              <ul>
+                <% auctionProducts.forEach(product => { %>
+                  <li>
+                    <a href="/profile/auction/<%= product._id %>" style="text-decoration: none; color: #007bff;">
+                      <h4><%= product.title %></h4>
+                    </a>
+                  </li>
+                <% }); %>
+              </ul>
+            <% } else { %>
+              <p>You haven't posted any auction products yet.</p>
+            <% } %>
+          </div>          
+          
+
         <div class="badge-card">
             <p style="margin: 5px; font-size: 20px; color: #2c3e50;"><strong>Badges Earned</strong></p>
             <div class="badges-container">
