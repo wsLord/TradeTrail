@@ -17,40 +17,91 @@ function toggleChat() {
     chatButton.setAttribute('aria-expanded', String(!isVisible));
 }
 
-function sendMessage() {
-    const userInput = document.getElementById('userInput');
-    const chatMessages = document.getElementById('chatMessages');
-    const message = userInput.value.toLowerCase();
+async function sendMessage() {
+  const userInput = document.getElementById('userInput');
+  const chatMessages = document.getElementById('chatMessages');
+  const sendButton = document.querySelector('.chat-input button'); // Add this line
+  const message = userInput.value.trim();
 
-    // Add user message
-    chatMessages.innerHTML += `
-        <div class="message user-message">
-            ${userInput.value}
-        </div>
-    `;
+  if(!message) return;
 
-    // Find response
-    let response = predefinedResponses.default;
-    for (const [keyword, reply] of Object.entries(predefinedResponses)) {
-        if (message.includes(keyword)) {
-            response = reply;
-            break;
-        }
-    }
+  // Clear input immediately
+  userInput.value = '';
+  
+  // Disable input and button during processing
+  userInput.disabled = true;
+  sendButton.disabled = true;
 
-    // Add bot response
-    setTimeout(() => {
-        chatMessages.innerHTML += `
-            <div class="message bot-message">
-                ${response}
-            </div>
-        `;
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }, 500);
+  // Add user message
+  chatMessages.innerHTML += `
+      <div class="message user-message">
+          ${message}
+      </div>
+  `;
 
-    // Clear input
-    userInput.value = '';
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+  // Show loading indicator
+  const loadingMessage = document.getElementById('loadingTemplate').cloneNode(true);
+  loadingMessage.id = '';
+  loadingMessage.style.display = 'flex';
+  chatMessages.appendChild(loadingMessage);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+
+  try {
+      const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message })
+      });
+
+      if(!response.ok) throw new Error('Network response was not ok');
+
+      const data = await response.json();
+
+      // Remove loading indicator first
+      loadingMessage.remove();
+
+      // Create bot message element
+      const botMessage = document.createElement('div');
+      botMessage.className = 'message bot-message';
+      botMessage.innerHTML = data.response;
+
+      if(data.redirect) {
+          // Add countdown elements
+          const countdownWrapper = document.createElement('small');
+          countdownWrapper.innerHTML = 'Redirecting in <span class="countdown-number">5</span> seconds...';
+          botMessage.appendChild(document.createElement('br'));
+          botMessage.appendChild(countdownWrapper);
+
+          // Start countdown
+          let seconds = 7;
+          const countdownElement = botMessage.querySelector('.countdown-number');
+          const countdownInterval = setInterval(() => {
+              seconds--;
+              countdownElement.textContent = seconds;
+              
+              if(seconds <= 0) {
+                  clearInterval(countdownInterval);
+                  window.location.href = data.redirect;
+              }
+          }, 1000);
+      }
+
+      chatMessages.appendChild(botMessage);
+
+  } catch (error) {
+      console.error('Fetch error:', error);
+      chatMessages.innerHTML += `
+          <div class="message bot-message error">
+              Sorry, I'm having trouble connecting. Please try again later.
+          </div>
+      `;
+  } finally {
+      // Re-enable input and button
+      userInput.disabled = false;
+      sendButton.disabled = false;
+      userInput.focus(); // Add this to regain focus
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
 }
 
 // Handle Enter key

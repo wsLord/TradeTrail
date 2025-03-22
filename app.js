@@ -8,6 +8,36 @@ const session = require("express-session");
 const flash = require("connect-flash");
 const multer = require("multer");
 const bodyParser = require("body-parser");
+const { default: ollama } = require('ollama');
+
+// Predefined responses with redirect paths
+const predefinedResponses = {
+  "hello": {
+      text: "Hello! How can I assist you today?",
+      path: null
+  },
+  "rent": {
+      text: "You can rent items by visiting our rental section. Check out the 'Renting Items' feature!",
+      path: "/rental"
+  },
+  // "subscription": {
+  //     text: "To swap subscriptions, go to the 'Subscription Swapping' section. Need more help?",
+  //     path: "/subscription"
+  // },
+  "contact": {
+      text: "Our contact details are available in the Contact Us section below.",
+      path: "/contact"
+  },
+  "buy": {
+      text: "For second-hand items, please visit the 'Second-Hand Buying' section.",
+      path: "/secondHand"
+  },
+  "default": {
+      text: "I'm here to help with questions about renting, subscriptions, and second-hand items. Feel free to ask!",
+      path: null
+  }
+};
+
 
 
 // Connect to MongoDB
@@ -93,6 +123,83 @@ app.use("/assets", express.static(path.join(__dirname, "assets")));
 // Set up EJS as the view engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
+
+
+
+// Add new chat endpoint before routes
+app.post('/api/chat', async (req, res) => {
+  try {
+      const { message } = req.body;
+      const lowerMessage = message.toLowerCase();
+
+      // Check predefined responses first
+      const matchedKey = Object.keys(predefinedResponses).find(key => 
+          key !== 'default' && lowerMessage.includes(key)
+      );
+
+      if(matchedKey) {
+          return res.json({
+              response: predefinedResponses[matchedKey].text,
+              redirect: predefinedResponses[matchedKey].path
+          });
+      }
+
+      // Use Ollama for other queries
+      // const response = await ollama.chat({
+      //     model: 'mistral',
+      //     messages: [{
+      //         role: 'user',
+      //         content: `Respond as a concise shopping assistant. Focus on: 
+      //         - Item rentals
+      //         - Subscription swapping
+      //         - Second-hand goods
+      //         Keep responses under 2 sentences. Query: "${message}"`
+      //     }]
+      // });
+
+      const response = await ollama.chat({
+        model: 'mistral',
+        messages: [{
+          role: 'user',
+          content: `Act as an official concierge for our rental, subscription and second hand platform specializing in:
+          - OTT platform direct selling and auction based selling (Netflix, Disney+ Hotstar, Amazon Prime)
+          - second hand items direct selling and auction based selling
+          -renting items with security deposit
+          - Credential-verified account sharing for subscription
+          - Auction-style bidding
+          - Fixed-price purchase
+          - Secure subscription transfers
+      
+          Response Requirements:
+          1. Highlight either auction bids or fixed-price options
+          2. Tell about if the asked subscription is avaialable or not
+          3. Mention remaining duration for auction based (2 weeks left/New listing)
+          4. Reference our secure escrow system
+          5. Suggest complementary subscriptions ("Pair with Prime Video for complete entertainment")
+      
+          Example Response:
+          "For Disney+ Hotstar Premium (3 screens, 4K), we have:
+          - Auction: 3 bids, time left for the auction
+          - Direct rental: ₹299/week or as defined by the seller"
+      
+          Current Query: "${message}"
+          
+          [First confirm screen count needed, then suggest duration options]`
+        }]
+      });
+
+      res.json({
+          response: response.message.content,
+          redirect: null
+      });
+
+  } catch (error) {
+      console.error('Chat error:', error);
+      res.status(500).json({ 
+          error: "Our chat service is currently unavailable. Please try again later." 
+      });
+  }
+});
 
 // ✅ Register Routes
 app.use("/api/auth", authRoutes); // ✅ FIX: Include auth routes

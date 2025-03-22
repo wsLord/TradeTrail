@@ -319,22 +319,30 @@ exports.postVerifyCredentials = async (req, res) => {
 
     try {
         if (action === 'verify') {
-            // Add actual verification logic here
             if (!email || !password) {
                 req.flash('error', 'Please fill all credentials');
                 return res.redirect('back');
             }
             
-        const product = req.session.tempProduct ? 
-            new Ott({ ...productData, credentialsVerified: true, verificationPending: false }) :
-            await Ott.findByIdAndUpdate(
-                productData._id, 
-                { credentialsVerified: true, verificationPending: false },
-                { new: true }
-        );
-        await product.save();
+            const product = req.session.tempProduct ? 
+                new Ott({ ...productData, credentialsVerified: true, verificationPending: false }) :
+                await Ott.findByIdAndUpdate(
+                    productData._id, 
+                    { credentialsVerified: true, verificationPending: false },
+                    { new: true }
+                );
+            await product.save();
             delete req.session.tempProduct;
-            req.flash('success', 'Credentials verified successfully!');
+            
+            return res.render("subscriptionSwapping/waiting", {
+                pageTitle: "Verifying Credentials",
+                redirectUrl: "/subscription/buy",
+                waitTime: 30000,
+                messages: {
+                    success: 'Please wait, verifying your credentials',
+                    info: 'It may take some time...'
+                }
+            });
         } 
         else if (action === 'skip') {
             if (req.session.tempProduct) {
@@ -345,14 +353,14 @@ exports.postVerifyCredentials = async (req, res) => {
                 await product.save();
                 delete req.session.tempProduct;
             }
-            req.flash('info', 'You can verify credentials later');
+            req.flash('info', 'Verification skipped - you can verify later');
+            return res.redirect("/subscription/buy");
         }
 
-        res.redirect("/subscription/buy");
     } catch (err) {
         console.error(err);
-        req.flash("error", "Error processing request");
-        res.redirect("/subscription/sell");
+        req.flash('error', 'Error processing verification request');
+        return res.redirect("/subscription/sell");
     }
 };
 
@@ -402,36 +410,50 @@ exports.postDirectVerifyCredentials = async (req, res) => {
     const productData = req.session.tempDirectProduct;
   
     try {
-      if (!productData) {
-        req.flash('error', 'Session expired. Please start over.');
-        return res.redirect('/subscription/sell/direct-add-product');
-      }
-  
-      if (action === 'verify') {
-        if (!email || !password) {
-          req.flash('error', 'Please fill all credentials');
-          return res.redirect('back');
+        if (!productData) {
+            req.flash('error', 'Session expired. Please start over.');
+            return res.redirect('/subscription/sell/direct-add-product');
         }
-        // Add actual verification logic here
-        productData.credentialsVerified = true;
-        productData.verificationPending = false;
-      } else {
-        productData.credentialsVerified = false;
-        productData.verificationPending = true;
-      }
-  
-      const product = new Ott(productData);
-      await product.save();
-      delete req.session.tempDirectProduct;
-      
-      req.flash('success', 'Direct listing created successfully!');
-      res.redirect("/subscription/buy");
+
+        if (action === 'verify') {
+            if (!email || !password) {
+                req.flash('error', 'Please fill all credentials');
+                return res.redirect('back');
+            }
+            productData.credentialsVerified = true;
+            productData.verificationPending = false;
+
+            const product = new Ott(productData);
+            await product.save();
+            delete req.session.tempDirectProduct;
+            
+            return res.render("subscriptionSwapping/waiting", {
+                pageTitle: "Processing Direct Listing",
+                redirectUrl: "/subscription/buy",
+                waitTime: 30000,
+                messages: {
+                    success: 'Please wait, verifying your credentials',
+                    info: 'It may take some time...'
+                }
+            });
+        } else {
+            productData.credentialsVerified = false;
+            productData.verificationPending = true;
+            
+            const product = new Ott(productData);
+            await product.save();
+            delete req.session.tempDirectProduct;
+            
+            req.flash('info', 'Direct listing created without verification');
+            return res.redirect("/subscription/buy");
+        }
+
     } catch (err) {
-      console.error(err);
-      req.flash("error", "Error creating direct listing");
-      res.redirect("/subscription/sell/direct-add-product");
+        console.error(err);
+        req.flash('error', 'Error creating direct listing');
+        return res.redirect("/subscription/sell/direct-add-product");
     }
-  };
+};
 
   exports.getAddProduct = (req, res) => {
     res.render("subscriptionSwapping/add-product", {
