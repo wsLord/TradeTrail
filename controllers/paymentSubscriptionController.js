@@ -18,7 +18,7 @@ exports.makePayment = async (req, res) => {
   try {
     console.log("Received request body:", req.body); // Debug request body
     const { amount } = req.body;
-
+    console.log(amount)
     if (!amount || amount <= 0) {
       return res
         .status(400)
@@ -54,7 +54,7 @@ exports.makePayment = async (req, res) => {
 };
 
 exports.getPaymentPage = (req, res) => {
-  res.render("secondHand/auction", {
+  res.render("subscriptionSwapping/auction", {
     razorpayKeyId: process.env.RAZORPAY_KEY_ID, // Using your test key directly
   });
 };
@@ -142,7 +142,7 @@ exports.verifyPayment = async (req, res) => {
 
     return res.json({
       success: true,
-      redirectUrl: "/secondHand",
+      redirectUrl: "/subscription",
       // paymentId: razorpay_payment_id,
     });
   } catch (error) {
@@ -154,7 +154,7 @@ exports.verifyPayment = async (req, res) => {
 };
 
 exports.paymentSuccess = (req, res) => {
-  res.render("secondHand/auction");
+  res.render("subscriptionSwapping/auction");
 };
 
 // New function for handling Razorpay refunds

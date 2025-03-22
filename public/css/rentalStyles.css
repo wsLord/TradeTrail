@@ -580,3 +580,27 @@ body {
       }
       .prev { left: 5px; }
       .next { right: 5px; }
+      .scroll-text {
+        white-space: nowrap;
+        font-size: 24px;
+        font-weight: bold;
+        position: absolute;
+        animation: scrollText 10s linear infinite;
+      }
+    
+      @keyframes scrollText {
+        from {
+          left: -100%;
+        }
+        to {
+          left: 100%;
+        }
+      }
+    
+      .scroll-container {
+        width: 100%;
+        overflow: hidden;
+        position: relative;
+        height: 40px;
+        background: lightgray;
+      }

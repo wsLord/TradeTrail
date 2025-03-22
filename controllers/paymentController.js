@@ -130,7 +130,7 @@ exports.verifyPayment = async (req, res) => {
     console.log("Saving payment:", newPayment);
     await newPayment.save();
 
-    return res.json({ success: true, redirectUrl: "/api/payment/payment-success" });
+    return res.json({ success: true, redirectUrl:`/api/payment/success?paymentId=${razorpay_payment_id}` });
   } catch (error) {
     console.error("Error verifying payment:", error);
     return res.status(500).json({ success: false, message: "Payment verification failed" });
@@ -140,5 +140,6 @@ exports.verifyPayment = async (req, res) => {
 
 
 exports.paymentSuccess = (req, res) => {
-  res.render("cart/success");
+  const paymentId = req.query.paymentId || "N/A";
+    res.render("cart/success", { paymentId });
 };

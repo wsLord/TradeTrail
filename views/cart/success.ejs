@@ -34,6 +34,14 @@
             color: #666;
             font-size: 16px;
         }
+        .payment-info {
+            background: #e7f6e7;
+            padding: 10px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-weight: bold;
+            color: #2d6a2d;
+        }
         .btn {
             display: inline-block;
             margin-top: 20px;
@@ -53,6 +61,9 @@
         <div class="checkmark">✔</div>
         <h1>Payment Successful</h1>
         <p>Thank you for your purchase! Your payment has been successfully processed.</p>
+        <div class="payment-info">
+            <p><strong>Payment ID:</strong> <%= paymentId %></p>
+        </div>
         <a href="/" class="btn">Go to Dashboard</a>
     </div>
 </body>
