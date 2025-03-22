@@ -84,37 +84,64 @@ exports.postAddProduct = (req, res) => {
     res.redirect("/subscription/verify-credentials");
   };
 
-exports.getProducts = (req, res, next) => {
-    const searchQuery = req.query.search || "";
-    let filter = {};
+  exports.getProducts = async (req, res, next) => {
+    try {
+        const { search, minPrice, maxPrice, location, platform } = req.query;
+        const filter = {};
 
-    if (searchQuery) {
-        filter = {
-            $or: [
-                { title: { $regex: searchQuery, $options: 'i' } },
-                { platform_name: { $regex: searchQuery, $options: 'i' } },
-                { description: { $regex: searchQuery, $options: 'i' } },
-                { location: { $regex: searchQuery, $options: 'i' } }
-            ]
-        };
-    }
+        // Search Filter
+        if (search) {
+            filter.$or = [
+                { platform_name: { $regex: search, $options: 'i' } },
+                { description: { $regex: search, $options: 'i' } },
+                { location: { $regex: search, $options: 'i' } }
+            ];
+        }
 
-    Ott.find(filter)
-        .populate("seller", "fullName _id")  // Add this line to populate seller details
-        .then((products) => {
-            res.render("subscriptionSwapping/buy", {
-                prods: products,
-                user: req.user,
-                pageTitle: "All Products",
-                path: "/products",
-                searchQuery: searchQuery,
-                activePage: "subscription"
-                
-            });
-        })
-        .catch((err) => {
-            console.log(err);
+        // Price Range Filter
+        if (minPrice || maxPrice) {
+            filter.price = {};
+            if (minPrice) filter.price.$gte = parseFloat(minPrice);
+            if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
+        }
+
+        // Location Filter
+        if (location) {
+            filter.location = new RegExp(location, 'i');
+        }
+
+        // Subscription Name Filter
+        if (platform) {
+            filter.platform_name = new RegExp(platform, 'i');
+        }
+
+        const products = await Ott.find(filter)
+            .populate("seller", "fullName _id")
+            .lean();
+
+        // Get unique values for filters
+        const locations = await Ott.distinct("location");
+        const subscriptionNames = await Ott.distinct("platform_name");
+
+        res.render("subscriptionSwapping/buy", {
+            prods: products,
+            user: req.user,
+            pageTitle: "All Subscriptions",
+            path: "/products",
+            searchQuery: search || "",
+            minPrice: minPrice || "",
+            maxPrice: maxPrice || "",
+            location: location || "",
+            platform: platform || "",
+            locations: locations.filter(l => l),
+            subscriptionNames: subscriptionNames.filter(n => n),
+            activePage: "subscription"
         });
+    } catch (err) {
+        console.log(err);
+        req.flash("error", "Error loading subscriptions");
+        res.redirect("/subscription/buy");
+    }
 };
 
 

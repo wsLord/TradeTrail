@@ -16,10 +16,10 @@ const predefinedResponses = {
       text: "Hello! How can I assist you today?",
       path: null
   },
-  "rent": {
-      text: "You can rent items by visiting our rental section. Check out the 'Renting Items' feature!",
-      path: "/rental"
-  },
+  // "rent": {
+  //     text: "You can rent items by visiting our rental section. Check out the 'Renting Items' feature!",
+  //     path: "/rental"
+  // },
   // "subscription": {
   //     text: "To swap subscriptions, go to the 'Subscription Swapping' section. Need more help?",
   //     path: "/subscription"
@@ -161,26 +161,22 @@ app.post('/api/chat', async (req, res) => {
         model: 'mistral',
         messages: [{
           role: 'user',
-          content: `Act as an official concierge for our rental, subscription and second hand platform specializing in:
-          - OTT platform direct selling and auction based selling (Netflix, Disney+ Hotstar, Amazon Prime)
-          - second hand items direct selling and auction based selling
+          content: `Act as an official chatbot for our multi-purpose platform which has features rental, subscription and second hand specializing in:
+          - OTT platform come under the subscription feature in which a person can list the subscription in two ways, direct listing or auction based listing. In direct listing the subscription is sold at the given price and in auction based listing the subscription can have bids. And there are two types of bids, monetary and product, customers can either bid with money or products.
+          - second hand items come under second hand buying feature in which a person can list the item in two ways, direct listing or auction based listing. In direct listing the item is sold at the given price and in auction based listing the item can have bids. And there are two types of bids, monetary and product, customers can either bid with money or products.
           -renting items with security deposit
           - Credential-verified account sharing for subscription
           - Auction-style bidding
           - Fixed-price purchase
           - Secure subscription transfers
+          -check the product listings of any feature if a user asks for any particular thing and then tell the user in which feature that item is present
       
           Response Requirements:
-          1. Highlight either auction bids or fixed-price options
-          2. Tell about if the asked subscription is avaialable or not
-          3. Mention remaining duration for auction based (2 weeks left/New listing)
-          4. Reference our secure escrow system
-          5. Suggest complementary subscriptions ("Pair with Prime Video for complete entertainment")
+          1. Highlight either auction bids or fixed-price options for second hand and subscriptions, tell whether that particular product is listed in direct listing or auction based listing and once the feature is identified, also give the clickable link to that particular feature
+          2. Tell about if the asked item, subscription is avaialable or not
+          3. Mention remaining duration for auction in auction based
+          4. In auction based, give the maximum bids and the bid products if a user asks for a particular item or subscription
       
-          Example Response:
-          "For Disney+ Hotstar Premium (3 screens, 4K), we have:
-          - Auction: 3 bids, time left for the auction
-          - Direct rental: ₹299/week or as defined by the seller"
       
           Current Query: "${message}"
           
