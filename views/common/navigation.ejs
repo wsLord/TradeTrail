@@ -22,7 +22,7 @@
             <a href="/subscription">Subscription Swapping</a>
         </li>
         <li class="<%= typeof activePage !== 'undefined' && activePage === 'secondHand' ? 'active' : '' %>">
-            <a href="/secondHand">Second-Hand Buying</a>
+            <a href="/secondHand" onclick="return showWarning()">Second-Hand Buying</a>
         </li>
         <li class="<%= typeof activePage !== 'undefined' && activePage === 'cart' ? 'active' : '' %>">
           <a href="/cart">Cart</a>
@@ -111,5 +111,10 @@
           msg.style.display = 'none';
       });
   }, 3000);
+</script>
+<script>
+  function showWarning() {
+    return confirm("Caution: The exchange of products is entirely your responsibility. We are not liable for any loss or damage. Please proceed with caution!");
+  }
 </script>
 

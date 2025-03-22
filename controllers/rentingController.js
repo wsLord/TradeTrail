@@ -118,18 +118,15 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const { title, price, description, location, rate, quantity, securityDeposit  } = req.body;
-  // const images = req.files;
-  // Check if files were uploaded
+
   if (!req.files || req.files.length === 0) {
     console.log("No files uploaded!");
     return res.status(400).send("At least one image is required.");
   }
 
-  // const imageUrls = req.files.map((file) => file.path);
-  const imageUrls = req.files.map(file => `/uploads/${file.filename}`); 
+  const imageUrls = req.files.map(file => file.path); // Get Cloudinary image URLs
  if (!title || !imageUrls || !price || !description || !location || !rate || !quantity || !securityDeposit) {
     return res.status(400).send('All fields are required!');
-
   }
 
 

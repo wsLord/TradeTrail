@@ -27,7 +27,8 @@ exports.getAddProduct = (req, res, next) => {
 exports.postAddProduct = (req, res, next) => {
   const { title, price, min_price, description, location, startDate, endDate } = req.body;
   // Format image URL for consistency
-  const imageUrls = req.files.map(file => `/uploads/${file.filename}`); 
+  // const imageUrls = req.files.map(file => `/uploads/${file.filename}`); 
+  const imageUrls = req.files.map(file => file.path); 
 
    const product = new Product({
     title,
@@ -38,6 +39,8 @@ exports.postAddProduct = (req, res, next) => {
     location,
     startDate,
     endDate,
+    seller: req.user._id,
+    saleType: 'auction',
   });
 
   product.save()
@@ -270,12 +273,13 @@ exports.getDirectAddProduct = (req, res) => {
 };
 
 exports.postDirectAddProduct = async (req, res) => {
-  const { title, imageUrl, price, description, location, quantity } = req.body;
+  const { title, price, description, location, quantity } = req.body;
+  const imageUrls = req.files.map(file => file.path); 
 
   try {
     const product = new Product({
       title,
-      imageUrl,
+      imageUrls,
       price: parseFloat(price),
       min_price: parseFloat(price), // Set to same as price
       description,

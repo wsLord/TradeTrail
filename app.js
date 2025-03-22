@@ -6,8 +6,12 @@ const path = require("path");
 const cookieParser = require("cookie-parser"); // Ensure cookies are parsed
 const session = require("express-session");
 const flash = require("connect-flash");
+ 
+const Razorpay= require('razorpay');
+const bodyParser=require('body-parser');
+const fs= require('fs');
+
 const multer = require("multer");
-const bodyParser = require("body-parser");
 
 
 // Connect to MongoDB
@@ -25,11 +29,15 @@ const cartRoutes = require('./routes/cartRoutes');
 // const secondHandCartRoutes = require("./routes/secondHandCartRoutes");
 // const subscriptionCartRoutes = require("./routes/subscriptionCartRoutes");
 
-const cron = require("node-cron");
-const User = require("./models/userModel");
+const paymentRoutes = require("./routes/paymentRoutes");
 
-// Daily cleanup at 3 AM of unverified accounts whose verification emails bounce back
-cron.schedule("0 3 * * *", async () => {
+const cron = require('node-cron');
+const User = require('./models/userModel');
+
+const paymentSecondRoutes=require("./routes/paymentsecondhandRoutes");
+
+// Daily cleanup at 3 AM of unverified accounts whose verification emails bounce back 
+cron.schedule('0 3 * * *', async () => {
   try {
     await User.deleteMany({
       isVerified: false,
@@ -87,8 +95,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser()); // ✅ Required for JWT authentication
 app.use(express.static(path.join(__dirname, "public")));
-app.use("/assets", express.static(path.join(__dirname, "assets")));
-// app.use("/uploads", express.static("uploads"));
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
+
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended:true}));
+const cors = require('cors');
+app.use(cors());
+
 
 // Set up EJS as the view engine
 app.set("view engine", "ejs");
@@ -103,10 +117,12 @@ app.use("/subscription", subscriptionRoutes);
 app.use('/cart', cartRoutes);
 
 
+app.use("/rental/api/payment", paymentRoutes);
 // app.use("/rental/cart", rentalCartRoutes);
 // app.use("/subscription/cart", subscriptionCartRoutes);
 // app.use("/secondHand/cart", secondHandCartRoutes);
 
+app.use("/secondHand/api/payment", paymentSecondRoutes);
 app.get("/", (req, res) => {
   res.render("home", {
     pageTitle: "Home",

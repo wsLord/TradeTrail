@@ -117,7 +117,11 @@
                 %>
                   <tr class="cart-item">
                     <td>
-                      <img src="<%= item.product.imageUrl %>" alt="<%= item.product.title %>" style="max-width: 100px;">
+                      <% if (item.productType === 'Rental' || item.productType === 'SecondHand') { %>
+                        <img src="<%= item.product.imageUrls[0] %>" alt="<%= item.product.title %>" style="max-width: 100px;">
+                      <% } else if (item.productType === 'Subscription') { %>
+                        <img src="<%= item.product.imageUrl %>" alt="<%= item.product.platform_name %>" style="max-width: 100px;">
+                      <% } %>
                     </td>
                     <td><%= item.product.title || item.product.platform_name %></td>
                     
@@ -140,9 +144,10 @@
                       <td>
                         <div class="price-breakdown">
                           ₹<%= item.product.price %>/<%= item.product.rate %>
-                          <% if (item.product.rate === 'day' && diffDays > 1) { %>
-                            × <%= diffDays %> days
+                          <% if (item.product.rate === 'day' && (item.diffDays || 0) > 1) { %>
+                              × <%= item.diffDays || 1 %> days
                           <% } %>
+                          
                         </div>
                       </td>
                     <% } else if (sectionName === 'Subscription') { %>
@@ -150,9 +155,10 @@
                     <% } %>
 
                     <td>
-                      ₹<%= sectionName === 'Rental' ? 
-                        item.calculatedPrice.toFixed(2) : 
-                        item.product.price.toFixed(2) %>
+                      
+                        ₹<%= sectionName === 'Rental' ? (item.calculatedPrice || 0).toFixed(2) : 
+(item.product?.price || 0).toFixed(2) %>
+
                       <% if (sectionName === 'Rental') { %>
                         <div class="security-deposit">
                           + ₹<%= item.securityDeposit %> deposit
@@ -177,7 +183,9 @@
                       <% if (sectionName === 'Rental') { %>
                         <div class="price-breakdown">
                           (₹<%= totalPrice.toFixed(2) %> + 
-                          ₹<%= itemDeposit.toFixed(2) %> deposit)
+                          
+                          ₹<%= (itemDeposit || 0).toFixed(2) %> deposit)
+
                         </div>
                       <% } %>
                     </td>
