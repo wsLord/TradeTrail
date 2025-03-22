@@ -1,22 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Your Cart</title>
-    <link rel="stylesheet" href="/css/main.css" />
-    <link rel="stylesheet" href="/css/cart.css" />
-    <link rel="stylesheet" href="/css/forms.css" />
-    <link rel="stylesheet" href="/css/rentalStyles.css" />
-  </head>
 
-  <body>
-    <div id="navbar"><%- include('../common/navigation.ejs') %></div>
-    <main class="cart-container">
-      <div class="cart-header">
-        <h1>Your Rental Cart</h1>
-      </div>
-      <% if (cart.items.length === 0) { %>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Cart</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/cart.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/rentalStyles.css">
+  <link rel="icon" type="image/png" href="/assets/logo2.png">
+</head>
+
+<body>
+  <div id="navbar">
+    <%- include('../common/navigation.ejs') %>
+  </div>
+  <main class="cart-container">
+    <div class="cart-header">
+      <h1>Your Rental Cart</h1>
+    </div>
+    <% if (cart.items.length === 0) { %>
       <p>Your cart is empty.</p>
       <% } else { %>
       <table class="cart-items">
