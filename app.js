@@ -35,6 +35,7 @@ const cron = require('node-cron');
 const User = require('./models/userModel');
 
 const paymentSecondRoutes=require("./routes/paymentsecondhandRoutes");
+const paymentSubscriptionRoutes=require("./routes/paymentSubscriptionRoutes");
 
 // Daily cleanup at 3 AM of unverified accounts whose verification emails bounce back 
 cron.schedule('0 3 * * *', async () => {
@@ -117,12 +118,13 @@ app.use("/subscription", subscriptionRoutes);
 app.use('/cart', cartRoutes);
 
 
-app.use("/rental/api/payment", paymentRoutes);
+app.use("/api/payment", paymentRoutes);
 // app.use("/rental/cart", rentalCartRoutes);
 // app.use("/subscription/cart", subscriptionCartRoutes);
 // app.use("/secondHand/cart", secondHandCartRoutes);
 
 app.use("/secondHand/api/payment", paymentSecondRoutes);
+app.use("/subscription/api/payment", paymentSubscriptionRoutes);
 app.get("/", (req, res) => {
   res.render("home", {
     pageTitle: "Home",

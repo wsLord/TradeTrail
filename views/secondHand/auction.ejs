@@ -570,6 +570,7 @@ if (distance <= 0) {
 
   const inputElement = document.getElementById("bidAmount");
   const maxBidElement = document.getElementById("max-bid");
+  console.log(inputElement);
 
   if (!inputElement || !maxBidElement) {
     console.error("Required input fields not found!");
@@ -625,7 +626,7 @@ function verifyPayment(response, amount, productId) {
   .then(res => res.json())
   .then(data => {
     if (data.success) {
-      alert("Payment successful! Your bid has been placed.");
+      alert(`Payment successful with Payment ID: ${response.razorpay_payment_id}! Your bid has been placed.`);
       // Store the payment ID temporarily in session storage
       sessionStorage.setItem("paymentId", response.razorpay_payment_id);
 
@@ -691,7 +692,7 @@ function verifyPayment(response, amount, productId) {
       })
       .then(data => {
         if (data.success) {
-          alert("Refund initiated successfully! Your bid will be deleted.");
+          alert(`Refund initiated successfully with Refund ID: ${data.refundId}! Your bid will be deleted.`);
           // Submit the form to delete the bid after refund is initiated
           // event.target.closest('form').submit();
           document.getElementById('refundform').submit();
