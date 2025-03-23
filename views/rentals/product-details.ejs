@@ -111,6 +111,7 @@
         <div class="price-summary-card">
           <h3>Pricing Details</h3>
           <p>Rate: ₹<%= product.price %>/<%= product.rate %></p>
+          <p>seller: <%= product.seller.fullName %></p>
           <p>Security Deposit: ₹<%= product.securityDeposit %></p>
           <div class="calculation-breakdown" id="calculationDetails">
             <!-- JavaScript will populate this -->
@@ -122,6 +123,8 @@
       <div class="product-info-column">
         <h2 class="section-title">Product Details</h2>
         <p class="description"><%= product.description %></p>
+        <p>seller: <%= product.seller.fullName %></p>
+        <p>Buyer: <%= product.buyer ? product.buyer.fullName : 'Not Sold Yet' %></p>
         
         <div class="product-meta">
           <p><strong>Location:</strong> <%= product.location %></p>

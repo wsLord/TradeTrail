@@ -58,7 +58,12 @@ const OttSchema = new Schema({
     verificationPending: {
              type: Boolean,
              default: false
-    }
+    },
+    winner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: null,
+      },
 });
 const ottProduct = mongoose.model("Ott", OttSchema);
 module.exports = ottProduct;
