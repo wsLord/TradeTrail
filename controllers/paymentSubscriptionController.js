@@ -154,7 +154,7 @@ exports.verifyPayment = async (req, res) => {
 };
 
 exports.paymentSuccess = (req, res) => {
-  res.render("subscriptionSwapping/auction");
+  res.render("cart/success");
 };
 
 // New function for handling Razorpay refunds
