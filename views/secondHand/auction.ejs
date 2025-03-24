@@ -678,7 +678,7 @@ function verifyPayment(response, amount, productId) {
         },
         body: JSON.stringify({
           paymentId: paymentId,
-          amount: amount * 100, // Convert to paise for Razorpay
+          amount: Math.floor(amount * 100 * 0.9), // Convert to paise for Razorpay
           notes: {
             reason: "Bid deleted by user"
           }
