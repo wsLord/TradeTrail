@@ -2,6 +2,24 @@ const RentalProduct = require("../models/rentalProduct");
 const RentalBooking = require("../models/rentalBooking");
 const Cart = require("../models/cartModel");
 
+async function clearExpiredRentals() {
+  const currentDate = new Date();
+  const expiredRentals = await RentalBooking.find({ rentalEnd: { $lt: currentDate }, status: "active" });
+
+  for (const rental of expiredRentals) {
+    await RentalProduct.findByIdAndUpdate(rental.product, {
+      buyer: null,
+      currentBooking: null
+    });
+
+    await RentalBooking.findByIdAndUpdate(rental._id, {
+      status: "completed"
+    });
+  }
+
+  console.log('Expired rentals cleared and updated.');
+}
+
 // Add-to-Cart Controller Method
 exports.addToCart = async (req, res) => {
   try {
@@ -157,7 +175,7 @@ exports.postAddProduct = (req, res, next) => {
 };
 
 // Get all rental items (with search)
-exports.getRentItems = (req, res, next) => {
+exports.getRentItems = async (req, res, next) => {
   const searchQuery = req.query.search || "";
   const query = {};
 
@@ -169,20 +187,33 @@ exports.getRentItems = (req, res, next) => {
     ];
   }
 
-  RentalProduct.find(query)
-    .then((products) => {
-      res.render("rentals/rent-items", {
-        pageTitle: "Available Rentals",
-        path: "/rental/rent",
-        products: products,
-        searchQuery: searchQuery,
-        activePage: "rental",
-      });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).send("An error occurred while fetching rental items.");
+  try {
+    // Fetch all rental products
+    const products = await RentalProduct.find(query);
+
+    // Get active bookings to determine availability
+    const activeBookings = await RentalBooking.find({ status: "active" }).select('product');
+
+    // Extract booked product IDs
+    const bookedProductIds = activeBookings.map(booking => booking.product.toString());
+
+    // Add availability status to products
+    const productsWithAvailability = products.map(product => ({
+      ...product._doc,
+      isAvailable: !bookedProductIds.includes(product._id.toString()),
+    }));
+
+    res.render("rentals/rent-items", {
+      pageTitle: "Available Rentals",
+      path: "/rental/rent",
+      products: productsWithAvailability,
+      searchQuery: searchQuery,
+      activePage: "rental",
     });
+  } catch (err) {
+    console.error("Error fetching rental items:", err);
+    res.status(500).send("An error occurred while fetching rental items.");
+  }
 };
 
 // Controller method to handle the buying action and decrementing quantity
@@ -240,12 +271,14 @@ exports.getProductDetails = (req, res, next) => {
       
       fetchedProduct = product;
       // Find an active booking for this product
-      return RentalBooking.findOne({ product: productId, status: "active" });
+      return RentalBooking.findOne({ product: productId, status: "active" }).populate("user", "fullName");
     })
     .then((booking) => {
       if (booking) {
         // Attach the booking information dynamically
         fetchedProduct.currentBooking = booking;
+        // fetchedProduct.populate('booking.user','fullName');
+        console.log(booking);
       }
       res.render("rentals/product-details", {
         pageTitle: fetchedProduct.title,

@@ -237,8 +237,6 @@
   font-size: 16px;
 }
 
-
-  
   </style>
 </head>
 <body>
@@ -517,10 +515,10 @@ if (distance <= 0) {
   }
   
   // Disable product bid button
-  const productBidBtn = document.querySelector('[href="/subscription/buy/<%= product._id %>/add-bid-product"]');
+  const productBidBtn = document.querySelector('[href="/secondHand/buy/<%= product._id %>/add-bid-product"]');
   if (productBidBtn) {
     productBidBtn.style.pointerEvents = "none";
-    productBidBtn.style.opacity = "0.6";
+    productBidBtn.style.opacity = "0.4";
   }
   
   // Disable bid deletion and update tables
