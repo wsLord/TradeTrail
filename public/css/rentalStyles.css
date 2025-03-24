@@ -139,6 +139,7 @@ body {
     transition: all 0.3s ease;
     text-align: center;
     box-sizing: border-box;
+    
 }
 
 /* Buy Now Button Specific Styles */
@@ -162,6 +163,7 @@ body {
     transition: all 0.3s ease;
     text-align: center;
     box-sizing: border-box;
+    
 }
 
 .add-to-cart-button:hover {
