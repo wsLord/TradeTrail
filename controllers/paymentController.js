@@ -3,6 +3,9 @@ const crypto = require("crypto");
 const dotenv = require("dotenv");
 dotenv.config();
 const payment = require("../models/payment");
+const Product = require("../models/product");
+const RentalProduct = require("../models/rentalProduct");
+const Ott = require("../models/ott");
 
 // Initialize Razorpay with your test keys
 const razorpayInstance = new Razorpay({
@@ -13,17 +16,64 @@ const razorpayInstance = new Razorpay({
 console.log(process.env.RAZORPAY_KEY_ID);
 
 exports.makePayment = async (req, res) => {
-  console.log('hit');
+  console.log("hit");
   try {
-    const { amount } = req.body; // Amount from the frontend
-    console.log("te" , req.body);
+    const { amount, section, productIds } = req.body; // Amount from the frontend
+    console.log("te", req.body);
+
+    // Update each product to "sold" status and set buyer across multiple models
+    await Promise.all(
+      productIds.map(async (productId) => {
+        try {
+          // Define the models
+          // Check each model for the product ID
+          const rental = await RentalProduct.findById(productId);
+          const subscription = await Ott.findById(productId);
+          const secondHand = await Product.findById(productId);
+
+          //     // Update the product if found
+          if (rental) {
+            await RentalProduct.findByIdAndUpdate(
+              productId,
+              {
+                $set: {
+                  // status: "sold",
+                  buyer: req.user._id,
+                },
+              },
+              console.log("in rental")
+            );
+          } else if (subscription) {
+            await Ott.findByIdAndUpdate(productId, {
+              $set: {
+                status: "sold",
+                buyer: req.user._id,
+              },
+            });
+          } else if (secondHand) {
+            await Product.findByIdAndUpdate(productId, {
+              $set: {
+                status: "sold",
+                buyer: req.user._id,
+              },
+            });
+          } else {
+            console.log(`Product ${productId} not found in any model.`);
+          }
+        } catch (error) {
+          console.error(`Error updating product ${productId}:`, error);
+        }
+      })
+    );
 
     if (!amount || amount <= 0) {
-      return res.status(400).json({ success: false, message: "Invalid amount" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid amount" });
     }
 
     const options = {
-      amount: amount*100 , // Convert to paise (₹1 = 100 paise)
+      amount: amount * 100, // Convert to paise (₹1 = 100 paise)
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
       payment_capture: 1,
@@ -44,9 +94,9 @@ exports.makePayment = async (req, res) => {
         order_id: order.id,
         theme: { color: "#4F7942" },
         prefill: { email: "customer@example.com", contact: "" },
+        productIds, // Pass product IDs back to frontend
       },
     });
-
   } catch (error) {
     console.error("Error in makePayment:", error);
     res.status(500).json({ success: false, message: "Failed to create order" });
@@ -93,14 +143,22 @@ exports.getPaymentPage = (req, res) => {
 //   }
 // };
 exports.verifyPayment = async (req, res) => {
-  console.log('verify');
+  console.log("verify");
   try {
     console.log("Received verification request:", req.body);
 
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, amount } = req.body;
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      amount,
+      productIds,
+    } = req.body;
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-      return res.status(400).json({ success: false, message: "Missing payment details" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing payment details" });
     }
 
     // Verify Razorpay Signature
@@ -115,31 +173,38 @@ exports.verifyPayment = async (req, res) => {
 
     if (razorpay_signature !== expectedSign) {
       console.log("Signature verification failed!");
-      return res.status(400).json({ success: false, message: "Invalid signature" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid signature" });
     }
 
     // Save the payment details in the database
     const newPayment = new payment({
       orderId: razorpay_order_id,
       paymentId: razorpay_payment_id,
+      buyer: req.user._id,
       signature: razorpay_signature,
       amount: parseFloat(amount || 0),
+      productIds, // Save product IDs
       status: "completed",
     });
 
     console.log("Saving payment:", newPayment);
     await newPayment.save();
 
-    return res.json({ success: true, redirectUrl:`/api/payment/success?paymentId=${razorpay_payment_id}` });
+    return res.json({
+      success: true,
+      redirectUrl: `/api/payment/success?paymentId=${razorpay_payment_id}`,
+    });
   } catch (error) {
     console.error("Error verifying payment:", error);
-    return res.status(500).json({ success: false, message: "Payment verification failed" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Payment verification failed" });
   }
 };
 
-
-
 exports.paymentSuccess = (req, res) => {
   const paymentId = req.query.paymentId || "N/A";
-    res.render("cart/success", { paymentId });
+  res.render("cart/success", { paymentId });
 };

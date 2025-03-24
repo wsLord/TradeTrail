@@ -12,7 +12,7 @@ router.get("/", rentingController.getHome);
 router.get("/post", rentingController.getAddProduct);
 
 // Route to handle the form submission for posting a rental product
-router.post("/post", uploadMultiple, rentingController.postAddProduct);
+router.post("/post", uploadMultiple,protectRoute, rentingController.postAddProduct);
 
 // Product details route
 router.get('/details/:productId', rentingController.getProductDetails);

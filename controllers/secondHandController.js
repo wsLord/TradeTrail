@@ -93,6 +93,7 @@ exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
   Product.findById(prodId)
       .populate("seller", "fullName")
+      .populate('winner', 'fullName')
       .populate({
           path: "bids",
           populate: { path: "bidder", select: "fullName" },
@@ -117,7 +118,8 @@ exports.getProduct = (req, res, next) => {
               monetaryBidsCount: monetaryBids.length,
               MIN_BID_INCREMENT: MIN_BID_INCREMENT,
               path: "/product",
-              activePage: "secondHand"
+              activePage: "secondHand",
+              type:"buy"
           });
       })
       .catch((err) => {

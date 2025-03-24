@@ -129,7 +129,6 @@ exports.postAddProduct = (req, res, next) => {
     return res.status(400).send('All fields are required!');
   }
 
-
   const rentalProduct = new RentalProduct({
     title: title,
     imageUrls: imageUrls,
@@ -139,6 +138,7 @@ exports.postAddProduct = (req, res, next) => {
     rate: rate,  // Save rate directly as per the form
     quantity: quantity,
     securityDeposit: securityDeposit,  // Save quantity directly
+    seller: req.user._id,
 
   });
 
@@ -188,9 +188,10 @@ exports.getRentItems = (req, res, next) => {
 // Controller method to handle the buying action and decrementing quantity
 exports.buyProduct = (req, res, next) => {
   const productId = req.params.productId; // Extract product ID from the URL
-
+      
   // Find the rental product by its ID in the database
   RentalProduct.findById(productId)
+  .populate("seller", "fullName")
     .then((product) => {
       if (product) {
         // If the product has sufficient stock, decrement the quantity
@@ -229,6 +230,8 @@ exports.getProductDetails = (req, res, next) => {
   let fetchedProduct;
 
   RentalProduct.findById(productId)
+  .populate("seller", "fullName")
+  .populate('buyer', 'fullName')
     .then((product) => {
       if (!product) {
         return res.status(404).send("Product not found");
