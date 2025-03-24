@@ -5,7 +5,10 @@ dotenv.config();
 const payment = require("../models/payment");
 const Product = require("../models/product");
 const RentalProduct = require("../models/rentalProduct");
+const RentalBooking = require("../models/rentalBooking");
 const Ott = require("../models/ott");
+const Cart = require("../models/cartModel");
+
 
 // Initialize Razorpay with your test keys
 const razorpayInstance = new Razorpay({
@@ -21,50 +24,102 @@ exports.makePayment = async (req, res) => {
     const { amount, section, productIds } = req.body; // Amount from the frontend
     console.log("te", req.body);
 
-    // Update each product to "sold" status and set buyer across multiple models
-    await Promise.all(
-      productIds.map(async (productId) => {
-        try {
-          // Define the models
-          // Check each model for the product ID
-          const rental = await RentalProduct.findById(productId);
-          const subscription = await Ott.findById(productId);
-          const secondHand = await Product.findById(productId);
+    // Find user's cart and get relevant product details
+    const cart = await Cart.findOne({ user: req.user._id });
 
-          //     // Update the product if found
-          if (rental) {
-            await RentalProduct.findByIdAndUpdate(
-              productId,
-              {
-                $set: {
-                  // status: "sold",
-                  buyer: req.user._id,
-                },
-              },
-              console.log("in rental")
-            );
-          } else if (subscription) {
-            await Ott.findByIdAndUpdate(productId, {
-              $set: {
-                status: "sold",
-                buyer: req.user._id,
-              },
+    // Filter products based on the section and product IDs
+    const filteredProducts = cart.items.filter(
+      (item) =>
+        item.productType === section &&
+        productIds.includes(item.product.toString())
+    );
+
+    if (filteredProducts.length === 0) {
+      return res.status(404).json({ success: false, message: `No ${section} products found in your cart.` });
+    }
+
+    // Update the buyer field for each product and handle rentals if necessary
+    await Promise.all(
+      filteredProducts.map(async (item) => {
+        try {
+          let model;
+          // Identify the correct model based on productType
+          if (section === "Rental") model = RentalProduct;
+          else if (section === "Subscription") model = Ott;
+          else if (section === "SecondHand") model = Product;
+
+          // Update the product with buyer info
+          await model.findByIdAndUpdate(item.product, {
+            $set: { buyer: req.user._id },
+          });
+
+          console.log(`Buyer updated for product ${item.product}`);
+
+          // For rentals, create a booking entry
+          if (section === "Rental") {
+            const booking = new RentalBooking({
+              product: item.product,
+              user: req.user._id,
+              rentalStart: item.rentalStart || new Date(),
+              rentalEnd: item.rentalEnd,
+              status: "active",
             });
-          } else if (secondHand) {
-            await Product.findByIdAndUpdate(productId, {
-              $set: {
-                status: "sold",
-                buyer: req.user._id,
-              },
-            });
-          } else {
-            console.log(`Product ${productId} not found in any model.`);
+            await booking.save();
+            console.log(`Rental booking created for product ${item.product}`);
           }
         } catch (error) {
-          console.error(`Error updating product ${productId}:`, error);
+          console.error(`Error updating product ${item.product}:`, error);
         }
       })
     );
+
+
+    // Update each product to "sold" status and set buyer across multiple models
+    // await Promise.all(
+    //   productIds.map(async (productId) => {
+    //     try {
+          // Define the models
+          // Check each model for the product ID
+      //     const rental = await RentalProduct.findById(productId);
+      //     const subscription = await Ott.findById(productId);
+      //     const secondHand = await Product.findById(productId);
+
+      //     //     // Update the product if found
+      //     if (rental) {
+      //       await RentalProduct.findByIdAndUpdate(
+      //         productId,
+      //         {
+      //           $set: {
+      //             // status: "sold",
+      //             buyer: req.user._id,
+      //           },
+      //         },
+      //         // console.log("in rental")
+      //       );
+      //     } else if (subscription) {
+      //       await Ott.findByIdAndUpdate(productId, {
+      //         $set: {
+      //           status: "sold",
+      //           buyer: req.user._id,
+      //         },
+      //       });
+      //     } else if (secondHand) {
+      //       await Product.findByIdAndUpdate(productId, {
+      //         $set: {
+      //           status: "sold",
+      //           buyer: req.user._id,
+      //         },
+      //       });
+      //     } else {
+      //       console.log(`Product ${productId} not found in any model.`);
+      //     }
+      //   } catch (error) {
+      //     console.error(`Error updating product ${productId}:`, error);
+      //   }
+    //     const prod=await cartModel.findOne({user:req.user._id,items:{$elemMatch:{_id:productId}}});
+
+    //   })
+    // );
 
     if (!amount || amount <= 0) {
       return res
