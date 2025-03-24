@@ -295,63 +295,208 @@
                        accept="image/*"
                        onchange="uploadProfilePic(this.files[0])">
             </div>
+
         </div>
 
-        <div class="badge-card">
-            <p style="margin: 5px; font-size: 20px; color: #2c3e50;"><strong>Badges Earned</strong></p>
-            <div class="badges-container">
-                <% if (user.badges && user.badges.length > 0) { %>
-                    <% user.badges.forEach(function(badge) { %>
-                        <img src="<%= badge %>" alt="Badge" class="badge-img">
-                    <% }); %>
-                <% } else { %>
-                    <p style="color: #95a5a6;">No badges earned yet!</p>
-                <% } %>
-            </div>
+        <!-- Edit Mode -->
+        <form id="editMode" style="display: none;" action="/profile" method="POST">
+          <div class="form-group">
+            <label>City:</label>
+            <input type="text" class="form-control" name="city" value="<%= user.city || '' %>">
+          </div>
+          <div class="form-group">
+            <label>State:</label>
+            <input type="text" class="form-control" name="state" value="<%= user.state || '' %>">
+          </div>
+          <div class="form-group">
+            <label>Country:</label>
+            <input type="text" class="form-control" name="country" value="<%= user.country || '' %>">
+          </div>
+          <div class="form-group">
+            <label>Phone:</label>
+            <input type="tel" class="form-control" name="phone" value="<%= user.phone || '' %>">
+          </div>
+          <div style="margin-top: 25px;">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <button type="button" class="btn btn-secondary" onclick="toggleEditMode()">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Profile Picture Section -->
+      <div class="profile-pic-section">
+        <img src="<%= user.profilePic %>" alt="Profile Picture" class="profile-pic" id="profilePic"
+          onclick="document.getElementById('fileInput').click()">
+        <div class="upload-overlay" onclick="document.getElementById('fileInput').click()">
+          📷 Update Photo
         </div>
-    </main>
+        <input type="file" id="fileInput" style="display: none;" accept="image/*"
+          onchange="uploadProfilePic(this.files[0])">
+      </div>
+    </div>
 
-    <script>
-        // Toggle between view and edit modes
-        function toggleEditMode() {
-            const viewMode = document.getElementById('viewMode');
-            const editMode = document.getElementById('editMode');
-            viewMode.style.display = viewMode.style.display === 'none' ? 'block' : 'none';
-            editMode.style.display = editMode.style.display === 'none' ? 'block' : 'none';
-        }
+    <!-- Auction Products Section -->
+    <div class="auction-products-card">
+      <h3>Your Auction Products</h3>
+      <% if (auctionProducts.length > 0) { %>
+      <ul>
+        <% auctionProducts.forEach(product => { %>
+        <li>
+          <a href="/profile/auction/<%= product._id %>" style="text-decoration: none; color: #007bff;">
+            <h4><%= product.title %></h4>
+            <% if (product.otp) { %>
+            <p>OTP: <%= product.otp %></p>
+            <% } else { %>
+            <p>OTP: Not generated yet</p>
+            <% } %>
+          </a>
+        </li>
+        <% }); %>
+      </ul>
+      <% } else { %>
+      <p>You haven't posted any auction products yet.</p>
+      <% } %>
+    </div>
 
-        // Handle profile picture upload with loading state
-        async function uploadProfilePic(file) {
-            const loader = document.createElement('div');
-            loader.innerHTML = `
+    <!-- Rental Products Section -->
+    <div class="rental-products-card">
+      <h3>Rental Products you posted</h3>
+      <% if (rentalProducts.length > 0) { %>
+      <ul>
+        <% rentalProducts.forEach(product => { %>
+        <li>
+          <a href="/rental/details/<%= product._id %>" style="text-decoration: none; color: #007bff;">
+            <h4>Product: <%= product.title %></h4>
+            <% if (product.buyer) { %>
+            <h4>Buyer: <%= product.buyer.fullName %></h4>
+            <% if (product.otp) { %>
+            <p>OTP: <%= product.otp %></p>
+            <% } else { %>
+            <p>OTP: Not generated yet</p>
+            <% } %>
+            <% } else { %>
+            <h4>Not Sold Yet</h4>
+            <% } %>
+          </a>
+        </li>
+        <% }); %>
+      </ul>
+      <% } else { %>
+      <p>You haven't posted any rental products yet.</p>
+      <% } %>
+    </div>
+
+    <!-- Direct Purchase (Second Hand) Products Section -->
+    <div class="direct-products-card">
+      <h3>Your Secondhand Direct Purchase Products</h3>
+      <% if (directSecondhandProducts && directSecondhandProducts.length > 0) { %>
+      <ul>
+        <% directSecondhandProducts.forEach(product => { %>
+        <li>
+          <a href="/secondHand/buy" style="text-decoration: none; color: #007bff;">
+            <h4>Product: <%= product.title %></h4>
+            <% if (product.buyer) { %>
+            <h4>Buyer: <%= product.buyer.fullName %></h4>
+            <% if (product.otp) { %>
+            <p>OTP: <%= product.otp %></p>
+            <% } else { %>
+            <p>OTP: Not generated yet</p>
+            <% } %>
+            <% } else { %>
+            <h4>Not Sold Yet</h4>
+            <% } %>
+          </a>
+        </li>
+        <% }); %>
+      </ul>
+      <% } else { %>
+      <p>You haven't posted any direct purchase products yet.</p>
+      <% } %>
+    </div>
+
+    <!-- Subscription Products Section -->
+    <div class="subscription-products-card">
+      <h3>Your Subscription Direct Purchase Products</h3>
+      <% if (directSubscriptionProducts && directSubscriptionProducts.length > 0) { %>
+      <ul>
+        <% directSubscriptionProducts.forEach(product => { %>
+        <li>
+          <a href="/subscription/buy" style="text-decoration: none; color: #007bff;">
+            <h4>Product: <%= product.platform_name %></h4>
+            <% if (product.buyer) { %>
+            <h4>Buyer: <%= product.buyer.fullName %></h4>
+            <% if (product.otp) { %>
+            <p>OTP: <%= product.otp %></p>
+            <% } else { %>
+            <p>OTP: Not generated yet</p>
+            <% } %>
+            <% } else { %>
+            <h4>Not Sold Yet</h4>
+            <% } %>
+          </a>
+        </li>
+        <% }); %>
+      </ul>
+      <% } else { %>
+      <p>You haven't posted any subscription products yet.</p>
+      <% } %>
+    </div>
+
+    <div class="badge-card">
+      <p style="margin: 5px; font-size: 20px; color: #2c3e50;"><strong>Badges Earned</strong></p>
+      <div class="badges-container">
+        <% if (user.badges && user.badges.length > 0) { %>
+        <% user.badges.forEach(function(badge) { %>
+        <img src="<%= badge %>" alt="Badge" class="badge-img">
+        <% }); %>
+        <% } else { %>
+        <p style="color: #95a5a6;">No badges earned yet!</p>
+        <% } %>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Toggle between view and edit modes
+    function toggleEditMode() {
+      const viewMode = document.getElementById('viewMode');
+      const editMode = document.getElementById('editMode');
+      viewMode.style.display = viewMode.style.display === 'none' ? 'block' : 'none';
+      editMode.style.display = editMode.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Handle profile picture upload with loading state
+    async function uploadProfilePic(file) {
+      const loader = document.createElement('div');
+      loader.innerHTML = `
                 <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
                     background: rgba(255, 255, 255, 0.9); z-index: 9999; display: flex; 
                     align-items: center; justify-content: center;">
                     <div class="spinner-border text-success" style="width: 3rem; height: 3rem;"></div>
                 </div>
             `;
-            document.body.appendChild(loader);
+      document.body.appendChild(loader);
 
-            try {
-                const formData = new FormData();
-                formData.append('image', file);
-                
-                const response = await fetch('/profile/picture', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await response.json();
-                if (data.success) {
-                    document.getElementById('profilePic').src = data.profilePic;
-                }
-            } catch (error) {
-                console.error('Upload error:', error);
-                alert('Error uploading image');
-            } finally {
-                document.body.removeChild(loader);
-            }
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const response = await fetch('/profile/picture', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await response.json();
+        if (data.success) {
+          document.getElementById('profilePic').src = data.profilePic;
         }
-    </script>
+      } catch (error) {
+        console.error('Upload error:', error);
+        alert('Error uploading image');
+      } finally {
+        document.body.removeChild(loader);
+      }
+    }
+  </script>
 </body>
 
 </html>

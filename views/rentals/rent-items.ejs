@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="/css/forms.css">
   <link rel="stylesheet" href="/css/chatbot.css">
   <link rel="stylesheet" href="/css/rentalStyles.css">
+  <link rel="icon" type="image/png" href="/assets/logo2.png">
 
   <style>
 
@@ -67,7 +68,9 @@
       }
     }
   </style>
+
 </head>
+
 <body>
   <!-- Include Navbar -->
   <div id="navbar">
@@ -76,6 +79,7 @@
   </div>
 
   <main>
+
     <h1>Rental Products</h1>
     
     <div class="filter-container">
@@ -158,7 +162,18 @@
     
     <% if (products && products.length > 0) { %>
       <div class="rental-list">
+
+        <div class="rental-item">
+          <a href="/rental/post" class="post-button">
+            <div class="circle">
+                +
+            </div>
+            <span class="post-text">POST AN ITEM !</span>
+        </a>
+        </div>
+
         <% products.forEach((product, index) => { %>
+
           <div class="rental-item">
             <div class="product-card">
               

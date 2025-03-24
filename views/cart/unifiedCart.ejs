@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your Unified Cart</title>
+  <title>Your Cart</title>
   <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/cart.css">
   <link rel="stylesheet" href="/css/forms.css">
   <link rel="stylesheet" href="/css/chatbot.css">
   <link rel="stylesheet" href="/css/rentalStyles.css">
+  <link rel="icon" type="image/png" href="/assets/logo2.png">
+  
   <style>
     .cart-section {
       margin: 2rem 0;
@@ -33,9 +35,9 @@
       display: block;
     }
     .toggle-btn {
-      color: #24b02b !important;
-      font-size: 2rem;
-      background: none;
+      font-size: 1.5rem;
+      /* background: none; */
+      background-color: #838383;
       border: none;
       cursor: pointer;
       padding: 0 1rem;
@@ -51,6 +53,25 @@
       padding-left: 20px;
       border-left: 3px solid #007bff;
     }
+    .section-checkout {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      text-align: right;
+    }
+    .checkout-section-btn {
+      background-color: #2f9146;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .checkout-section-btn:hover {
+      background-color: #156225;
+    }
   </style>
 </head>
 
@@ -61,19 +82,19 @@
   </div>
   <main class="cart-container">
     <div class="cart-header">
-      <h1>Your Unified Cart</h1>
+      <h1>Your Cart</h1>
     </div>
 
     <% const sections = {
       Rental: cart.items.filter(item => item.productType === 'Rental'),
       Subscription: cart.items.filter(item => item.productType === 'Subscription'),
       SecondHand: cart.items.filter(item => item.productType === 'SecondHand')
-    };
-    let grandTotal = 0;
-    let depositTotal = 0;
-    %>
+    }; %>
 
-    <% Object.entries(sections).forEach(([sectionName, items]) => { %>
+    <% Object.entries(sections).forEach(([sectionName, items]) => { 
+      let sectionTotal = 0;
+      let sectionDeposit = 0;
+    %>
       <div class="cart-section">
         <div class="section-header" onclick="toggleSection('<%= sectionName %>')">
           <h2><%= sectionName %> (<%= items.length %>)</h2>
@@ -108,12 +129,12 @@
                   if (sectionName === 'Rental') {
                     totalPrice = item.calculatedPrice * item.quantity;
                     itemDeposit = item.securityDeposit;
-                    depositTotal += itemDeposit;
+                    sectionDeposit += itemDeposit;
                   } else {
                     totalPrice = item.product.price * item.quantity;
                   }
                   
-                  grandTotal += totalPrice;
+                  sectionTotal += totalPrice;
                 %>
                   <tr class="cart-item">
                     <td>
@@ -147,7 +168,6 @@
                           <% if (item.product.rate === 'day' && (item.diffDays || 0) > 1) { %>
                               × <%= item.diffDays || 1 %> days
                           <% } %>
-                          
                         </div>
                       </td>
                     <% } else if (sectionName === 'Subscription') { %>
@@ -155,10 +175,8 @@
                     <% } %>
 
                     <td>
-                      
-                        ₹<%= sectionName === 'Rental' ? (item.calculatedPrice || 0).toFixed(2) : 
-(item.product?.price || 0).toFixed(2) %>
-
+                      ₹<%= sectionName === 'Rental' ? (item.calculatedPrice || 0).toFixed(2) : 
+                        (item.product?.price || 0).toFixed(2) %>
                       <% if (sectionName === 'Rental') { %>
                         <div class="security-deposit">
                           + ₹<%= item.securityDeposit %> deposit
@@ -183,9 +201,7 @@
                       <% if (sectionName === 'Rental') { %>
                         <div class="price-breakdown">
                           (₹<%= totalPrice.toFixed(2) %> + 
-                          
                           ₹<%= (itemDeposit || 0).toFixed(2) %> deposit)
-
                         </div>
                       <% } %>
                     </td>
@@ -196,25 +212,26 @@
                                 style="background-color: black; color: white;">Delete</button>
                       </form>
                     </td>
+                    
                   </tr>
                 <% }); %>
               </tbody>
             </table>
+
+            <!-- Section Checkout Button -->
+            <div class="section-checkout">
+              <button class="checkout-section-btn"
+  data-section="<%= sectionName %>"
+  data-total="<%= (sectionTotal + (sectionName === 'Rental' ? sectionDeposit : 0)).toFixed(2) %>"
+  onclick="makePayment(event)">
+  Checkout <%= sectionName %> - ₹<%= (sectionTotal + (sectionName === 'Rental' ? sectionDeposit : 0)).toFixed(2) %>
+</button>
+
+            </div>
           <% } %>
         </div>
       </div>
     <% }); %>
-
-    <% if (cart.items.length > 0) { %>
-      <div class="cart-total">
-        <% if (depositTotal > 0) { %>
-          <h4>Total Security Deposits: ₹<%= depositTotal.toFixed(2) %></h4>
-        <% } %>
-        <h3>Grand Total: ₹<%= grandTotal.toFixed(2) %></h3>
-      </div>
-      <div style="clear: both;"></div>
-      <button class="checkout-button">Proceed to Checkout</button>
-    <% } %>
   </main>
 
   <script>
@@ -232,6 +249,137 @@
         toggleSection(sectionName);
       }
     });
-  </script>
+
+    // Razorpay Checkout Handlers
+  //   document.querySelectorAll('.checkout-section-btn').forEach(button => {
+  //     button.addEventListener('click', async (e) => {
+  //       const section = button.dataset.section;
+  //       const amount = button.dataset.total;
+        
+  //       try {
+  //         const response = await fetch(`/payment/${section.toLowerCase()}/checkout`, {
+  //           method: 'POST',
+  //           headers: {
+  //             'Content-Type': 'application/json',
+  //             'Authorization': `Bearer ${localStorage.getItem('token')}`
+  //           },
+  //           body: JSON.stringify({ amount })
+  //         });
+
+  //         const { success, order } = await response.json();
+          
+  //         if (success) {
+  //           const options = {
+  //             key: '<%= process.env.RAZORPAY_KEY_ID %>',
+  //             amount: order.amount,
+  //             currency: "INR",
+  //             name: "TradeTrail",
+  //             description: `${section} Payment`,
+  //             order_id: order.id,
+  //             handler: async function(response) {
+  //               const verificationResponse = await fetch(`/payment/${section.toLowerCase()}/verify`, {
+  //                 method: 'POST',
+  //                 headers: {
+  //                   'Content-Type': 'application/json',
+  //                   'Authorization': `Bearer ${localStorage.getItem('token')}`
+  //                 },
+  //                 body: JSON.stringify(response)
+  //               });
+
+  //               const { success: verificationSuccess } = await verificationResponse.json();
+  //               if (verificationSuccess) {
+  //                 window.location.href = `/payment/success/${section.toLowerCase()}`;
+  //               }
+  //             }
+  //           };
+
+  //           const rzp = new Razorpay(options);
+  //           rzp.open();
+  //         }
+  //       } catch (error) {
+  //         console.error('Checkout error:', error);
+  //       }
+  //     });
+  //   });
+  // </script>
+      <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
+      <script>
+        function collectProductIds() {
+    const productIds = [];
+    const productIdInputs = document.querySelectorAll('.product-id');
+    
+    productIdInputs.forEach(input => {
+      productIds.push(input.value);
+    });
+    return productIds;
+    // console.log(productIds); // This will log the array of product IDs
+    // You can now use the productIds array as needed
+  }
+
+      function makePayment(event) {
+  let button = event.target; // Get the button that was clicked
+  let section = button.getAttribute("data-section");
+  let amount = parseFloat(button.getAttribute("data-total")) ; 
+  
+  // Call the function to collect IDs
+  const productIds = collectProductIds();
+  
+  console.log("Section:", section);
+  console.log("Amount:", amount);
+  console.log("Product IDs:", productIds);
+
+  fetch("/api/payment/makePayment", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ amount,section, productIds  }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("data", data);
+      if (data.success) {
+        const options = {
+          ...data.options,
+          handler: function (response) {
+            verifyPayment(response, amount,productIds);
+          },
+        };
+        console.log(options);
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+      } else {
+        alert("Payment initialization failed");
+      }
+    })
+    .catch(() => alert("Failed to create order"));
+}
+
+function verifyPayment(response, amount,productIds) {
+  console.log("Verifying payment with:", response, "and amount:", amount);
+
+  fetch("/api/payment/verifyPayment", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...response, amount,productIds }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) {
+        alert("Payment successful! Redirecting...");
+        console.log("Redirecting to:", data.redirectUrl);
+        window.location.href = data.redirectUrl;
+      } else {
+        alert("Payment verification failed");
+      }
+    })
+    .catch((error) => {
+      console.error("Error verifying payment:", error);
+      alert("Error verifying payment");
+    });
+}
+
+  
+      </script>
 </body>
 </html>

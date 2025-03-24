@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="/css/rentalStyles.css">
   <link rel="stylesheet" href="/css/navigation.css">
   <link rel="stylesheet" href="/css/chatbot.css">
+  <link rel="icon" type="image/png" href="/assets/logo2.png">
   <style>
     /* Verification badges */
     .verified-badge {
@@ -132,6 +133,7 @@
   </div>
 
   <main>
+
     <h1>Subscriptions</h1>
 
     <div class="filter-container">
@@ -212,10 +214,22 @@
     </div>
 
     <button type="button" onclick="window.location.href='/subscription/sell'">POST A SUBSCRIPTION!</button>
+
     
     <% if (prods.length > 0) { %>
       <div class="rental-list">
+
+        <div class="rental-item">
+          <a href="/subscription/sell" class="post-button">
+            <div class="circle">
+                +
+            </div>
+            <span class="post-text">POST A PLATFORM</span>
+        </a>
+        </div>
+
         <% for (let product of prods) { %>
+          
           <div class="rental-item">
             <div class="product-card">
               <div class="card__image">

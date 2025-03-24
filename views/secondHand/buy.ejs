@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="/css/chatbot.css">
   <link rel="stylesheet" href="/css/rentalStyles.css">
   <link rel="stylesheet" href="/css/navigation.css">
+  <link rel="icon" type="image/png" href="/assets/logo2.png">
+
   <style>
     /* Filter sidebar styles */
     .filter-sidebar {
@@ -67,6 +69,7 @@
       }
     }
   </style>
+
 </head>
 <body>
   <div id="navbar">
@@ -75,6 +78,7 @@
   </div>
 
   <main>
+
     <h1>Second Hand Products</h1>
 
     <div class="filter-container">
@@ -155,10 +159,22 @@
     </div>
 
     <button type="button" onclick="window.location.href='/secondHand/sell'">POST AN ITEM!</button>
+
     
     <% if (prods.length > 0) { %>
       <div class="rental-list">
+
+        <div class="rental-item">
+          <a href="/secondHand/sell" class="post-button">
+            <div class="circle">
+                +
+            </div>
+            <span class="post-text">POST AN ITEM !</span>
+        </a>
+        </div>
+
         <% prods.forEach((product, index) => { %>
+
           <div class="rental-item">
             <div class="product-card">
               <!-- Image Slider -->

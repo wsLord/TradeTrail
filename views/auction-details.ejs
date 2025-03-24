@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auction Details</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 12px;
+      text-align: center;
+    }
+    th {
+      background-color: #4f6b3d;
+      color: white;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .no-bids {
+      text-align: center;
+      padding: 20px;
+      background-color: #f9f9f9;
+      border: 1px solid #ccc;
+    }
+    .disabled-button {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+    button:disabled:hover {
+    background-color: #ccc;
+    cursor: not-allowed;
+    }
+
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Auction Details for <%= product.title %></h1>
+    <p>Seller: <%= product.seller.fullName %></p>
+    <p>Minimum Price: $<%= product.min_price %></p>
+  </header>
+  
+<!-- Monetary Bids Section -->
+<h2>Monetary Bids</h2>
+<% if (monetaryBids.length > 0) { %>
+  <table>
+    <thead>
+      <tr>
+        <th>Bidder</th>
+        <th>Amount</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% monetaryBids.forEach(bid => { %>
+        <tr>
+          <td><%= bid.bidder.fullName %></td>
+          <td>$<%= bid.bidAmount %></td>
+          <td>
+            <form action="/profile/accept-bid" method="POST">
+              <input type="hidden" name="bidId" value="<%= bid._id %>">
+              <button 
+                type="submit" 
+                class="<%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled-button' : '' %>" 
+                <%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled' : '' %>
+              >
+                <%= product.winner ? 'Bid Accepted' : (new Date() < new Date(product.endDate) ? 'Auction Ongoing' : 'Accept') %>
+              </button>
+            </form>
+          </td>
+          
+          
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+<% } else { %>
+  <div class="no-bids">No monetary bids yet.</div>
+<% } %>
+
+  <!-- Product Bids Section -->
+  <h2>Product Bids</h2>
+  <% if (productBids.length > 0) { %>
+    <table>
+      <thead>
+        <tr>
+          <th>Bidder</th>
+          <th>Product Name</th>
+          <th>Description</th>
+          <th>Location</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% productBids.forEach(bid => { %>
+          <tr>
+            <td><%= bid.bidder.fullName %></td>
+            <td><%= bid.product?.name || 'N/A' %></td>
+            <td><%= bid.product?.description || 'No description' %></td>
+            <td><%= bid.product?.location || 'Unknown' %></td>
+            <td>
+                <form action="/profile/accept-bid" method="POST">
+                  <input type="hidden" name="bidId" value="<%= bid._id %>">
+                  <button 
+                    type="submit" 
+                    class="<%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled-button' : '' %>" 
+                    <%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled' : '' %>
+                  >
+                    <%= product.winner ? 'Bid Accepted' : (new Date() < new Date(product.endDate) ? 'Auction Ongoing' : 'Accept') %>
+                  </button>
+                </form>
+              </td>
+              
+              
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  <% } else { %>
+    <div class="no-bids">No product bids yet.</div>
+  <% } %>
+
+  <footer>
+    <a href="/secondHand/buy">Back to Products</a>
+  </footer>
+</body>
+<!-- JavaScript to Control Button State -->
+<script>
+    const endDate = new Date("<%= product.endDate.toISOString() %>");
+    const currentTime = new Date();
+    
+    if (currentTime < endDate) {
+      document.querySelectorAll('.accept-button').forEach(button => {
+        button.disabled = true;
+        button.textContent = "Auction Ongoing";
+        button.style.backgroundColor = "#ccc";
+        button.style.cursor = "not-allowed";
+      });
+    }
+  </script>
+</html>
