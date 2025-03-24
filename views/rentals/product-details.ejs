@@ -135,11 +135,19 @@
               <button type="submit" formaction="/rental/rent/<%= product.id %>" class="buy-now-button <%= product.buyer ? 'disabled-button' : '' %>" <%= product.buyer ? 'disabled' : '' %>>
                 Rent Now (₹<span id="dynamicPrice2">0</span>)
               </button>
-              <% if (product.buyer) { %>
+              <!-- <% if (product.buyer) { %>
                 <p class="rented-message" style="color: red; font-weight: bold; margin-top: 10px;">
                   Already Rented By: <%= product.buyer.fullName %>
                 </p>
+              <% } %> -->
+              <!-- for rental dates -->
+              <% if (product.currentBooking) { %>
+                <p class="availability-notice" style="color: red; font-weight: bold;">
+                  Already Rented By: <%= product.currentBooking.user.fullName %> until 
+                  <%= new Date(product.currentBooking.rentalEnd).toLocaleDateString('en-IN') %>
+                </p>
               <% } %>
+              
               
             </div>
           </form>
@@ -158,6 +166,23 @@
       slideIndex = (slideIndex + n + slides.length) % slides.length;
       slides[slideIndex].classList.add("active");
     }
+    // for disabling buttons
+    const addToCartButton = document.querySelector('.add-to-cart-button');
+const rentNowButton = document.querySelector('.buy-now-button');
+const rentalEndDate = "<%= product.currentBooking ? product.currentBooking.rentalEnd : null %>";
+
+if (rentalEndDate) {
+  const endDate = new Date(rentalEndDate);
+  const currentDate = new Date();
+
+  if (currentDate <= endDate) {
+    addToCartButton.disabled = true;
+    rentNowButton.disabled = true;
+    addToCartButton.classList.add('disabled-button');
+    rentNowButton.classList.add('disabled-button');
+  }
+}
+
   </script>
 
 </body>
