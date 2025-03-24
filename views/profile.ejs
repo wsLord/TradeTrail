@@ -10,6 +10,8 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="icon" type="image/png" href="/assets/logo2.png">
+    <link rel="stylesheet" href="/css/rentalStyles.css">
+    <link rel="stylesheet" href="/css/navigation.css">
 
     <style>
         body {
@@ -27,7 +29,7 @@
             border-radius: 15px;
             width: 90%;
             max-width: 1000px;
-            margin: 40px auto;
+            margin: 40px auto 60px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
             display: flex;
             justify-content: space-between;
@@ -47,7 +49,7 @@
             color: #2c3e50;
             text-align: center;
             width: 100%;
-            position: relative;
+            /* position: relative; */
         }
 
         h3::after {
@@ -73,7 +75,7 @@
         }
 
         .edit-btn {
-            background: linear-gradient(135deg, #3E6B48, #2d5035);
+            background: linear-gradient(135deg, #44a559, #3c6d47);
             color: white;
             padding: 12px 35px;
             border: none;
@@ -81,15 +83,32 @@
             border-radius: 30px;
             font-size: 17px;
             letter-spacing: 0.5px;
-            margin-top: 25px;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(62, 107, 72, 0.2);
             display: block;
             width: fit-content;
-            margin: 25px auto 0;
+            margin: 30px auto 20px;
         }
 
         .edit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(62, 107, 72, 0.3);
+        }
+
+        .prod-btn {
+            background: linear-gradient(135deg, #137c73, #074641);
+            color: white;
+            padding: 12px 35px;
+            border-radius: 30px;
+            font-size: 20px;
+            letter-spacing: 0.6px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(62, 107, 72, 0.2);
+            width: fit-content;
+            margin: 15px auto 20px;
+        }
+
+        .prod-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(62, 107, 72, 0.3);
         }
@@ -123,6 +142,10 @@
             border-radius: 8px;
         }
 
+        .btn-primary:hover{
+            background: #38974c;
+        }
+
         .btn-secondary {
             background: #95a5a6;
             border: none;
@@ -145,7 +168,7 @@
             display: flex;
             gap: 20px;
             flex-wrap: wrap;
-            justify-content: center;
+            justify-content: space-evenly;
             padding: 20px 0;
         }
 
@@ -154,7 +177,7 @@
             height: 180px;
             object-fit: cover;
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); */
             transition: transform 0.2s ease;
         }
 
@@ -173,15 +196,15 @@
         }
 
         .profile-pic-section {
-            position: relative;
+            /* position: relative; */
             margin-left: 30px;
         }
 
         .upload-overlay {
-            position: absolute;
+            /* position: relative; */
             bottom: 15px;
             right: 15px;
-            background: rgba(255, 255, 255, 0.95);
+            background: #e6efdf;
             padding: 8px 15px;
             border-radius: 25px;
             font-size: 14px;
@@ -191,12 +214,15 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            margin-top: 10px;
+            z-index: 1;
         }
 
         .upload-overlay:hover {
-            background: white;
+            background: #c7ddb5;
             transform: scale(1.05);
         }
+
 
         @media (max-width: 768px) {
             .profile-card {
@@ -230,13 +256,45 @@
                 max-width: 100%;
             }
         }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #d9534f, #b52b27);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            cursor: pointer;
+            border-radius: 30px;
+            font-size: 17px;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(3, 2, 2, 0.3);
+            display: block;
+            width: fit-content;
+            margin: 55px auto 20px;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(179, 35, 30, 0.4);
+            background: linear-gradient(135deg, #b52b27, #8b1e1a);
+        }
+
+        .rental-item{
+            height: 300px;
+            width: 450px;
+        }
+
+        .product-card{
+            padding: 0px 30px;
+        }
+
     </style>
 </head>
 
 <body>
     <%- include('./common/navigation.ejs') %>
 
-    <main>
+    <main><br>
         <div class="profile-card">
             <div class="profile-content">
                 <h3><%= user.fullName %></h3>
@@ -291,21 +349,36 @@
                        style="display: none;" 
                        accept="image/*"
                        onchange="uploadProfilePic(this.files[0])">
+                <button class="logout-btn" onclick="window.location.href = '/api/auth/logout'">Logout</button>
             </div>
         </div>
 
         <div class="auction-products-card">
             <h3>Your Auction Products</h3>
             <% if (auctionProducts.length > 0) { %>
+            <div class="rental-list">
+
               <ul>
                 <% auctionProducts.forEach(product => { %>
-                  <li>
-                    <a href="/profile/auction/<%= product._id %>" style="text-decoration: none; color: #007bff;">
-                      <h4><%= product.title %></h4>
-                    </a>
-                  </li>
+                    <div class="rental-item">
+                        <div class="product-card">
+                    <!-- <a href="/profile/auction/<%= product._id %>" style="text-decoration: none; color: #007bff;"> -->
+                    <button class="prod-btn" onclick="window.location.href='/profile/auction/<%= product._id %>'"><%= product.title %></button>
+                        <div class="product-info">
+                            <div class="price-info">
+                            <p class="direct-price">Direct Purchase: ₹<%= product.price %></p>
+                            <% if (product.saleType === 'auction') { %>
+                                <p class="auction-price">Auction Starts At: ₹<%= product.min_price %></p>
+                            <% } %>
+                            </div>
+                            <p class="description"><%= product.description %></p>
+                        </div>
+                    </div>
+                    </div>
+                  
                 <% }); %>
               </ul>
+            </div>
             <% } else { %>
               <p>You haven't posted any auction products yet.</p>
             <% } %>

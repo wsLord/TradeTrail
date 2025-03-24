@@ -25,7 +25,7 @@ body {
 }
 
 /* Options Section */
-.options {
+/* .options {
     display: flex;
     justify-content: center;
     gap: 30px;
@@ -64,7 +64,100 @@ body {
 
 .option button:hover {
     background-color: #2d5035;
+} */
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  margin: 5rem 5.5rem 0;
 }
+
+.option {
+  background: #ffffff;
+  border-radius: 15px;
+  padding: 2.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* height: 0%; */
+  transition: transform 0.3s ease;
+  margin-top: 5rem auto 0;
+  padding: 2rem;
+  max-width: 40rem;
+  margin: auto;
+}
+
+.option:hover {
+  transform: translateY(-5px);
+}
+
+.option h2 {
+  color: #2c3e50;
+  font-size: 1.6rem;
+  margin-bottom: 30px;
+  text-align: center;
+  line-height: 1.3;
+  max-width: 20rem;
+}
+
+.option p {
+  color: #7f8c8d;
+  font-size: 1rem;
+  line-height: 1.6;
+  /* margin-bottom: 40px; */
+  text-align: center;
+  min-height: 80px; /* Ensures equal height for descriptions */
+  display: flex;
+  align-items: center;
+  max-width: 20rem;
+  padding: 0 3rem;
+}
+
+.button-container {
+  margin-top: auto;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.option button {
+  background: linear-gradient(135deg, #4caf50 0%, #357d37 100%);
+  color: white;
+  padding: 1.2rem 2.5rem;
+  border-radius: 30px;
+  font-size: 1.1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  width: fit-content;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+  margin: 20px auto 30px;
+}
+
+.option button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+}
+
+/* @media (max-width: 768px) {
+  .options {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .option {
+    padding: 2rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+} */
+
 
 /* Rental List */
 .rental-list {

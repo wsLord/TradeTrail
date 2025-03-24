@@ -9,19 +9,19 @@ const { uploadMultiple } = require("../middleware/multerConfig");
 router.get("/", rentingController.getHome);
 
 // Route to render the form for posting a rental product
-router.get("/post", rentingController.getAddProduct);
+router.get("/post", protectRoute, rentingController.getAddProduct);
 
 // Route to handle the form submission for posting a rental product
-router.post("/post", uploadMultiple,protectRoute, rentingController.postAddProduct);
+router.post("/post", uploadMultiple, protectRoute, rentingController.postAddProduct);
 
 // Product details route
-router.get('/details/:productId', rentingController.getProductDetails);
+router.get('/details/:productId', protectRoute, rentingController.getProductDetails);
 
 // Route to display rented products (this can be a page where renters can browse items)
-router.get("/rent", rentingController.getRentItems);
+router.get("/rent", protectRoute, rentingController.getRentItems);
 
 // Handle the purchase of a rental product (Decrement the quantity)
-router.post("/buy/:productId", rentingController.buyProduct);
+router.post("/buy/:productId", protectRoute, rentingController.buyProduct);
 
 // Protected route for Add-to-Cart
 // router.post("/add-to-cart/:productId", protectRoute, rentingController.addToCart);
