@@ -175,7 +175,7 @@ exports.postAddProduct = (req, res, next) => {
 };
 
 // Get all rental items (with search)
-exports.getRentItems = (req, res, next) => {
+exports.getRentItems = async (req, res, next) => {
   const searchQuery = req.query.search || "";
   const query = {};
 
@@ -187,20 +187,33 @@ exports.getRentItems = (req, res, next) => {
     ];
   }
 
-  RentalProduct.find(query)
-    .then((products) => {
-      res.render("rentals/rent-items", {
-        pageTitle: "Available Rentals",
-        path: "/rental/rent",
-        products: products,
-        searchQuery: searchQuery,
-        activePage: "rental",
-      });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).send("An error occurred while fetching rental items.");
+  try {
+    // Fetch all rental products
+    const products = await RentalProduct.find(query);
+
+    // Get active bookings to determine availability
+    const activeBookings = await RentalBooking.find({ status: "active" }).select('product');
+
+    // Extract booked product IDs
+    const bookedProductIds = activeBookings.map(booking => booking.product.toString());
+
+    // Add availability status to products
+    const productsWithAvailability = products.map(product => ({
+      ...product._doc,
+      isAvailable: !bookedProductIds.includes(product._id.toString()),
+    }));
+
+    res.render("rentals/rent-items", {
+      pageTitle: "Available Rentals",
+      path: "/rental/rent",
+      products: productsWithAvailability,
+      searchQuery: searchQuery,
+      activePage: "rental",
     });
+  } catch (err) {
+    console.error("Error fetching rental items:", err);
+    res.status(500).send("An error occurred while fetching rental items.");
+  }
 };
 
 // Controller method to handle the buying action and decrementing quantity

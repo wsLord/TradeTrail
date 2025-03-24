@@ -9,7 +9,6 @@ const RentalBooking = require("../models/rentalBooking");
 const Ott = require("../models/ott");
 const Cart = require("../models/cartModel");
 
-
 // Initialize Razorpay with your test keys
 const razorpayInstance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID, // Using your test key directly
@@ -35,7 +34,12 @@ exports.makePayment = async (req, res) => {
     );
 
     if (filteredProducts.length === 0) {
-      return res.status(404).json({ success: false, message: `No ${section} products found in your cart.` });
+      return res
+        .status(404)
+        .json({
+          success: false,
+          message: `No ${section} products found in your cart.`,
+        });
     }
 
     // Update the buyer field for each product and handle rentals if necessary
@@ -45,6 +49,7 @@ exports.makePayment = async (req, res) => {
           let model;
           // Identify the correct model based on productType
           if (section === "Rental") model = RentalProduct;
+          //only direct selling subscription and second hand products are handeled here
           else if (section === "Subscription") model = Ott;
           else if (section === "SecondHand") model = Product;
 
@@ -73,54 +78,6 @@ exports.makePayment = async (req, res) => {
       })
     );
 
-
-    // Update each product to "sold" status and set buyer across multiple models
-    // await Promise.all(
-    //   productIds.map(async (productId) => {
-    //     try {
-          // Define the models
-          // Check each model for the product ID
-      //     const rental = await RentalProduct.findById(productId);
-      //     const subscription = await Ott.findById(productId);
-      //     const secondHand = await Product.findById(productId);
-
-      //     //     // Update the product if found
-      //     if (rental) {
-      //       await RentalProduct.findByIdAndUpdate(
-      //         productId,
-      //         {
-      //           $set: {
-      //             // status: "sold",
-      //             buyer: req.user._id,
-      //           },
-      //         },
-      //         // console.log("in rental")
-      //       );
-      //     } else if (subscription) {
-      //       await Ott.findByIdAndUpdate(productId, {
-      //         $set: {
-      //           status: "sold",
-      //           buyer: req.user._id,
-      //         },
-      //       });
-      //     } else if (secondHand) {
-      //       await Product.findByIdAndUpdate(productId, {
-      //         $set: {
-      //           status: "sold",
-      //           buyer: req.user._id,
-      //         },
-      //       });
-      //     } else {
-      //       console.log(`Product ${productId} not found in any model.`);
-      //     }
-      //   } catch (error) {
-      //     console.error(`Error updating product ${productId}:`, error);
-      //   }
-    //     const prod=await cartModel.findOne({user:req.user._id,items:{$elemMatch:{_id:productId}}});
-
-    //   })
-    // );
-
     if (!amount || amount <= 0) {
       return res
         .status(400)
@@ -137,6 +94,17 @@ exports.makePayment = async (req, res) => {
 
     const order = await razorpayInstance.orders.create(options);
     console.log("order", order);
+
+    // ✅ Remove the products from the cart after successful payment
+    cart.items = cart.items.filter(
+      (item) =>
+        !(
+          item.productType === section &&
+          productIds.includes(item.product.toString())
+        )
+    );
+    await cart.save();
+    console.log("Products removed from the cart.");
 
     res.json({
       success: true,
