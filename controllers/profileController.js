@@ -2,7 +2,8 @@
 const User = require("../models/userModel");
 const Product = require("../models/product");
 const RentalProduct = require("../models/rentalProduct");
-const BidProduct = require("../models/bidProduct");
+const SecondhandDirectProduct = require("../models/product");
+const SubscriptionDirectProduct = require("../models/ott");
 
 exports.getProfile = async (req, res) => {
   try {
@@ -15,6 +16,10 @@ exports.getProfile = async (req, res) => {
       seller: req.user._id,
     }).populate("buyer");
 
+    // Fetch direct purchase and subscription products
+    const directSecondhandProducts = await SecondhandDirectProduct.find({ seller: req.user._id }).populate("buyer");
+    const directSubscriptionProducts = await SubscriptionDirectProduct.find({ seller: req.user._id }).populate("buyer");
+
     // Add default badges if none exist
     if (!user.badges || user.badges.length === 0) {
       user.badges = [
@@ -26,8 +31,10 @@ exports.getProfile = async (req, res) => {
     res.render("profile", {
       user: user,
       auctionProducts,
-      activePage: "profile",
       rentalProducts,
+      directSecondhandProducts,
+      directSubscriptionProducts,
+      activePage: "profile",
     });
   } catch (error) {
     console.error("Error fetching profile:", error);
