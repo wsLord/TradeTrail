@@ -604,3 +604,45 @@ body {
         height: 40px;
         background: lightgray;
       }
+      /* Button container to align button and info icon */
+      .info-icon {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 18px;
+        color: white; /* Change the color of the "i" icon */
+        background-color: #2d4d34;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Tooltip styling */
+    .info-icon:hover::after {
+        content: "The exchange of products is entirely your responsibility. We are not liable for any loss or damage."; /* Tooltip text */
+        position: absolute;
+        bottom: 150%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white; /* Change the tooltip text color */
+        padding: 5px 10px;
+        border-radius: 5px;
+        white-space: nowrap;
+        font-size: 12px;
+        text-align: center;
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    /* Hide tooltip by default */
+    .info-icon::after {
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease-in-out;
+    }
+    
