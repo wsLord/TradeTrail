@@ -210,6 +210,11 @@
                                 style="background-color: black; color: white;">Delete</button>
                       </form>
                     </td>
+                    <td>
+                      <input type="hidden" class="product-id" value="<%= item.product._id %>">
+                       <p>product id is<%= item.product._id %></p>
+                    </td>
+                    
                   </tr>
                 <% }); %>
               </tbody>
@@ -302,18 +307,34 @@
       <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     
       <script>
-        function makePayment(event) {
+        function collectProductIds() {
+    const productIds = [];
+    const productIdInputs = document.querySelectorAll('.product-id');
+    
+    productIdInputs.forEach(input => {
+      productIds.push(input.value);
+    });
+    return productIds;
+    // console.log(productIds); // This will log the array of product IDs
+    // You can now use the productIds array as needed
+  }
+
+      function makePayment(event) {
   let button = event.target; // Get the button that was clicked
   let section = button.getAttribute("data-section");
   let amount = parseFloat(button.getAttribute("data-total")) ; 
-
+  
+  // Call the function to collect IDs
+  const productIds = collectProductIds();
+  
   console.log("Section:", section);
   console.log("Amount:", amount);
+  console.log("Product IDs:", productIds);
 
   fetch("/api/payment/makePayment", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ amount }),
+    body: JSON.stringify({ amount,section, productIds  }),
   })
     .then((response) => response.json())
     .then((data) => {
@@ -322,7 +343,7 @@
         const options = {
           ...data.options,
           handler: function (response) {
-            verifyPayment(response, amount);
+            verifyPayment(response, amount,productIds);
           },
         };
         console.log(options);
@@ -336,13 +357,13 @@
     .catch(() => alert("Failed to create order"));
 }
 
-function verifyPayment(response, amount) {
+function verifyPayment(response, amount,productIds) {
   console.log("Verifying payment with:", response, "and amount:", amount);
 
   fetch("/api/payment/verifyPayment", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...response, amount }),
+    body: JSON.stringify({ ...response, amount,productIds }),
   })
     .then((res) => res.json())
     .then((data) => {

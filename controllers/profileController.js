@@ -1,6 +1,7 @@
 // controllers/profileController.js
 const User = require("../models/userModel");
 const Product = require("../models/product");
+const RentalProduct = require("../models/rentalProduct");
 const BidProduct = require("../models/bidProduct");
 
 exports.getProfile = async (req, res) => {
@@ -10,6 +11,9 @@ exports.getProfile = async (req, res) => {
       seller: req.user._id,
       saleType: "auction",
     });
+    const rentalProducts = await RentalProduct.find({
+      seller: req.user._id,
+    }).populate("buyer");
 
     // Add default badges if none exist
     if (!user.badges || user.badges.length === 0) {
@@ -23,6 +27,7 @@ exports.getProfile = async (req, res) => {
       user: user,
       auctionProducts,
       activePage: "profile",
+      rentalProducts,
     });
   } catch (error) {
     console.error("Error fetching profile:", error);
@@ -64,6 +69,12 @@ exports.getAuctionDetails = async (req, res) => {
     const monetaryBids = bids.filter((bid) => bid.bidAmount !== null);
     const productBids = bids.filter((bid) => bid.bidAmount === null);
 
+    // res.render("secondHand/auction", {
+    //   product,
+    //   monetaryBids,
+    //   productBids,
+    //   type:"sell"
+    // });
     res.render("auction-details", {
       product,
       monetaryBids,
@@ -113,7 +124,6 @@ exports.acceptBid = async (req, res) => {
     res.redirect("back");
   }
 };
-
 
 exports.updateProfilePic = async (req, res) => {
   try {

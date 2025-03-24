@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const paymentSchema = new mongoose.Schema({
+  buyer:{ type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   orderId: {
     type: String,
     required: true,
@@ -17,6 +18,8 @@ const paymentSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  // product: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+  productIds: [{ type: String }],
   status: {
     type: String,
     enum: ["pending", "completed", "failed", "refunded"],

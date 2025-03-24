@@ -118,7 +118,8 @@ exports.getProduct = (req, res, next) => {
               monetaryBidsCount: monetaryBids.length,
               MIN_BID_INCREMENT: MIN_BID_INCREMENT,
               path: "/product",
-              activePage: "secondHand"
+              activePage: "secondHand",
+              type:"buy"
           });
       })
       .catch((err) => {
