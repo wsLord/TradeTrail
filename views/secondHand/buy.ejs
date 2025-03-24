@@ -41,7 +41,8 @@
         </a>
         </div>
 
-        <% prods.forEach((product, index) => { %>
+        <% prods.forEach((product, index) => { 
+          if (!product.buyer) { %>
 
           <div class="rental-item">
             <div class="product-card">
@@ -87,7 +88,7 @@
 
             </div>
           </div>
-        <% }); %>
+        <% } }); %>
       </div>
     <% } else { %>
       <h1>No Products Found!</h1>
