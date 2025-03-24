@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home TradeTrail</title>
     <link rel="stylesheet" href="/css/homeStyles.css">
+    <link rel="stylesheet" href="/css/chatbot.css">
     <link rel="icon" type="image/png" href="/assets/logo2.png">
 
 </head>
@@ -15,6 +16,7 @@
     <!-- Include Navbar -->
     <div id="navbar">
         <%- include('./common/navigation.ejs') %>
+        <%- include('./common/chatbot.ejs') %>
     </div>
 
     <!-- Welcome Section -->
@@ -86,104 +88,7 @@
                     </div>
                 </section>
 
-                 <!-- Chatbot Container -->
-                 <div class="chatbot-container">
-                    <div class="chat-icon" onclick="toggleChat()" role="button" aria-label="Open chat" tabindex="0">
-                        <svg viewBox="0 0 64 64">
-                            <!-- Main chat bubble -->
-                            <path class="chat-bubble" d="M12 12h40v30H28.86L12 50.86V12" rx="5" ry="5"/>
-                            <!-- Chat lines -->
-                            <g class="chat-lines">
-                                <path d="M20 25h24"/>
-                                <path d="M20 32h18"/>
-                                <path d="M20 39h14"/>
-                            </g>
-                        </svg>
-                    </div>
-                    <div class="chatbot-interface" id="chatInterface">
-                        <div class="chat-header">
-                            <h3>TradeTrail Assistant</h3>
-                            <button class="close-button" onclick="toggleChat()" aria-label="Close chat">
-                                <svg class="close-icon" viewBox="0 0 24 24">
-                                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="chat-messages" id="chatMessages">
-                            <div class="message bot-message">
-                                Hello! How can I help you today?
-                            </div>
-                        </div>
-                        <div class="chat-input">
-                            <input type="text" id="userInput" placeholder="Type your message...">
-                            <button onclick="sendMessage()">Send</button>
-                        </div>
-                    </div>
     </div>
-
-    <script>
-        // Predefined responses
-        const predefinedResponses = {
-            "hello": "Hello! How can I assist you today?",
-            "hi": "Hi there! How can I help?",
-            "rent": "You can rent items by visiting our rental section. Check out the 'Renting Items' feature!",
-            "subscription": "To swap subscriptions, go to the 'Subscription Swapping' section. Need more help?",
-            "contact": "Our contact details are available in the Contact Us section below.",
-            "buy": "For second-hand items, please visit the 'Second-Hand Buying' section.",
-            "default": "I'm here to help with questions about renting, subscriptions, and second-hand items. Feel free to ask!"
-        };
-
-        function toggleChat() {
-            const chatInterface = document.getElementById('chatInterface');
-            chatInterface.style.display = chatInterface.style.display === 'none' ? 'flex' : 'none';
-
-            // Toggle aria-expanded state for accessibility
-            const chatButton = document.querySelector('.chat-icon');
-            const isExpanded = chatInterface.style.display === 'flex';
-            chatButton.setAttribute('aria-expanded', isExpanded);
-        }
-
-        function sendMessage() {
-            const userInput = document.getElementById('userInput');
-            const chatMessages = document.getElementById('chatMessages');
-            const message = userInput.value.toLowerCase();
-
-            // Add user message
-            chatMessages.innerHTML += `
-                <div class="message user-message">
-                    ${userInput.value}
-                </div>
-            `;
-
-            // Find response
-            let response = predefinedResponses.default;
-            for (const [keyword, reply] of Object.entries(predefinedResponses)) {
-                if (message.includes(keyword)) {
-                    response = reply;
-                    break;
-                }
-            }
-
-            // Add bot response after short delay
-            setTimeout(() => {
-                chatMessages.innerHTML += `
-                    <div class="message bot-message">
-                        ${response}
-                    </div>
-                `;
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }, 500);
-
-            // Clear input
-            userInput.value = '';
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        // Handle Enter key
-        document.getElementById('userInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-    </script>
 
 </body>
 

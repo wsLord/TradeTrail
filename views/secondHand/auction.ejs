@@ -8,8 +8,9 @@
   <link rel="stylesheet" href="/css/forms.css">
   <link rel="stylesheet" href="/css/navigation.css">
   <link rel="stylesheet" href="/css/auction.css">
+  <link rel="stylesheet" href="/css/chatbot.css">
   <link rel="icon" type="image/png" href="/assets/logo2.png">
-
+  
   <style>
     /* Flash message container */
 .alert-box {
@@ -243,6 +244,7 @@
 </head>
 <body>
   <%- include('../common/navigation.ejs') %>
+  <%- include('../common/chatbot.ejs') %>
   <main>
     <!-- Flash messages block -->
     <% if (messages.error && messages.error.length > 0) { %>
