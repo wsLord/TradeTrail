@@ -156,4 +156,13 @@ const checkAuth = (req, res) => {
   }
 };
 
-module.exports = { signup, login, checkAuth, resendVerificationEmail };
+const logout = (req, res) => {
+  // res.clearCookie("jwt", { httpOnly: true, secure: process.env.NODE_ENV === "production" });
+  req.session.destroy(err =>{
+    console.log(err);
+    res.redirect("/api/auth/login"); // Redirect to login page
+
+  })
+};
+
+module.exports = { signup, login, checkAuth, resendVerificationEmail, logout };

@@ -66,7 +66,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-around;
-    max-width: 900px;
+    max-width: 75%;
     margin: auto;
     background-color: white;
     border-radius: 10px;
@@ -81,17 +81,22 @@ body {
 }
 .feature-content h2 {
     color: #3E6B48;
+    font-size: 30px;
 }
 .feature-content p {
     color: #5A5A5A;
 }
 .feature-content button {
-    background-color: #3E6B48;
+    /* background-color: #3E6B48; */
+    background: linear-gradient(135deg, #469e49 0%, #275d28 100%);
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
     color: white;
-    padding: 10px 15px;
+    padding: 12px 17px;
     border: none;
     cursor: pointer;
     border-radius: 5px;
+    font-size: 17px;
+    margin-top: 10px;
 }
 
 
