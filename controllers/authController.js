@@ -37,6 +37,22 @@ const signup = async (req, res) => {
       return res.status(400).json({ message: "Password must be at least 6 characters" });
     }
 
+    // ▼▼▼ NEW: Check for existing OAuth users ▼▼▼
+    const existingOAuthUser = await User.findOne({
+      email,
+      $or: [
+        { googleId: { $exists: true } },
+        { facebookId: { $exists: true } }
+      ]
+    });
+
+    if (existingOAuthUser) {
+      return res.status(400).json({
+        message: "This email is associated with a social login. Please use Google/Facebook to sign in.",
+        shouldUseOAuth: true
+      });
+    }
+
     // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -97,6 +113,14 @@ const login = async (req, res) => {
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
     if (!isPasswordCorrect) {
       return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // Add check for OAuth users
+    if (user.googleId || user.facebookId) {
+      return res.status(401).json({
+        message: "This account uses social login. Please sign in with Google or Facebook.",
+        shouldUseOAuth: true
+      });
     }
 
     // Generate JWT token

@@ -101,7 +101,7 @@
     }
 
     button:hover {
-      background: #4b6043;
+      background: #588248;
     }
 
     .login-link {
@@ -119,6 +119,106 @@
       color: #4b6043;
       text-decoration: underline;
     }
+
+    .oauth-providers {
+      margin: 25px 0;
+      text-align: center;
+    }
+
+    .divider {
+  display: flex;
+  align-items: center;
+  margin: 25px 0;
+  color: #666;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid #eee;
+  margin: 0 10px;
+}
+
+    .oauth-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background: white;
+      color: #444;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .oauth-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .oauth-btn i {
+      margin-right: 10px;
+      font-size: 18px;
+    }
+    .oauth-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background: white;
+      color: #444;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .oauth-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Updated Google button styles */
+    .oauth-btn.google {
+      border-color: #000000;
+      color: #3c4043;
+    }
+
+    .oauth-btn.google:hover {
+      background: #eeeeee;
+    }
+
+    .oauth-btn.google .logo {
+      width: 18px;
+      height: 18px;
+      margin-right: 12px;
+    }
+
+    /* Facebook button styles */
+    .oauth-btn.facebook {
+      border-color: #7e93c1;
+      color: #3B5998;
+    }
+
+    .oauth-btn.facebook:hover {
+      background: #eeeeee;
+    }
+
+    .oauth-btn i.fab {
+      font-size: 18px;
+      margin-right: 12px;
+    }
+
+    
+
+    .google { border-color: #DB4437; color: #DB4437; }
+    .facebook { border-color: #3B5998; color: #3B5998; }
   </style>
 </head>
 <body>
@@ -142,7 +242,19 @@
           <input type="checkbox"> Remember Me
         </label>
         <button type="submit">SIGN UP</button>
-        
+
+        <div class="oauth-providers">
+          <p class="divider">Or continue with</p>
+          <button class="oauth-btn google" onclick="window.location.href='/api/auth/google'">
+            <img src="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_18dp.png" 
+                 alt="Google logo" 
+                 class="logo"> Google
+          </button>
+          <button class="oauth-btn facebook" onclick="window.location.href='/api/auth/facebook'">
+            <i class="fab fa-facebook"></i> Facebook
+          </button>
+        </div>
+
         <div class="login-link">
           Already have an account? <a href="/api/auth/login">Login</a>
         </div>
