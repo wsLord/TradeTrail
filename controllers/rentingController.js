@@ -2,6 +2,24 @@ const RentalProduct = require("../models/rentalProduct");
 const RentalBooking = require("../models/rentalBooking");
 const Cart = require("../models/cartModel");
 
+async function clearExpiredRentals() {
+  const currentDate = new Date();
+  const expiredRentals = await RentalBooking.find({ rentalEnd: { $lt: currentDate }, status: "active" });
+
+  for (const rental of expiredRentals) {
+    await RentalProduct.findByIdAndUpdate(rental.product, {
+      buyer: null,
+      currentBooking: null
+    });
+
+    await RentalBooking.findByIdAndUpdate(rental._id, {
+      status: "completed"
+    });
+  }
+
+  console.log('Expired rentals cleared and updated.');
+}
+
 // Add-to-Cart Controller Method
 exports.addToCart = async (req, res) => {
   try {
@@ -240,12 +258,14 @@ exports.getProductDetails = (req, res, next) => {
       
       fetchedProduct = product;
       // Find an active booking for this product
-      return RentalBooking.findOne({ product: productId, status: "active" });
+      return RentalBooking.findOne({ product: productId, status: "active" }).populate("user", "fullName");
     })
     .then((booking) => {
       if (booking) {
         // Attach the booking information dynamically
         fetchedProduct.currentBooking = booking;
+        // fetchedProduct.populate('booking.user','fullName');
+        console.log(booking);
       }
       res.render("rentals/product-details", {
         pageTitle: fetchedProduct.title,
