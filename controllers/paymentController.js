@@ -73,54 +73,6 @@ exports.makePayment = async (req, res) => {
       })
     );
 
-
-    // Update each product to "sold" status and set buyer across multiple models
-    // await Promise.all(
-    //   productIds.map(async (productId) => {
-    //     try {
-          // Define the models
-          // Check each model for the product ID
-      //     const rental = await RentalProduct.findById(productId);
-      //     const subscription = await Ott.findById(productId);
-      //     const secondHand = await Product.findById(productId);
-
-      //     //     // Update the product if found
-      //     if (rental) {
-      //       await RentalProduct.findByIdAndUpdate(
-      //         productId,
-      //         {
-      //           $set: {
-      //             // status: "sold",
-      //             buyer: req.user._id,
-      //           },
-      //         },
-      //         // console.log("in rental")
-      //       );
-      //     } else if (subscription) {
-      //       await Ott.findByIdAndUpdate(productId, {
-      //         $set: {
-      //           status: "sold",
-      //           buyer: req.user._id,
-      //         },
-      //       });
-      //     } else if (secondHand) {
-      //       await Product.findByIdAndUpdate(productId, {
-      //         $set: {
-      //           status: "sold",
-      //           buyer: req.user._id,
-      //         },
-      //       });
-      //     } else {
-      //       console.log(`Product ${productId} not found in any model.`);
-      //     }
-      //   } catch (error) {
-      //     console.error(`Error updating product ${productId}:`, error);
-      //   }
-    //     const prod=await cartModel.findOne({user:req.user._id,items:{$elemMatch:{_id:productId}}});
-
-    //   })
-    // );
-
     if (!amount || amount <= 0) {
       return res
         .status(400)
@@ -137,6 +89,15 @@ exports.makePayment = async (req, res) => {
 
     const order = await razorpayInstance.orders.create(options);
     console.log("order", order);
+
+    // ✅ Remove the products from the cart after successful payment
+    cart.items = cart.items.filter(
+      (item) =>
+        !(item.productType === section &&
+        productIds.includes(item.product.toString()))
+    );
+    await cart.save();
+    console.log("Products removed from the cart.");
 
     res.json({
       success: true,
