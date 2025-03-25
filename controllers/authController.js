@@ -180,4 +180,21 @@ const checkAuth = (req, res) => {
   }
 };
 
-module.exports = { signup, login, checkAuth, resendVerificationEmail };
+const logout = (req, res) => {
+  try {
+    res.cookie('jwt', '', {
+      httpOnly: true,
+      expires: new Date(0),
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      path: '/'
+    });
+    
+    res.status(200).json({ message: "Logged out successfully" }); // ✅ Send success response
+  } catch (error) {
+    console.log("Error in logout controller:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+module.exports = { signup, login, checkAuth, resendVerificationEmail, logout };

@@ -36,6 +36,7 @@ const OttSchema = new Schema({
     //need to add user
     bids: [{ type: mongoose.Schema.Types.ObjectId, ref: "BidProducts" }], // Store bid product references
     seller: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    otp: { type: String },
     quantity: { 
       type: Number, 
       required: true, 

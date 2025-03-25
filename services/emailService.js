@@ -112,3 +112,16 @@ exports.sendVerificationEmail = async (email, token) => {
     console.error('Error sending verification email:', error);
   }
 };
+
+exports.sendOtpEmail = async (email, otp) => {
+  try {
+    await transporter.sendMail({
+      from: `"TradeTrail" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Your OTP for Your Purchase',
+      html: `<p>Your OTP is: <strong>${otp}</strong></p>`
+    });
+  } catch (error) {
+    console.error('Error sending OTP email:', error);
+  }
+};

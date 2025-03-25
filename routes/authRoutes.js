@@ -1,5 +1,5 @@
 const express = require("express");
-const { signup, login, checkAuth, resendVerificationEmail } = require("../controllers/authController");
+const { signup, login, checkAuth, resendVerificationEmail, logout } = require("../controllers/authController");
 const { protectRoute } = require("../middleware/authMiddleware");
 const User = require("../models/userModel"); 
 const { sendWelcomeEmail } = require("../services/emailService");
@@ -31,6 +31,8 @@ router.get("/login", (req, res) => {
 
 // ✅ Handle login form submission
 router.post("/login", login);
+
+router.post('/logout', logout);
 
 // ✅ Protected home route
 router.get("/home", protectRoute, (req, res) => {

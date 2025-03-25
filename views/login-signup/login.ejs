@@ -225,7 +225,6 @@
 <body>
 
   <!-- Include Navigation -->
-  <%- include('../common/navigation.ejs') %> 
   <%- include('../common/chatbot.ejs') %>
   
   <div class="container">
@@ -238,9 +237,6 @@
       <form id="loginForm">
         <input type="email" id="email" placeholder="Email address" required>
         <input type="password" id="password" placeholder="Password" required>
-        <label>
-          <input type="checkbox"> Remember Me
-        </label>
         <button type="submit">LOGIN</button>
         
         <div class="oauth-providers">

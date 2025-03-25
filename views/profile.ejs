@@ -2,476 +2,545 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/css/chatbot.css">
-    <link rel="icon" type="image/png" href="/assets/logo2.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="icon" type="image/png" href="/assets/logo2.png">
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #F5F8F2;
+      text-align: center;
+    }
 
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #F5F8F2;
-            text-align: center;
-        }
+    .profile-card {
+      background: #fff;
+      color: #333;
+      padding: 40px 35px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 1000px;
+      margin: 40px auto;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      text-align: left;
+      transition: all 0.3s ease;
+    }
 
-        .profile-card {
-            background: #fff;
-            color: #333;
-            padding: 40px 35px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 1000px;
-            margin: 40px auto;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            text-align: left;
-            transition: all 0.3s ease;
-        }
+    .profile-content {
+      flex: 1;
+      padding-right: 50px;
+    }
 
-        .profile-content {
-            flex: 1;
-            padding-right: 50px;
-        }
+    h3 {
+      margin: 0 0 30px 0;
+      font-size: 36px;
+      color: #2c3e50;
+      text-align: center;
+      width: 100%;
+      position: relative;
+    }
 
-        h2 {
-            margin: 0 0 30px 0;
-            font-size: 36px;
-            color: #2c3e50;
-            text-align: center;
-            width: 100%;
-            position: relative;
-        }
+    h3::after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 3px;
+      background: #3E6B48;
+      margin: 15px auto 0;
+    }
 
-        h2::after {
-            content: '';
-            display: block;
-            width: 60px;
-            height: 3px;
-            background: #3E6B48;
-            margin: 15px auto 0;
-        }
+    p {
+      margin: 15px 0;
+      font-size: 18px;
+      line-height: 1.6;
+      color: #34495e;
+    }
 
-        p {
-            margin: 15px 0;
-            font-size: 18px;
-            line-height: 1.6;
-            color: #34495e;
-        }
+    p strong {
+      color: #2c3e50;
+      min-width: 100px;
+      display: inline-block;
+    }
 
-        p strong {
-            color: #2c3e50;
-            min-width: 100px;
-            display: inline-block;
-        }
+    .edit-btn {
+      background: linear-gradient(135deg, #3E6B48, #2d5035);
+      color: white;
+      padding: 12px 35px;
+      border: none;
+      cursor: pointer;
+      border-radius: 30px;
+      font-size: 17px;
+      letter-spacing: 0.5px;
+      margin-top: 25px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(62, 107, 72, 0.2);
+      display: block;
+      width: fit-content;
+      margin: 25px auto 0;
+    }
 
-        .edit-btn {
-            background: linear-gradient(135deg, #3E6B48, #2d5035);
-            color: white;
-            padding: 12px 35px;
-            border: none;
-            cursor: pointer;
-            border-radius: 30px;
-            font-size: 17px;
-            letter-spacing: 0.5px;
-            margin-top: 25px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(62, 107, 72, 0.2);
-            display: block;
-            width: fit-content;
-            margin: 25px auto 0;
-        }
+    .edit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(62, 107, 72, 0.3);
+    }
 
-        .edit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(62, 107, 72, 0.3);
-        }
+    .form-group label {
+      font-weight: 500;
+      color: #34495e;
+      margin-bottom: 8px;
+      display: block;
+    }
 
-        .form-group label {
-            font-weight: 500;
-            color: #34495e;
-            margin-bottom: 8px;
-            display: block;
-        }
+    .form-control {
+      border: 2px solid #ecf0f1;
+      border-radius: 8px;
+      padding: 10px 15px;
+      transition: border-color 0.3s ease;
+      width: 100%;
+      max-width: 400px;
+    }
 
-        .form-control {
-            border: 2px solid #ecf0f1;
-            border-radius: 8px;
-            padding: 10px 15px;
-            transition: border-color 0.3s ease;
-            width: 100%;
-            max-width: 400px;
-        }
+    .form-control:focus {
+      border-color: #3E6B48;
+      box-shadow: none;
+    }
 
-        .form-control:focus {
-            border-color: #3E6B48;
-            box-shadow: none;
-        }
+    .btn-primary {
+      background: #3E6B48;
+      border: none;
+      padding: 10px 25px;
+      margin-right: 15px;
+      border-radius: 8px;
+    }
 
-        .btn-primary {
-            background: #3E6B48;
-            border: none;
-            padding: 10px 25px;
-            margin-right: 15px;
-            border-radius: 8px;
-        }
+    .btn-secondary {
+      background: #95a5a6;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 8px;
+    }
 
-        .btn-secondary {
-            background: #95a5a6;
-            border: none;
-            padding: 10px 25px;
-            border-radius: 8px;
-        }
+    .badge-card {
+      background: #fff;
+      color: #333;
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 1000px;
+      margin: 30px auto;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
 
-        .badge-card {
-            background: #fff;
-            color: #333;
-            padding: 30px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 1000px;
-            margin: 30px auto;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-        }
+    .badges-container {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 20px 0;
+    }
 
-        .badges-container {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-            padding: 20px 0;
-        }
+    .badge-img {
+      width: 160px;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease;
+    }
 
-        .badge-img {
-            width: 160px;
-            height: 180px;
-            object-fit: cover;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s ease;
-        }
+    .badge-img:hover {
+      transform: scale(1.05);
+    }
 
-        .badge-img:hover {
-            transform: scale(1.05);
-        }
+    .profile-pic {
+      width: 220px;
+      height: 220px;
+      border-radius: 15px;
+      object-fit: cover;
+      border: 4px solid #c7ddb5;
+      padding: 10px;
+      transition: all 0.3s ease;
+    }
 
-        .profile-pic {
-            width: 220px;
-            height: 220px;
-            border-radius: 15px;
-            object-fit: cover;
-            border: 4px solid #c7ddb5;
-            padding: 10px;
-            transition: all 0.3s ease;
-        }
+    .profile-pic-section {
+      position: relative;
+      margin-left: 30px;
+    }
 
-        .profile-pic-section {
-            position: relative;
-            margin-left: 30px;
-        }
+    .upload-overlay {
+      position: absolute;
+      bottom: 15px;
+      right: 15px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 8px 15px;
+      border-radius: 25px;
+      font-size: 14px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-        .upload-overlay {
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 8px 15px;
-            border-radius: 25px;
-            font-size: 14px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+    .upload-overlay:hover {
+      background: white;
+      transform: scale(1.05);
+    }
 
-        .upload-overlay:hover {
-            background: white;
-            transform: scale(1.05);
-        }
-        /* Style for Auction Products Card */
-.auction-products-card {
-    background: #fff;
-    color: #333;
-    padding: 30px;
-    border-radius: 15px;
-    width: 90%;
-    max-width: 1000px;
-    margin: 30px auto;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-}
+    /* Section Styles for Product Cards */
+    .auction-products-card,
+    .rental-products-card,
+    .direct-products-card,
+    .subscription-products-card {
+      background: #fff;
+      color: #333;
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 1000px;
+      margin: 30px auto;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
 
-.auction-products-card h3 {
-    margin-bottom: 20px;
-    font-size: 24px;
-    color: #2c3e50;
-}
+    .auction-products-card h3,
+    .rental-products-card h3,
+    .direct-products-card h3,
+    .subscription-products-card h3 {
+      margin-bottom: 20px;
+      font-size: 24px;
+      color: #2c3e50;
+    }
 
-.auction-products-card ul {
-    list-style: none;
-    padding: 0;
-}
+    .auction-products-card ul,
+    .rental-products-card ul,
+    .direct-products-card ul,
+    .subscription-products-card ul {
+      list-style: none;
+      padding: 0;
+    }
 
-.auction-products-card li {
-    margin-bottom: 15px;
-}
+    .auction-products-card li,
+    .rental-products-card li,
+    .direct-products-card li,
+    .subscription-products-card li {
+      margin-bottom: 15px;
+    }
 
-.auction-products-card li a {
-    text-decoration: none;
-    color: #007bff;
-}
+    .auction-products-card li a,
+    .rental-products-card li a,
+    .direct-products-card li a,
+    .subscription-products-card li a {
+      text-decoration: none;
+      color: #007bff;
+    }
 
-.auction-products-card li a:hover {
-    color: #0056b3;
-}
+    .auction-products-card li a:hover,
+    .rental-products-card li a:hover,
+    .direct-products-card li a:hover,
+    .subscription-products-card li a:hover {
+      color: #0056b3;
+    }
 
-/* Style for Rental Products Card */
-.rental-products-card {
-    background: #fff;
-    color: #333;
-    padding: 30px;
-    border-radius: 15px;
-    width: 90%;
-    max-width: 1000px;
-    margin: 30px auto;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-}
-
-.rental-products-card h3 {
-    margin-bottom: 20px;
-    font-size: 24px;
-    color: #2c3e50;
-}
-
-.rental-products-card ul {
-    list-style: none;
-    padding: 0;
-}
-
-.rental-products-card li {
-    margin-bottom: 15px;
-}
-
-.rental-products-card li a {
-    text-decoration: none;
-    color: #007bff;
-}
-
-.rental-products-card li a:hover {
-    color: #0056b3;
-}
-
-
-
-        @media (max-width: 768px) {
-            .auction-products-card, .rental-products-card {
+    @media (max-width: 768px) {
+      .auction-products-card,
+      .rental-products-card,
+      .direct-products-card,
+      .subscription-products-card {
         padding: 20px;
         margin: 20px auto;
+      }
+
+      .profile-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 30px 20px;
+      }
+
+      .profile-content {
+        padding-right: 0;
+        margin-bottom: 30px;
+      }
+
+      .profile-pic {
+        width: 200px;
+        height: 200px;
+        margin: 0;
+      }
+
+      p {
+        text-align: center;
+      }
+
+      .edit-btn {
+        width: 100%;
+        max-width: 200px;
+      }
+
+      .form-control {
+        max-width: 100%;
+      }
     }
-            .profile-card {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-                padding: 30px 20px;
-            }
+    .profile-actions {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 20px;
+}
 
-            .profile-content {
-                padding-right: 0;
-                margin-bottom: 30px;
-            }
-
-            .profile-pic {
-                width: 200px;
-                height: 200px;
-                margin: 0;
-            }
-
-            p {
-                text-align: center;
-            }
-
-            .edit-btn {
-                width: 100%;
-                max-width: 200px;
-            }
-
-            .form-control {
-                max-width: 100%;
-            }
-           
-        }
-
-
-
-    </style>
+  </style>
 </head>
 
 <body>
-    <%- include('./common/navigation.ejs') %>
-    <%- include('./common/chatbot.ejs') %>
+  <%- include('./common/navigation.ejs') %>
 
-    <main>
-        <div class="profile-card">
-            <div class="profile-content">
-                <h3><%= user.fullName %></h3>
-                
-                <!-- View Mode -->
-                <div id="viewMode">
-                    <p><strong>Email:</strong> <%= user.email %></p>
-                    <p><strong>City:</strong> <span id="cityText"><%= user.city || 'Not specified' %></span></p>
-                    <p><strong>State:</strong> <span id="stateText"><%= user.state || 'Not specified' %></span></p>
-                    <p><strong>Country:</strong> <span id="countryText"><%= user.country || 'Not specified' %></span></p>
-                    <p><strong>Phone:</strong> <span id="phoneText"><%= user.phone || 'Not specified' %></span></p>
-                    <button class="edit-btn" onclick="toggleEditMode()">Edit Profile</button>
-                </div>
+  <main>
+    <div class="profile-card">
+      <div class="profile-content">
+        <h3><%= user.fullName %></h3>
 
-                <!-- Edit Mode -->
-                <form id="editMode" style="display: none;" action="/profile" method="POST">
-                    <div class="form-group">
-                        <label>City:</label>
-                        <input type="text" class="form-control" name="city" value="<%= user.city || '' %>">
-                    </div>
-                    <div class="form-group">
-                        <label>State:</label>
-                        <input type="text" class="form-control" name="state" value="<%= user.state || '' %>">
-                    </div>
-                    <div class="form-group">
-                        <label>Country:</label>
-                        <input type="text" class="form-control" name="country" value="<%= user.country || '' %>">
-                    </div>
-                    <div class="form-group">
-                        <label>Phone:</label>
-                        <input type="tel" class="form-control" name="phone" value="<%= user.phone || '' %>">
-                    </div>
-                    <div style="margin-top: 25px;">
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                        <button type="button" class="btn btn-secondary" onclick="toggleEditMode()">Cancel</button>
-                    </div>
-                </form>
-            </div>
-            
-            <!-- Profile Picture Section -->
-            <div class="profile-pic-section">
-                <img src="<%= user.profilePic %>" 
-                     alt="Profile Picture" 
-                     class="profile-pic" 
-                     id="profilePic"
-                     onclick="document.getElementById('fileInput').click()">
-                <div class="upload-overlay" onclick="document.getElementById('fileInput').click()">
-                    📷 Update Photo
-                </div>
-                <input type="file" 
-                       id="fileInput" 
-                       style="display: none;" 
-                       accept="image/*"
-                       onchange="uploadProfilePic(this.files[0])">
-            </div>
-        </div>
-
-        <div class="auction-products-card">
-            <h3>Your Auction Products</h3>
-            <% if (auctionProducts.length > 0) { %>
-              <ul>
-                <% auctionProducts.forEach(product => { %>
-                  <li>
-                    <a href="/profile/auction/<%= product._id %>" style="text-decoration: none; color: #007bff;">
-                      <h4><%= product.title %></h4>
-                    </a>
-                  </li>
-                <% }); %>
-              </ul>
-            <% } else { %>
-              <p>You haven't posted any auction products yet.</p>
-            <% } %>
-          </div>          
-        
-          <div class="rental-products-card">
-            <h3>Rental Products you posted</h3>
-            <% if (rentalProducts.length > 0) { %>
-              <ul>
-                <% rentalProducts.forEach(product => { %>
-                  <li>
-                    <a href="/rental/details/<%= product._id %>" style="text-decoration: none; color: #007bff;">
-                      <h4>product: <%= product.title %></h4>
-                      <% if (product.buyer) { %>
-                        <h4>Buyer: <%= product.buyer.fullName %></h4>
-                      <% } else { %>
-                        <h4>Not Sold Yet</h4>
-                      <% } %>                      
-                    </a>
-                  </li>
-                <% }); %>
-              </ul>
-            <% } else { %>
-              <p>You haven't posted any rental products yet.</p>
-            <% } %>
+        <!-- View Mode -->
+        <div id="viewMode">
+          <p><strong>Email:</strong> <%= user.email %></p>
+          <p><strong>City:</strong> <span id="cityText"><%= user.city || 'Not specified' %></span></p>
+          <p><strong>State:</strong> <span id="stateText"><%= user.state || 'Not specified' %></span></p>
+          <p><strong>Country:</strong> <span id="countryText"><%= user.country || 'Not specified' %></span></p>
+          <p><strong>Phone:</strong> <span id="phoneText"><%= user.phone || 'Not specified' %></span></p>
+          <div class="profile-actions">
+            <button class="edit-btn" onclick="toggleEditMode()">Edit Profile</button>
+            <button class="edit-btn" onclick="logout()" style="background: #e74c3c;">Logout</button>
           </div>
-          
 
-        <div class="badge-card">
-            <p style="margin: 5px; font-size: 20px; color: #2c3e50;"><strong>Badges Earned</strong></p>
-            <div class="badges-container">
-                <% if (user.badges && user.badges.length > 0) { %>
-                    <% user.badges.forEach(function(badge) { %>
-                        <img src="<%= badge %>" alt="Badge" class="badge-img">
-                    <% }); %>
-                <% } else { %>
-                    <p style="color: #95a5a6;">No badges earned yet!</p>
-                <% } %>
-            </div>
         </div>
-    </main>
 
-    <script>
-        // Toggle between view and edit modes
-        function toggleEditMode() {
-            const viewMode = document.getElementById('viewMode');
-            const editMode = document.getElementById('editMode');
-            viewMode.style.display = viewMode.style.display === 'none' ? 'block' : 'none';
-            editMode.style.display = editMode.style.display === 'none' ? 'block' : 'none';
-        }
+        <!-- Edit Mode -->
+        <form id="editMode" style="display: none;" action="/profile" method="POST">
+          <div class="form-group">
+            <label>City:</label>
+            <input type="text" class="form-control" name="city" value="<%= user.city || '' %>">
+          </div>
+          <div class="form-group">
+            <label>State:</label>
+            <input type="text" class="form-control" name="state" value="<%= user.state || '' %>">
+          </div>
+          <div class="form-group">
+            <label>Country:</label>
+            <input type="text" class="form-control" name="country" value="<%= user.country || '' %>">
+          </div>
+          <div class="form-group">
+            <label>Phone:</label>
+            <input type="tel" class="form-control" name="phone" value="<%= user.phone || '' %>">
+          </div>
+          <div style="margin-top: 25px;">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <button type="button" class="btn btn-secondary" onclick="toggleEditMode()">Cancel</button>
+          </div>
+        </form>
+      </div>
 
-        // Handle profile picture upload with loading state
-        async function uploadProfilePic(file) {
-            const loader = document.createElement('div');
-            loader.innerHTML = `
+      <!-- Profile Picture Section -->
+      <div class="profile-pic-section">
+        <img src="<%= user.profilePic %>" alt="Profile Picture" class="profile-pic" id="profilePic"
+          onclick="document.getElementById('fileInput').click()">
+        <div class="upload-overlay" onclick="document.getElementById('fileInput').click()">
+          📷 Update Photo
+        </div>
+        <input type="file" id="fileInput" style="display: none;" accept="image/*"
+          onchange="uploadProfilePic(this.files[0])">
+      </div>
+    </div>
+
+    <!-- Auction Products Section -->
+    <div class="auction-products-card">
+      <h3>Your Auction Products</h3>
+      <% if (auctionProducts.length > 0) { %>
+      <ul>
+        <% auctionProducts.forEach(product => { %>
+        <li>
+          <a href="/profile/auction/<%= product._id %>" style="text-decoration: none; color: #007bff;">
+            <h4><%= product.title %></h4>
+            <% if (product.otp) { %>
+            <p>OTP: <%= product.otp %></p>
+            <% } else { %>
+            <p>OTP: Not generated yet</p>
+            <% } %>
+          </a>
+        </li>
+        <% }); %>
+      </ul>
+      <% } else { %>
+      <p>You haven't posted any auction products yet.</p>
+      <% } %>
+    </div>
+
+    <!-- Rental Products Section -->
+    <div class="rental-products-card">
+      <h3>Rental Products you posted</h3>
+      <% if (rentalProducts.length > 0) { %>
+      <ul>
+        <% rentalProducts.forEach(product => { %>
+        <li>
+          <a href="/rental/details/<%= product._id %>" style="text-decoration: none; color: #007bff;">
+            <h4>Product: <%= product.title %></h4>
+            <% if (product.buyer) { %>
+            <h4>Buyer: <%= product.buyer.fullName %></h4>
+            <% if (product.otp) { %>
+            <p>OTP: <%= product.otp %></p>
+            <% } else { %>
+            <p>OTP: Not generated yet</p>
+            <% } %>
+            <% } else { %>
+            <h4>Not Sold Yet</h4>
+            <% } %>
+          </a>
+        </li>
+        <% }); %>
+      </ul>
+      <% } else { %>
+      <p>You haven't posted any rental products yet.</p>
+      <% } %>
+    </div>
+
+    <!-- Direct Purchase (Second Hand) Products Section -->
+    <div class="direct-products-card">
+      <h3>Your Direct Purchase Products</h3>
+      <% if (directSecondhandProducts && directSecondhandProducts.length > 0) { %>
+      <ul>
+        <% directSecondhandProducts.forEach(product => { %>
+        <li>
+          <a href="/direct/details/<%= product._id %>" style="text-decoration: none; color: #007bff;">
+            <h4>Product: <%= product.title %></h4>
+            <% if (product.buyer) { %>
+            <h4>Buyer: <%= product.buyer.fullName %></h4>
+            <% if (product.otp) { %>
+            <p>OTP: <%= product.otp %></p>
+            <% } else { %>
+            <p>OTP: Not generated yet</p>
+            <% } %>
+            <% } else { %>
+            <h4>Not Sold Yet</h4>
+            <% } %>
+          </a>
+        </li>
+        <% }); %>
+      </ul>
+      <% } else { %>
+      <p>You haven't posted any direct purchase products yet.</p>
+      <% } %>
+    </div>
+
+    <!-- Subscription Products Section -->
+    <div class="subscription-products-card">
+      <h3>Your Subscription Products</h3>
+      <% if (directSubscriptionProducts && directSubscriptionProducts.length > 0) { %>
+      <ul>
+        <% directSubscriptionProducts.forEach(product => { %>
+        <li>
+          <a href="/subscription/details/<%= product._id %>" style="text-decoration: none; color: #007bff;">
+            <h4>Product: <%= product.platform_name %></h4>
+            <% if (product.buyer) { %>
+            <h4>Buyer: <%= product.buyer.fullName %></h4>
+            <% if (product.otp) { %>
+            <p>OTP: <%= product.otp %></p>
+            <% } else { %>
+            <p>OTP: Not generated yet</p>
+            <% } %>
+            <% } else { %>
+            <h4>Not Sold Yet</h4>
+            <% } %>
+          </a>
+        </li>
+        <% }); %>
+      </ul>
+      <% } else { %>
+      <p>You haven't posted any subscription products yet.</p>
+      <% } %>
+    </div>
+
+    <div class="badge-card">
+      <p style="margin: 5px; font-size: 20px; color: #2c3e50;"><strong>Badges Earned</strong></p>
+      <div class="badges-container">
+        <% if (user.badges && user.badges.length > 0) { %>
+        <% user.badges.forEach(function(badge) { %>
+        <img src="<%= badge %>" alt="Badge" class="badge-img">
+        <% }); %>
+        <% } else { %>
+        <p style="color: #95a5a6;">No badges earned yet!</p>
+        <% } %>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Toggle between view and edit modes
+    function toggleEditMode() {
+      const viewMode = document.getElementById('viewMode');
+      const editMode = document.getElementById('editMode');
+      viewMode.style.display = viewMode.style.display === 'none' ? 'block' : 'none';
+      editMode.style.display = editMode.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Handle profile picture upload with loading state
+    async function uploadProfilePic(file) {
+      const loader = document.createElement('div');
+      loader.innerHTML = `
                 <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
                     background: rgba(255, 255, 255, 0.9); z-index: 9999; display: flex; 
                     align-items: center; justify-content: center;">
                     <div class="spinner-border text-success" style="width: 3rem; height: 3rem;"></div>
                 </div>
             `;
-            document.body.appendChild(loader);
+      document.body.appendChild(loader);
 
-            try {
-                const formData = new FormData();
-                formData.append('image', file);
-                
-                const response = await fetch('/profile/picture', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await response.json();
-                if (data.success) {
-                    document.getElementById('profilePic').src = data.profilePic;
-                }
-            } catch (error) {
-                console.error('Upload error:', error);
-                alert('Error uploading image');
-            } finally {
-                document.body.removeChild(loader);
-            }
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        const response = await fetch('/profile/picture', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await response.json();
+        if (data.success) {
+          document.getElementById('profilePic').src = data.profilePic;
         }
-    </script>
+      } catch (error) {
+        console.error('Upload error:', error);
+        alert('Error uploading image');
+      } finally {
+        document.body.removeChild(loader);
+      }
+    }
+  </script>
+  <script>
+    async function logout() {
+  try {
+    const response = await fetch('/api/auth/logout', { 
+      method: 'POST',
+      credentials: 'include' // This is crucial for sending cookies
+    });
+    
+    if (response.ok) {
+      window.location.href = '/api/auth/login';
+    } else {
+      console.error('Logout failed');
+    }
+  } catch (error) {
+    console.error('Error logging out:', error);
+  }
+}
+  </script>
 </body>
 
 </html>

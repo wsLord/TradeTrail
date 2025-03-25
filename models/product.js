@@ -48,6 +48,7 @@ const productSchema = new Schema({
   //need to add user
   bids: [{ type: mongoose.Schema.Types.ObjectId, ref: "BidProduct" }], // Store bid product references
   seller: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  otp: { type: String },
   auctionStatus: {
     type: String,
     enum: ["upcoming", "ongoing", "completed"],
@@ -58,6 +59,11 @@ const productSchema = new Schema({
     ref: "User",
     default: null,
   },
+  buyer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: null,
+      },
 });
 
 module.exports = mongoose.model("Product", productSchema);
