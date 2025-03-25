@@ -10,6 +10,8 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/chatbot.css">
+    <link rel="icon" type="image/png" href="/assets/logo2.png">
+
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -196,8 +198,85 @@
             background: white;
             transform: scale(1.05);
         }
+        /* Style for Auction Products Card */
+.auction-products-card {
+    background: #fff;
+    color: #333;
+    padding: 30px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 1000px;
+    margin: 30px auto;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.auction-products-card h3 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #2c3e50;
+}
+
+.auction-products-card ul {
+    list-style: none;
+    padding: 0;
+}
+
+.auction-products-card li {
+    margin-bottom: 15px;
+}
+
+.auction-products-card li a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+.auction-products-card li a:hover {
+    color: #0056b3;
+}
+
+/* Style for Rental Products Card */
+.rental-products-card {
+    background: #fff;
+    color: #333;
+    padding: 30px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 1000px;
+    margin: 30px auto;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.rental-products-card h3 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #2c3e50;
+}
+
+.rental-products-card ul {
+    list-style: none;
+    padding: 0;
+}
+
+.rental-products-card li {
+    margin-bottom: 15px;
+}
+
+.rental-products-card li a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+.rental-products-card li a:hover {
+    color: #0056b3;
+}
+
+
 
         @media (max-width: 768px) {
+            .auction-products-card, .rental-products-card {
+        padding: 20px;
+        margin: 20px auto;
+    }
             .profile-card {
                 flex-direction: column;
                 align-items: center;
@@ -228,6 +307,7 @@
             .form-control {
                 max-width: 100%;
             }
+           
         }
 
 
@@ -296,6 +376,46 @@
                        onchange="uploadProfilePic(this.files[0])">
             </div>
         </div>
+
+        <div class="auction-products-card">
+            <h3>Your Auction Products</h3>
+            <% if (auctionProducts.length > 0) { %>
+              <ul>
+                <% auctionProducts.forEach(product => { %>
+                  <li>
+                    <a href="/profile/auction/<%= product._id %>" style="text-decoration: none; color: #007bff;">
+                      <h4><%= product.title %></h4>
+                    </a>
+                  </li>
+                <% }); %>
+              </ul>
+            <% } else { %>
+              <p>You haven't posted any auction products yet.</p>
+            <% } %>
+          </div>          
+        
+          <div class="rental-products-card">
+            <h3>Rental Products you posted</h3>
+            <% if (rentalProducts.length > 0) { %>
+              <ul>
+                <% rentalProducts.forEach(product => { %>
+                  <li>
+                    <a href="/rental/details/<%= product._id %>" style="text-decoration: none; color: #007bff;">
+                      <h4>product: <%= product.title %></h4>
+                      <% if (product.buyer) { %>
+                        <h4>Buyer: <%= product.buyer.fullName %></h4>
+                      <% } else { %>
+                        <h4>Not Sold Yet</h4>
+                      <% } %>                      
+                    </a>
+                  </li>
+                <% }); %>
+              </ul>
+            <% } else { %>
+              <p>You haven't posted any rental products yet.</p>
+            <% } %>
+          </div>
+          
 
         <div class="badge-card">
             <p style="margin: 5px; font-size: 20px; color: #2c3e50;"><strong>Badges Earned</strong></p>

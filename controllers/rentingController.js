@@ -2,6 +2,24 @@ const RentalProduct = require("../models/rentalProduct");
 const RentalBooking = require("../models/rentalBooking");
 const Cart = require("../models/cartModel");
 
+async function clearExpiredRentals() {
+  const currentDate = new Date();
+  const expiredRentals = await RentalBooking.find({ rentalEnd: { $lt: currentDate }, status: "active" });
+
+  for (const rental of expiredRentals) {
+    await RentalProduct.findByIdAndUpdate(rental.product, {
+      buyer: null,
+      currentBooking: null
+    });
+
+    await RentalBooking.findByIdAndUpdate(rental._id, {
+      status: "completed"
+    });
+  }
+
+  console.log('Expired rentals cleared and updated.');
+}
+
 // Add-to-Cart Controller Method
 exports.addToCart = async (req, res) => {
   try {
@@ -129,7 +147,6 @@ exports.postAddProduct = (req, res, next) => {
     return res.status(400).send('All fields are required!');
   }
 
-
   const rentalProduct = new RentalProduct({
     title: title,
     imageUrls: imageUrls,
@@ -139,6 +156,7 @@ exports.postAddProduct = (req, res, next) => {
     rate: rate,  // Save rate directly as per the form
     quantity: quantity,
     securityDeposit: securityDeposit,  // Save quantity directly
+    seller: req.user._id,
 
   });
 
@@ -211,9 +229,10 @@ exports.getRentItems = async (req, res) => {
 // Controller method to handle the buying action and decrementing quantity
 exports.buyProduct = (req, res, next) => {
   const productId = req.params.productId; // Extract product ID from the URL
-
+      
   // Find the rental product by its ID in the database
   RentalProduct.findById(productId)
+  .populate("seller", "fullName")
     .then((product) => {
       if (product) {
         // If the product has sufficient stock, decrement the quantity
@@ -252,6 +271,8 @@ exports.getProductDetails = (req, res, next) => {
   let fetchedProduct;
 
   RentalProduct.findById(productId)
+  .populate("seller", "fullName")
+  .populate('buyer', 'fullName')
     .then((product) => {
       if (!product) {
         return res.status(404).send("Product not found");
@@ -260,12 +281,14 @@ exports.getProductDetails = (req, res, next) => {
       
       fetchedProduct = product;
       // Find an active booking for this product
-      return RentalBooking.findOne({ product: productId, status: "active" });
+      return RentalBooking.findOne({ product: productId, status: "active" }).populate("user", "fullName");
     })
     .then((booking) => {
       if (booking) {
         // Attach the booking information dynamically
         fetchedProduct.currentBooking = booking;
+        // fetchedProduct.populate('booking.user','fullName');
+        console.log(booking);
       }
       res.render("rentals/product-details", {
         pageTitle: fetchedProduct.title,
