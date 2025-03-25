@@ -320,6 +320,10 @@
           <div class="profile-actions">
             <button class="edit-btn" onclick="toggleEditMode()">Edit Profile</button>
             <button class="edit-btn" onclick="logout()" style="background: #e74c3c;">Logout</button>
+            <% if (!user.googleId && !user.facebookId) { %>
+              <button class="edit-btn" data-toggle="modal" data-target="#changePasswordModal" 
+                      style="background: #3498db;">Change Password</button>
+            <% } %>
           </div>
 
         </div>
@@ -347,6 +351,39 @@
             <button type="button" class="btn btn-secondary" onclick="toggleEditMode()">Cancel</button>
           </div>
         </form>
+
+        <div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <form id="changePasswordForm">
+                <div class="modal-body">
+                  <div class="form-group">
+                    <label>Current Password</label>
+                    <input type="password" class="form-control" name="currentPassword" required>
+                  </div>
+                  <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" class="form-control" name="newPassword" minlength="6" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" class="form-control" name="confirmPassword" minlength="6" required>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                  <button type="submit" class="btn btn-primary">Change Password</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Profile Picture Section -->
@@ -541,6 +578,38 @@
   }
 }
   </script>
+
+<script>
+  document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = {
+      currentPassword: document.querySelector('input[name="currentPassword"]').value,
+      newPassword: document.querySelector('input[name="newPassword"]').value,
+      confirmPassword: document.querySelector('input[name="confirmPassword"]').value
+    };
+
+    try {
+      const response = await fetch('/profile/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok) {
+        alert('Password changed successfully!');
+        $('#changePasswordModal').modal('hide');
+      } else {
+        alert(result.message || 'Error changing password');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred. Please try again.');
+    }
+  });
+</script>
 </body>
 
 </html>
