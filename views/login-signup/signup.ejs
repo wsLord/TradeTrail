@@ -216,6 +216,25 @@
       margin-right: 12px;
     }
 
+    .loading-spinner {
+  display: none;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.button-loading .loading-spinner {
+  display: inline-block;
+}
+
     
 
     .google { border-color: #DB4437; color: #DB4437; }
@@ -239,7 +258,10 @@
         <input type="text" id="lastName" placeholder="Last name" required>
         <input type="email" id="email" placeholder="Email address" required>
         <input type="password" id="password" placeholder="Password" required>
-        <button type="submit">SIGN UP</button>
+        <button type="submit" id="signupButton">
+          <span class="loading-spinner"></span>
+          SIGN UP
+        </button>
 
         <div class="oauth-providers">
           <p class="divider">Or continue with</p>
@@ -269,6 +291,11 @@
   
     document.getElementById("signupForm").addEventListener("submit", async function(event) {
       event.preventDefault();
+
+      const button = document.getElementById("signupButton");
+      button.classList.add("button-loading");
+      button.disabled = true;
+      button.innerHTML = `<span class="loading-spinner"></span> Creating account...`;
   
       const firstName = document.getElementById("firstName").value.trim();
       const lastName = document.getElementById("lastName").value.trim();
@@ -310,7 +337,11 @@
       } catch (error) {
         console.error("Error:", error);
         alert("An error occurred. Please try again later.");
-      }
+      } finally {
+    button.classList.remove("button-loading");
+    button.disabled = false;
+    button.innerHTML = "SIGN UP";
+  }
     });
   </script>
 
