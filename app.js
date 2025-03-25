@@ -8,7 +8,6 @@ const session = require("express-session");
 const flash = require("connect-flash");
  
 const Razorpay= require('razorpay');
-const bodyParser=require('body-parser');
 const fs= require('fs');
 
 const multer = require("multer");
