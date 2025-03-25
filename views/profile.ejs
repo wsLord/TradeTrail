@@ -9,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/chatbot.css">
     <link rel="icon" type="image/png" href="/assets/logo2.png">
 
     <style>
@@ -41,7 +42,7 @@
             padding-right: 50px;
         }
 
-        h3 {
+        h2 {
             margin: 0 0 30px 0;
             font-size: 36px;
             color: #2c3e50;
@@ -50,7 +51,7 @@
             position: relative;
         }
 
-        h3::after {
+        h2::after {
             content: '';
             display: block;
             width: 60px;
@@ -308,11 +309,15 @@
             }
            
         }
+
+
+
     </style>
 </head>
 
 <body>
     <%- include('./common/navigation.ejs') %>
+    <%- include('./common/chatbot.ejs') %>
 
     <main>
         <div class="profile-card">

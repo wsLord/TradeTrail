@@ -3,7 +3,12 @@ const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  password: { 
+    type: String,
+    required: function() {
+      return !(this.googleId || this.facebookId); // Only require password for non-OAuth users
+    }
+  },
   city: String,
   state: String,
   country: String,
@@ -21,6 +26,8 @@ const userSchema = new mongoose.Schema({
     type: String, 
     default: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
   },
+  googleId: String,
+  facebookId: String,
   isVerified: { type: Boolean, default: false },
   verificationToken: String,
   verificationExpires: Date

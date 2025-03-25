@@ -13,6 +13,38 @@ const fs= require('fs');
 
 const multer = require("multer");
 
+const bodyParser = require("body-parser");
+const { default: ollama } = require('ollama');
+
+// Predefined responses with redirect paths
+const predefinedResponses = {
+  "hello": {
+      text: "Hello! How can I assist you today?",
+      path: null
+  },
+  // "rent": {
+  //     text: "You can rent items by visiting our rental section. Check out the 'Renting Items' feature!",
+  //     path: "/rental"
+  // },
+  // "subscription": {
+  //     text: "To swap subscriptions, go to the 'Subscription Swapping' section. Need more help?",
+  //     path: "/subscription"
+  // },
+  "contact": {
+      text: "Our contact details are available in the Contact Us section below.",
+      path: "/contact"
+  },
+  "buy": {
+      text: "For second-hand items, please visit the 'Second-Hand Buying' section.",
+      path: "/secondHand"
+  },
+  "default": {
+      text: "I'm here to help with questions about renting, subscriptions, and second-hand items. Feel free to ask!",
+      path: null
+  }
+};
+
+
 
 // Connect to MongoDB
 const connectToMongoDB = require("./config/mongoose");
@@ -108,6 +140,79 @@ app.use(cors());
 // Set up EJS as the view engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
+
+
+
+// Add new chat endpoint before routes
+app.post('/api/chat', async (req, res) => {
+  try {
+      const { message } = req.body;
+      const lowerMessage = message.toLowerCase();
+
+      // Check predefined responses first
+      const matchedKey = Object.keys(predefinedResponses).find(key => 
+          key !== 'default' && lowerMessage.includes(key)
+      );
+
+      if(matchedKey) {
+          return res.json({
+              response: predefinedResponses[matchedKey].text,
+              redirect: predefinedResponses[matchedKey].path
+          });
+      }
+
+      // Use Ollama for other queries
+      // const response = await ollama.chat({
+      //     model: 'mistral',
+      //     messages: [{
+      //         role: 'user',
+      //         content: `Respond as a concise shopping assistant. Focus on: 
+      //         - Item rentals
+      //         - Subscription swapping
+      //         - Second-hand goods
+      //         Keep responses under 2 sentences. Query: "${message}"`
+      //     }]
+      // });
+
+      const response = await ollama.chat({
+        model: 'mistral',
+        messages: [{
+          role: 'user',
+          content: `Act as an official chatbot for our multi-purpose platform which has features rental, subscription and second hand specializing in:
+          - OTT platform come under the subscription feature in which a person can list the subscription in two ways, direct listing or auction based listing. In direct listing the subscription is sold at the given price and in auction based listing the subscription can have bids. And there are two types of bids, monetary and product, customers can either bid with money or products.
+          - second hand items come under second hand buying feature in which a person can list the item in two ways, direct listing or auction based listing. In direct listing the item is sold at the given price and in auction based listing the item can have bids. And there are two types of bids, monetary and product, customers can either bid with money or products.
+          - renting items with security deposit
+          - Credential-verified account sharing for subscription
+          - Auction-style bidding
+          - Fixed-price purchase
+          - Secure subscription transfers
+          - check the product listings of any feature if a user asks for any particular thing and then tell the user in which feature that item is present
+      
+          Response Requirements:
+          1. Highlight either auction bids or fixed-price options for second hand and subscriptions, tell whether that particular product is listed in direct listing or auction based listing and once the feature is identified, also give the clickable link to that particular feature
+          2. Tell about if the asked item, subscription is avaialable or not
+          3. Mention remaining duration for auction in auction based
+          4. In auction based, give the maximum bids and the bid products if a user asks for a particular item or subscription
+      
+      
+          Current Query: "${message}"
+          
+          [First confirm screen count needed, then suggest duration options]`
+        }]
+      });
+
+      res.json({
+          response: response.message.content,
+          redirect: null
+      });
+
+  } catch (error) {
+      console.error('Chat error:', error);
+      res.status(500).json({ 
+          error: "Our chat service is currently unavailable. Please try again later." 
+      });
+  }
+});
 
 // ✅ Register Routes
 app.use("/api/auth", authRoutes); // ✅ FIX: Include auth routes

@@ -175,32 +175,55 @@ exports.postAddProduct = (req, res, next) => {
 };
 
 // Get all rental items (with search)
-exports.getRentItems = (req, res, next) => {
-  const searchQuery = req.query.search || "";
-  const query = {};
+exports.getRentItems = async (req, res) => {
+  try {
+    const { search, minPrice, maxPrice, location, rate } = req.query;
+    const query = {};
 
-  if (searchQuery) {
-    query.$or = [
-      { title: { $regex: searchQuery, $options: "i" } },
-      { description: { $regex: searchQuery, $options: "i" } },
-      { location: { $regex: searchQuery, $options: "i" } },
-    ];
-  }
+    // Search Filter
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { location: { $regex: search, $options: 'i' } }
+      ];
+    }
 
-  RentalProduct.find(query)
-    .then((products) => {
-      res.render("rentals/rent-items", {
-        pageTitle: "Available Rentals",
-        path: "/rental/rent",
-        products: products,
-        searchQuery: searchQuery,
-        activePage: "rental",
-      });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).send("An error occurred while fetching rental items.");
+    // Price Range Filter
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = parseFloat(minPrice);
+      if (maxPrice) query.price.$lte = parseFloat(maxPrice);
+    }
+
+    // Location Filter
+    if (location) query.location = location;
+
+    // Rate Type Filter
+    if (rate) query.rate = rate;
+
+    // Get Distinct Locations for Dropdown
+    const locations = await RentalProduct.distinct('location');
+
+    const products = await RentalProduct.find(query);
+    
+    res.render('rentals/rent-items', {
+      products,
+      searchQuery: search,
+      minPrice,
+      maxPrice,
+      location,
+      rate,
+      locations,
+      pageTitle: "Available Rentals",  
+      path: "/rental/rent",           
+      activePage: "rental"   
     });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server Error');
+  }
 };
 
 // Controller method to handle the buying action and decrementing quantity

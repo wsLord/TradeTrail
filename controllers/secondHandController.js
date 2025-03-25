@@ -56,35 +56,61 @@ exports.postAddProduct = (req, res, next) => {
 
 //all the products for buy page
 exports.getProducts = (req, res, next) => {
-  const searchQuery = req.query.search || "";
-  let filter = {};
+  const { search, minPrice, maxPrice, location, saleType } = req.query;
+  const filter = {};
 
-  // If a search term is provided, build a filter for title, description, or location.
-  if (searchQuery) {
-    filter = {
-      $or: [
-        { title: { $regex: searchQuery, $options: "i" } },
-        { description: { $regex: searchQuery, $options: "i" } },
-        { location: { $regex: searchQuery, $options: "i" } }
-      ]
-    };
+  // Search Filter
+  if (search) {
+    filter.$or = [
+      { title: { $regex: search, $options: "i" } },
+      { description: { $regex: search, $options: "i" } },
+      { location: { $regex: search, $options: "i" } }
+    ];
   }
 
-  Product.find(filter)
-    .populate("seller", "fullName") // Fetch seller's full name
-    .then((products) => {
-      res.render("secondHand/buy", {
-        prods: products,
-        pageTitle: "All Products",
-        path: "/products",
-        user: req.user,
-        searchQuery: searchQuery,  // Pass searchQuery to the view
-        activePage: "secondHand",  // Added activePage
-      });
-    })
-    .catch((err) => {
-      console.log(err);
+  // Price Range Filter
+  if (minPrice || maxPrice) {
+    filter.price = {};
+    if (minPrice) filter.price.$gte = parseFloat(minPrice);
+    if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
+  }
+
+  // Location Filter
+  if (location) {
+    filter.location = new RegExp(location, 'i');
+  }
+
+  // Sale Type Filter
+  if (saleType) {
+    filter.saleType = saleType;
+  }
+
+  Promise.all([
+    Product.find(filter).populate("seller", "fullName"),
+    Product.distinct("location"),
+    Product.distinct("saleType")
+  ])
+  .then(([products, locations, saleTypes]) => {
+    res.render("secondHand/buy", {
+      prods: products,
+      pageTitle: "All Products",
+      path: "/products",
+      user: req.user,
+      searchQuery: search || "",
+      minPrice: minPrice || "",
+      maxPrice: maxPrice || "",
+      location: location || "",
+      saleType: saleType || "",
+      locations: locations.filter(l => l),
+      saleTypes: saleTypes.filter(st => st),
+      activePage: "secondHand"
     });
+  })
+  .catch((err) => {
+    console.log(err);
+    req.flash("error", "Error loading products");
+    res.redirect("/secondHand/buy");
+  });
 };
 
 //every product auction page
