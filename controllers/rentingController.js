@@ -175,7 +175,7 @@ exports.postAddProduct = (req, res, next) => {
 };
 
 // Get all rental items (with search)
-exports.getRentItems = (req, res, next) => {
+exports.getRentItems = async (req, res, next) => {
   const searchQuery = req.query.search || "";
   const query = {};
 
@@ -201,7 +201,9 @@ exports.getRentItems = (req, res, next) => {
       console.log(err);
       res.status(500).send("An error occurred while fetching rental items.");
     });
+  
 };
+
 
 // Controller method to handle the buying action and decrementing quantity
 exports.buyProduct = (req, res, next) => {

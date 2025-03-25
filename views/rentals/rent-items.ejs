@@ -64,7 +64,9 @@
               <div class="product-info">
                 <h3><%= product.title %></h3>
                 <p class="price">Price: <%= product.price %> per <%= product.rate %></p>
-                
+                <p><%= product.location %></p>
+                <!-- <p>Status: <strong><%= product.isAvailable ? 'Available' : 'Unavailable' %></strong></p> -->
+
                 <div class="button-group vertical">
                   <a href="/rental/details/<%= product.id %>" class="view-details-button">View Details</a>
                   <form action="/rental/add-to-cart/<%= product.id %>" method="POST" class="inline-form">

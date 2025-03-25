@@ -99,7 +99,8 @@
         </a>
         </div>
 
-        <% for (let product of prods) { %>
+        <% for (let product of prods) { 
+          if (!product.buyer) { %>     
           
           <div class="rental-item">
             <div class="product-card">
@@ -144,7 +145,7 @@
               </div>
             </div>
           </div>
-        <% } %>
+        <% }} %>
       </div>
     <% } else { %>
       <h1>No Products Found!</h1>
