@@ -320,10 +320,10 @@
           <div class="profile-actions">
             <button class="edit-btn" onclick="toggleEditMode()">Edit Profile</button>
             <button class="edit-btn" onclick="logout()" style="background: #e74c3c;">Logout</button>
-            <% if (!user.googleId && !user.facebookId) { %>
-              <button class="edit-btn" data-toggle="modal" data-target="#changePasswordModal" 
-                      style="background: #3498db;">Change Password</button>
+            <% if (user.password) { %>
+              <button class="edit-btn" data-toggle="modal" data-target="#changePasswordModal" style="background: #3498db;">Change Password</button>
             <% } %>
+            
           </div>
 
         </div>

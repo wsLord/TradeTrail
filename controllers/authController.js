@@ -115,13 +115,14 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Add check for OAuth users
-    if (user.googleId || user.facebookId) {
+    // Check if the account is OAuth-only (i.e., no password set)
+    if (!user.password) {
       return res.status(401).json({
         message: "This account uses social login. Please sign in with Google or Facebook.",
         shouldUseOAuth: true
       });
     }
+
 
     // Generate JWT token
     generateToken(user._id, res);
