@@ -175,7 +175,8 @@ exports.postAddProduct = (req, res, next) => {
 };
 
 // Get all rental items (with search)
-exports.getRentItems = async (req, res) => {
+
+exports.getRentItems = async (req, res,next) => {
   try {
     const { search, minPrice, maxPrice, location, rate } = req.query;
     const query = {};
@@ -220,11 +221,14 @@ exports.getRentItems = async (req, res) => {
       activePage: "rental"   
     });
 
+
   } catch (err) {
     console.error(err);
     res.status(500).send('Server Error');
   }
+
 };
+
 
 // Controller method to handle the buying action and decrementing quantity
 exports.buyProduct = (req, res, next) => {
