@@ -276,7 +276,7 @@ exports.getProductDetails = (req, res, next) => {
 
   RentalProduct.findById(productId)
   .populate("seller", "fullName")
-  .populate('buyer', 'fullName')
+  .populate("orderIds")
     .then((product) => {
       if (!product) {
         return res.status(404).send("Product not found");

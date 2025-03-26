@@ -8,6 +8,7 @@ const RentalProduct = require("../models/rentalProduct");
 const RentalBooking = require("../models/rentalBooking");
 const Ott = require("../models/ott");
 const Cart = require("../models/cartModel");
+const Order = require("../models/order");
 const emailService = require("../services/emailService");
 
 // Initialize Razorpay with your test keys
@@ -23,7 +24,6 @@ exports.makePayment = async (req, res) => {
     console.log("te", req.body);
 
     let model;
-
     if (section === "Rental") model = RentalProduct;
     else if (section === "Subscription") model = Ott;
     else if (section === "SecondHand") model = Product;
@@ -171,13 +171,25 @@ exports.verifyPayment = async (req, res) => {
 
     await newPayment.save();
 
+    let model;
+    if (section === "Rental") model = RentalProduct;
+    else if (section === "Subscription") model = Ott;
+    else if (section === "SecondHand") model = Product;
+    if (!model) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid section" });
+    }
+
     // Find user's cart and get relevant product details
-    const cart = await Cart.findOne({ user: req.user._id });
+    const cart = await Cart.findOne({ user: req.user._id }).populate({
+      path: "items.product",
+      model: model, // Use dynamically selected model
+    });
 
     // Filter products based on the section and product IDs
-    const filteredProducts = cart.items.filter(
-      (item) => item.productType === section
-    );
+    const filteredProducts = cart.items
+      .filter((item) => item.productType === section)
 
     if (filteredProducts.length === 0) {
       return res.status(404).json({
@@ -188,7 +200,8 @@ exports.verifyPayment = async (req, res) => {
 
     // Update each product with the generated OTP so the seller can view it later.
     // We try to update the product in each collection (RentalProduct, Ott, Product)
-    for (const productId of filteredProducts) {
+    for (const prodId of filteredProducts) {
+      productId = prodId.product;
       let updated = false;
       const rental = await RentalProduct.findById(productId);
       if (rental) {
@@ -210,24 +223,45 @@ exports.verifyPayment = async (req, res) => {
       }
     }
 
-    // Update the buyer field for each product and handle rentals if necessary
     await Promise.all(
       filteredProducts.map(async (item) => {
         try {
-          let model;
-          // Identify the correct model based on productType
-          if (section === "Rental") model = RentalProduct;
-          else if (section === "Subscription") model = Ott;
-          else if (section === "SecondHand") model = Product;
+          if (
+            !item.product ||
+            typeof item.product.quantity !== "number" ||
+            typeof item.quantity !== "number"
+          ) {
+            console.error(
+              `Invalid quantity for product ${item.product}:`,
+              item
+            );
+            return;
+          }
 
-          // Update the product with buyer info
-          await model.findByIdAndUpdate(item.product, {
-            $set: { buyer: req.user._id },
+          const order = new Order({
+            Payment: newPayment._id,
+            product_id: item.product,
+            productModel: section,
+            buyer: req.user._id,
+            quantity: item.quantity,
+            amount: 0,
+            otp: otp,
           });
+          await order.save();
+          console.log("Order is saved");
 
+          // Update quantity
+          const remainingQuantity = Math.max(
+            0,
+            item.product.quantity - item.quantity
+          );
+          await model.findByIdAndUpdate(item.product, {
+            $push: { orderIds: order._id },
+            $set: { quantity: remainingQuantity },
+          });
           console.log(`Buyer updated for product ${item.product}`);
 
-          // For rentals, create a booking entry
+          // Handle rentals
           if (section === "Rental") {
             const booking = new RentalBooking({
               product: item.product,

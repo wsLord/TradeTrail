@@ -3,24 +3,77 @@ const User = require("../models/userModel");
 const Product = require("../models/product");
 const RentalProduct = require("../models/rentalProduct");
 const BidProduct = require("../models/bidProduct");
-const SecondhandDirectProduct = require("../models/product");
-const SubscriptionDirectProduct = require("../models/ott");
+const Subscription = require("../models/ott");
+const Order = require("../models/order");
 const bcrypt = require("bcryptjs");
 
 exports.getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
-    const auctionProducts = await Product.find({
-      seller: req.user._id,
-      saleType: "auction",
-    });
+    //renting products
     const rentalProducts = await RentalProduct.find({
       seller: req.user._id,
-    }).populate("buyer");
+    }).populate({
+      path: "orderIds",
+      populate: {
+        path: "buyer",
+        model: "User",
+        select: "fullName",
+      },
+      select: "quantity otp",
+    });
 
-    const directSecondhandProducts = await SecondhandDirectProduct.find({ seller: req.user._id }).populate("buyer");
-    const directSubscriptionProducts = await SubscriptionDirectProduct.find({ seller: req.user._id }).populate("buyer");
+    //secondHand auction
+    const secondHandAuction = await Product.find({
+      seller: req.user._id,
+      saleType: "auction",
+    }).populate({
+      path: "orderIds",
+      populate: {
+        path: "buyer",
+        model: "User",
+        select: "fullName",
+      },
+      select: "quantity otp",
+    });
+    //subscription auction
+    const subscriptionAuction = await Subscription.find({
+      seller: req.user._id,
+      saleType: "auction",
+    }).populate({
+      path: "orderId",
+      populate: {
+        path: "buyer",
+        model: "User",
+        select: "fullName",
+      },
+      select: "quantity otp",
+    });
 
+    //direct secondhand and subscription products
+    const directSecondhandProducts = await Product.find({
+      seller: req.user._id,
+      saleType: "direct",
+    }).populate({
+      path: "orderIds",
+      populate: {
+        path: "buyer",
+        model: "User",
+        select: "fullName",
+      },
+      select: "quantity otp",
+    });
+    const directSubscriptionProducts = await Subscription.find({
+      seller: req.user._id,
+    }).populate({
+      path: "orderId",
+      populate: {
+        path: "buyer",
+        model: "User",
+        select: "fullName",
+      },
+      select: "quantity otp",
+    });
 
     // Add default badges if none exist
     if (!user.badges || user.badges.length === 0) {
@@ -32,12 +85,12 @@ exports.getProfile = async (req, res) => {
     }
     res.render("profile", {
       user: user,
-      auctionProducts,
+      secondHandAuction,
+      subscriptionAuction,
       rentalProducts,
       directSecondhandProducts,
       directSubscriptionProducts,
       activePage: "profile",
-      
     });
   } catch (error) {
     console.error("Error fetching profile:", error);
@@ -156,8 +209,8 @@ exports.changePassword = async (req, res) => {
 
     // Check if user has password (OAuth users shouldn't have one)
     if (!user.password) {
-      return res.status(400).json({ 
-        message: "Password change not available for social login users" 
+      return res.status(400).json({
+        message: "Password change not available for social login users",
       });
     }
 
@@ -173,8 +226,8 @@ exports.changePassword = async (req, res) => {
     }
 
     if (newPassword.length < 6) {
-      return res.status(400).json({ 
-        message: "Password must be at least 6 characters" 
+      return res.status(400).json({
+        message: "Password must be at least 6 characters",
       });
     }
 
@@ -184,7 +237,6 @@ exports.changePassword = async (req, res) => {
     await user.save();
 
     res.json({ success: true });
-    
   } catch (error) {
     console.error("Error changing password:", error);
     res.status(500).json({ message: "Internal server error" });
