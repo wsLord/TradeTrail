@@ -16,39 +16,54 @@ const razorpayInstance = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-console.log(process.env.RAZORPAY_KEY_ID);
-
 exports.makePayment = async (req, res) => {
   console.log("hit");
   try {
     const { section } = req.body; // Amount from the frontend
     console.log("te", req.body);
 
+    let model;
+
+    if (section === "Rental") model = RentalProduct;
+    else if (section === "Subscription") model = Ott;
+    else if (section === "SecondHand") model = Product;
+    if (!model) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid section" });
+    }
     // Find user's cart and get relevant product details
-    const cart = await Cart.findOne({ user: req.user._id });
+    const cart = await Cart.findOne({ user: req.user._id }).populate({
+      path: "items.product",
+      model: model, // Use dynamically selected model
+    });
+
+    if (!cart) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Cart not found." });
+    }
 
     // Filter products based on the section and product IDs
     const filteredProducts = cart.items.filter(
-      (item) =>
-        item.productType === section &&
-        productIds.includes(item.product.toString())
+      (item) => item.productType === section
     );
+    console.log("Filtered Products:", filteredProducts);
 
     if (filteredProducts.length === 0) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: `No ${section} products found in your cart.`,
-        });
+      return res.status(404).json({
+        success: false,
+        message: `No ${section} products found in your cart.`,
+      });
     }
 
-    let sectionTotal=0;
-    let sectionDeposit=0;
+    let sectionTotal = 0;
+    let sectionDeposit = 0;
     filteredProducts.forEach((item) => {
+      console.log("Item Quantity:", item.quantity);
       let totalPrice = 0;
       let itemDeposit = 0;
-      if (sectionName === "Rental") {
+      if (section === "Rental") {
         totalPrice = item.calculatedPrice * item.quantity;
         itemDeposit = item.securityDeposit;
         sectionDeposit += itemDeposit;
@@ -57,7 +72,8 @@ exports.makePayment = async (req, res) => {
       }
       sectionTotal += totalPrice;
     });
-    let amount=sectionTotal+sectionDeposit;
+    let amount = sectionTotal + sectionDeposit;
+    console.log("Amount:", amount);
 
     if (!amount || amount <= 0) {
       return res
@@ -71,10 +87,9 @@ exports.makePayment = async (req, res) => {
       receipt: `receipt_${Date.now()}`,
       payment_capture: 1,
     };
-    console.log(options);
 
     const order = await razorpayInstance.orders.create(options);
-    console.log("order", order);
+    console.log("order done");
 
     res.json({
       success: true,
@@ -111,7 +126,9 @@ exports.verifyPayment = async (req, res) => {
       razorpay_payment_id,
       razorpay_signature,
       amount,
+      section,
     } = req.body;
+    console.log(section);
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return res
@@ -126,8 +143,8 @@ exports.verifyPayment = async (req, res) => {
       .update(sign)
       .digest("hex");
 
-    console.log("Expected signature:", expectedSign);
-    console.log("Received signature:", razorpay_signature);
+    // console.log("Expected signature:", expectedSign);
+    // console.log("Received signature:", razorpay_signature);
 
     if (razorpay_signature !== expectedSign) {
       console.log("Signature verification failed!");
@@ -136,9 +153,6 @@ exports.verifyPayment = async (req, res) => {
         .json({ success: false, message: "Invalid signature" });
     }
 
-    //payment verification done
-    console.log('Payment verified');
-
     // Generate a 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     console.log("Generated OTP:", otp);
@@ -146,9 +160,36 @@ exports.verifyPayment = async (req, res) => {
     // Send OTP to buyer via email
     await emailService.sendOtpEmail(req.user.email, otp);
 
+    // Save the payment details in the database
+    const newPayment = new payment({
+      orderId: razorpay_order_id,
+      paymentId: razorpay_payment_id,
+      buyer: req.user._id,
+      signature: razorpay_signature,
+      amount: parseFloat(amount || 0),
+      status: "completed",
+    });
+
+    await newPayment.save();
+
+    // Find user's cart and get relevant product details
+    const cart = await Cart.findOne({ user: req.user._id });
+
+    // Filter products based on the section and product IDs
+    const filteredProducts = cart.items.filter(
+      (item) => item.productType === section
+    );
+
+    if (filteredProducts.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `No ${section} products found in your cart.`,
+      });
+    }
+
     // Update each product with the generated OTP so the seller can view it later.
     // We try to update the product in each collection (RentalProduct, Ott, Product)
-    for (const productId of productIds) {
+    for (const productId of filteredProducts) {
       let updated = false;
       const rental = await RentalProduct.findById(productId);
       if (rental) {
@@ -168,38 +209,6 @@ exports.verifyPayment = async (req, res) => {
       if (!updated) {
         console.log(`Product ${productId} not found in any model.`);
       }
-    }
-
-    // Save the payment details in the database
-    const newPayment = new payment({
-      orderId: razorpay_order_id,
-      paymentId: razorpay_payment_id,
-      buyer: req.user._id,
-      signature: razorpay_signature,
-      amount: parseFloat(amount || 0),
-      status: "completed",
-    });
-
-    console.log("Saving payment:", newPayment);
-    await newPayment.save();
-
-    // Find user's cart and get relevant product details
-    const cart = await Cart.findOne({ user: req.user._id });
-
-    // Filter products based on the section and product IDs
-    const filteredProducts = cart.items.filter(
-      (item) =>
-        item.productType === section &&
-        productIds.includes(item.product.toString())
-    );
-
-    if (filteredProducts.length === 0) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: `No ${section} products found in your cart.`,
-        });
     }
 
     // Update the buyer field for each product and handle rentals if necessary
@@ -238,15 +247,10 @@ exports.verifyPayment = async (req, res) => {
     );
 
     // ✅ Remove the products from the cart after successful payment
-    cart.items = cart.items.filter(
-      (item) =>
-        !(
-          item.productType === section &&
-          productIds.includes(item.product.toString())
-        )
-    );
+    cart.items = cart.items.filter((item) => !(item.productType === section));
     await cart.save();
-    console.log("Products removed from the cart.");
+    //payment verification done
+    console.log("Payment verified");
 
     return res.json({
       success: true,
