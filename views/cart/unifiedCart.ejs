@@ -272,12 +272,13 @@
   })
     .then((response) => response.json())
     .then((data) => {
+      
       console.log("data", data);
       if (data.success) {
         const options = {
           ...data.options,
           handler: function (response) {
-            verifyPayment(response, amount,section);
+            verifyPayment(response,section);
           },
         };
         console.log(options);
@@ -291,13 +292,13 @@
     .catch(() => alert("Failed to create order"));
 }
 
-function verifyPayment(response, amount,section) {
-  console.log("Verifying payment with:", response, "and amount:", amount);
+function verifyPayment(response,section) {
+  console.log("Verifying payment with:", response);
 
   fetch("/api/payment/verifyPayment", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...response, amount,section }),
+    body: JSON.stringify({ ...response,section }),
   })
     .then((res) => res.json())
     .then((data) => {

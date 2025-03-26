@@ -125,7 +125,6 @@ exports.verifyPayment = async (req, res) => {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
-      amount,
       section,
     } = req.body;
     console.log(section);
@@ -166,7 +165,7 @@ exports.verifyPayment = async (req, res) => {
       paymentId: razorpay_payment_id,
       buyer: req.user._id,
       signature: razorpay_signature,
-      amount: parseFloat(amount || 0),
+      amount: parseFloat(0),
       status: "completed",
     });
 
