@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= product.platform_name %> Details</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/chatbot.css">
+  <link rel="stylesheet" href="/css/rentalStyles.css">
+  <link rel="icon" type="image/png" href="/assets/logo2.png">
+  
+  <style>
+    /* Image display styles */
+    .slider {
+      position: relative;
+      width: 90%;
+      height: 500px;
+      overflow: hidden;
+      margin: 0 auto;
+      background: #f5f5f5;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .slide {
+      width: auto;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    /* Layout styles */
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 50px;
+      align-items: start;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 30px;
+    }
+    .product-image-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 25px;
+      padding: 30px;
+    }
+    .product-info-column {
+      padding: 20px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    h1 {
+      text-align: center;
+      margin: 0;
+      font-size: 2.4rem;
+      color: #2c3e50;
+      width: 100%;
+      padding: 15px 0;
+      border-bottom: 2px solid #eee;
+    }
+    .section-title {
+      font-size: 1.2em;
+      color: #333;
+      text-decoration: underline;
+      margin-bottom: 10px;
+    }
+    .buy-button {
+      background: #b3cf99;
+      color: #333;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .buy-button:hover {
+      background: #a3c585;
+    }
+    .price-summary-card {
+      background: #fff;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    .sold-info {
+      background-color: #afedf3;
+      color: #060001;
+      padding: 10px 15px;
+      border-radius: 6px;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="navbar">
+    <%- include('./common/chatbot.ejs') %>
+  </div>
+
+  <main class="product-details-container">
+    <div class="details-grid">
+      <!-- Product Image Display -->
+      <div class="product-image-column">
+        <div class="slider">
+          <img src="<%= product.imageUrl %>" class="slide" alt="Product Image">
+        </div>
+        <h1><%= product.platform_name %></h1>
+      </div>
+      
+      <!-- Product Information -->
+      <div class="product-info-column">
+        <h2 class="section-title">Product Details</h2>
+        <p class="description"><%= product.description %></p>
+        <div class="seller-info">
+          <p><strong>Seller:</strong> <%= product.seller.fullName %></p>
+        </div>
+        
+        <div class="product-meta">
+          <p><strong>Available Stock:</strong> <%= product.quantity %></p>
+          <p><strong>Price:</strong> ₹<%= product.price %></p>
+        </div>
+
+        <div class="form-actions">
+          <% if (product.buyer) { %>
+            <p class="sold-info">Sold to: <%= product.buyer.fullName %></p>
+          <% } else { %>
+            <form action="/subscription/buy" method="POST">
+              <input type="hidden" name="productId" value="<%= product._id %>">
+              <button type="submit" class="buy-button">Buy Now</button>
+            </form>
+          <% } %>
+        </div>
+
+        <div class="price-summary-card">
+          <h3>Pricing Details</h3>
+          <p><strong>Price:</strong> ₹<%= product.price %></p>
+          <p><strong>Available Stock:</strong> <%= product.quantity %></p>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
