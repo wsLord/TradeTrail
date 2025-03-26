@@ -6,6 +6,7 @@ const { uploadSingle } = require("../middleware/multerConfig");
 
 router.get("/profile", protectRoute, profileController.getProfile);
 router.post("/profile", protectRoute, profileController.updateProfile);
+router.post("/profile/change-password", protectRoute, profileController.changePassword);
 router.post("/profile/picture", protectRoute, uploadSingle, profileController.updateProfilePic);
 router.get("/profile/auction/:productId", protectRoute, profileController.getAuctionDetails);
 

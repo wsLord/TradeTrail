@@ -8,6 +8,7 @@ const RentalProduct = require("../models/rentalProduct");
 const RentalBooking = require("../models/rentalBooking");
 const Ott = require("../models/ott");
 const Cart = require("../models/cartModel");
+const emailService = require("../services/emailService");
 
 // Initialize Razorpay with your test keys
 const razorpayInstance = new Razorpay({
@@ -137,7 +138,38 @@ exports.verifyPayment = async (req, res) => {
 
     //payment verification done
     console.log('Payment verified');
-    
+
+    // Generate a 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    console.log("Generated OTP:", otp);
+
+    // Send OTP to buyer via email
+    await emailService.sendOtpEmail(req.user.email, otp);
+
+    // Update each product with the generated OTP so the seller can view it later.
+    // We try to update the product in each collection (RentalProduct, Ott, Product)
+    for (const productId of productIds) {
+      let updated = false;
+      const rental = await RentalProduct.findById(productId);
+      if (rental) {
+        await RentalProduct.findByIdAndUpdate(productId, { otp });
+        updated = true;
+      }
+      const subscription = await Ott.findById(productId);
+      if (subscription) {
+        await Ott.findByIdAndUpdate(productId, { otp });
+        updated = true;
+      }
+      const secondHand = await Product.findById(productId);
+      if (secondHand) {
+        await Product.findByIdAndUpdate(productId, { otp });
+        updated = true;
+      }
+      if (!updated) {
+        console.log(`Product ${productId} not found in any model.`);
+      }
+    }
+
     // Save the payment details in the database
     const newPayment = new payment({
       orderId: razorpay_order_id,

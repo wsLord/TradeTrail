@@ -3,6 +3,9 @@ const User = require("../models/userModel");
 const Product = require("../models/product");
 const RentalProduct = require("../models/rentalProduct");
 const BidProduct = require("../models/bidProduct");
+const SecondhandDirectProduct = require("../models/product");
+const SubscriptionDirectProduct = require("../models/ott");
+const bcrypt = require("bcryptjs");
 
 exports.getProfile = async (req, res) => {
   try {
@@ -15,6 +18,10 @@ exports.getProfile = async (req, res) => {
       seller: req.user._id,
     }).populate("buyer");
 
+    const directSecondhandProducts = await SecondhandDirectProduct.find({ seller: req.user._id }).populate("buyer");
+    const directSubscriptionProducts = await SubscriptionDirectProduct.find({ seller: req.user._id }).populate("buyer");
+
+
     // Add default badges if none exist
     if (!user.badges || user.badges.length === 0) {
       user.badges = [
@@ -26,8 +33,11 @@ exports.getProfile = async (req, res) => {
     res.render("profile", {
       user: user,
       auctionProducts,
-      activePage: "profile",
       rentalProducts,
+      directSecondhandProducts,
+      directSubscriptionProducts,
+      activePage: "profile",
+      
     });
   } catch (error) {
     console.error("Error fetching profile:", error);
@@ -136,5 +146,47 @@ exports.updateProfilePic = async (req, res) => {
   } catch (error) {
     console.error("Error updating profile picture:", error);
     res.status(500).json({ success: false });
+  }
+};
+
+exports.changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    const user = await User.findById(req.user._id);
+
+    // Check if user has password (OAuth users shouldn't have one)
+    if (!user.password) {
+      return res.status(400).json({ 
+        message: "Password change not available for social login users" 
+      });
+    }
+
+    // Validate current password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Current password is incorrect" });
+    }
+
+    // Validate new password
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: "New passwords do not match" });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ 
+        message: "Password must be at least 6 characters" 
+      });
+    }
+
+    // Update password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    res.json({ success: true });
+    
+  } catch (error) {
+    console.error("Error changing password:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

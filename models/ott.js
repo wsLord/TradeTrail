@@ -37,6 +37,7 @@ const OttSchema = new Schema({
       return this.saleType === "auction";
     },
   },
+  otp: { type: String },
 
   maxBid: { type: Number, default: 0 }, // Store highest bid
   //need to add user
@@ -49,7 +50,6 @@ const OttSchema = new Schema({
     min: [1, "Quantity cannot be less than 1"],
     max: [1, "Cannot have more than one subscription"],
   },
-
   saleType: {
     type: String,
     enum: ["direct", "auction"],
