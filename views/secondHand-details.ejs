@@ -208,7 +208,7 @@
           <p><strong>Price:</strong> ₹<%= product.price %></p>
         </div>
 
-        <% if (product.otp && user._id.equals(product.seller._id)) { %>
+        <% if (product.orderIds && product.orderIds.length > 0 && user._id.equals(product.seller._id)) { %>
           <div class="otp-verification-card">
             <h4>OTP Verification</h4>
             <div class="otp-input-group">
@@ -223,10 +223,10 @@
           <% if (product.buyer) { %>
             <p class="sold-info">Sold to: <%= product.buyer.fullName %></p>
           <% } else { %>
-            <form action="/direct/buy" method="POST">
+            <!-- <form action="/direct/buy" method="POST">
               <input type="hidden" name="productId" value="<%= product._id %>">
               <button type="submit" class="buy-button">Buy Now</button>
-            </form>
+            </form> -->
           <% } %>
         </div>
 

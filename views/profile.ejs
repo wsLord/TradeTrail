@@ -400,7 +400,7 @@
 
     <!-- Auction Products Section -->
 <div class="auction-products-card">
-  <h3>secondhand Auction</h3>
+  <h3>Secondhand Auction</h3>
   <% if (secondHandAuction.length > 0) { %>
     <ul>
       <% secondHandAuction.forEach(product => { %>
@@ -408,7 +408,7 @@
           <a href="/profile/auction/<%= product._id %>" style="text-decoration: none; color: #007bff;">
             <h4>Product: <%= product.title %></h4>
             <% if (product.orderIds && product.orderIds.length > 0) { %>
-              <h4>Buyers:</h4>
+              <!-- <h4>Buyers:</h4> -->
               <ul>
                 <% product.orderIds.forEach(order => { %>
                   <% if (order.buyer) { %>
@@ -439,7 +439,7 @@
 </div>
 
 <div class="auction-products-card">
-  <h3>subscription Auction</h3>
+  <h3>Subscription Auction</h3>
   <% if (subscriptionAuction.length > 0) { %>
     <ul>
       <% subscriptionAuction.forEach(product => { %>
@@ -448,7 +448,7 @@
           <a href="/profile/auction/<%= product._id %>" style="text-decoration: none; color: #007bff;">
             <h4>Product: <%= product.title %></h4>
             <% if (product.orderIds && product.orderIds.length > 0) { %>
-              <h4>Buyers:</h4>
+              <!-- <h4>Buyers:</h4> -->
               <ul>
                 <% product.orderIds.forEach(order => { %>
                   <% if (order.buyer) { %>
@@ -486,10 +486,10 @@
         <ul>
           <% rentalProducts.forEach(product => { %>
             <li>
-              <a href="/rental/details/<%= product._id %>" style="text-decoration: none; color: #007bff;">
+              <a href="/profile/rentals/<%= product._id %>" style="text-decoration: none; color: #007bff;">
                 <h4>Product: <%= product.title %></h4>
                 <% if (product.orderIds && product.orderIds.length > 0) { %>
-                  <h4>Buyers:</h4>
+                  <!-- <h4>Buyers:</h4> -->
                   <ul>
                     <% product.orderIds.forEach(order => { %>
                       <% if (order.buyer) { %>
@@ -497,7 +497,7 @@
                           <p>Buyer: <%= order.buyer.fullName %></p>
                           <p>Quantity: <%= order.quantity %></p>
                           <% if (order.otp) { %>
-                            <p>OTP: <%= order.otp %></p>
+                            <p>OTP: Generated </p>
                           <% } else { %>
                             <p>OTP: Not generated yet</p>
                           <% } %>
@@ -521,16 +521,16 @@
 
    <!-- Direct Purchase (Second Hand) Products Section -->
 <div class="direct-products-card">
-  <h3>Your Direct secondHand Products</h3>
+  <h3>Your Direct SecondHand Products</h3>
   <% if (directSecondhandProducts && directSecondhandProducts.length > 0) { %>
     <ul>
       <% directSecondhandProducts.forEach(product => { %>
         <li>
-          <a href="/secondHand/buy/<%= product._id %>" style="text-decoration: none; color: #007bff;">
+          <a href="/profile/secondHand/<%= product._id %>" style="text-decoration: none; color: #007bff;">
             <h4>Product: <%= product.title %></h4>
             
             <% if (product.orderIds && product.orderIds.length > 0) { %>
-              <h4>Buyers:</h4>
+              <!-- <h4>Buyers:</h4> -->
               <ul>
                 <% product.orderIds.forEach(order => { %>
                   <% if (order.buyer) { %>
@@ -538,7 +538,7 @@
                       <p>Buyer: <%= order.buyer.fullName %></p>
                       <p>Quantity: <%= order.quantity %></p>
                       <% if (order.otp) { %>
-                        <p>OTP: <%= order.otp %></p>
+                        <p>OTP: Generated </p>
                       <% } else { %>
                         <p>OTP: Not generated yet</p>
                       <% } %>
@@ -568,11 +568,11 @@
       <% directSubscriptionProducts.forEach(product => { %>
         <li>
 
-          <a href="/subscription/details/<%= product._id %>" style="text-decoration: none; color: #007bff;">
+          <a href="/profile/subscription/<%= product._id %>" style="text-decoration: none; color: #007bff;">
             <h4>Platform: <%= product.platform_name %></h4>
             
             <% if (product.orderIds && product.orderIds.length > 0) { %>
-              <h4>Buyers:</h4>
+              <!-- <h4>Buyers:</h4> -->
               <ul>
                 <% product.orderIds.forEach(order => { %>
                   <% if (order.buyer) { %>

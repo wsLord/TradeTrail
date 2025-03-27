@@ -34,7 +34,6 @@ const rentalProductSchema = new mongoose.Schema({
     default: 1, // Default quantity to 1 if not specified.
   },
   seller: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  otp: { type: String },
   orderIds: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: "Order",

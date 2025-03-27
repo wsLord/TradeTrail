@@ -268,7 +268,7 @@
       </div>
     </div> -->
 
-    <% if (product.otp && user._id.equals(product.seller._id)) { %>
+    <% if (product.orderIds && product.orderIds.length > 0 && user._id.equals(product.seller._id)) { %>
       <div class="otp-verification-card">
         <h4>OTP Verification</h4>
         <div class="otp-input-group">

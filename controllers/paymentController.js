@@ -198,30 +198,6 @@ exports.verifyPayment = async (req, res) => {
       });
     }
 
-    // Update each product with the generated OTP so the seller can view it later.
-    // We try to update the product in each collection (RentalProduct, Ott, Product)
-    for (const prodId of filteredProducts) {
-      productId = prodId.product;
-      let updated = false;
-      const rental = await RentalProduct.findById(productId);
-      if (rental) {
-        await RentalProduct.findByIdAndUpdate(productId, { otp });
-        updated = true;
-      }
-      const subscription = await Ott.findById(productId);
-      if (subscription) {
-        await Ott.findByIdAndUpdate(productId, { otp });
-        updated = true;
-      }
-      const secondHand = await Product.findById(productId);
-      if (secondHand) {
-        await Product.findByIdAndUpdate(productId, { otp });
-        updated = true;
-      }
-      if (!updated) {
-        console.log(`Product ${productId} not found in any model.`);
-      }
-    }
 
     await Promise.all(
       filteredProducts.map(async (item) => {

@@ -37,7 +37,6 @@ const OttSchema = new Schema({
       return this.saleType === "auction";
     },
   },
-  otp: { type: String },
 
   maxBid: { type: Number, default: 0 }, // Store highest bid
   //need to add user

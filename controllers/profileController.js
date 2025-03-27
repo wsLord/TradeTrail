@@ -253,7 +253,16 @@ exports.getRentalDetails = (req, res, next) => {
 
   RentalProduct.findById(productId)
     .populate("seller", "fullName")
-    .populate("buyer", "fullName")
+    // Instead of populating a "buyer" field, populate orderIds and within that, buyer details.
+    .populate({
+      path: "orderIds",
+      populate: {
+        path: "buyer",
+        model: "User",
+        select: "fullName"
+      },
+      select: "quantity otp"
+    })
     .then((product) => {
       if (!product) {
         return res.status(404).send("Product not found");
@@ -264,7 +273,6 @@ exports.getRentalDetails = (req, res, next) => {
     })
     .then((booking) => {
       if (booking) {
-        // Attach the booking information dynamically
         fetchedProduct.currentBooking = booking;
       }
       // Render the 'rental-details' view from your views folder
@@ -281,13 +289,23 @@ exports.getRentalDetails = (req, res, next) => {
     });
 };
 
+
 exports.getSecondHandDetails = (req, res, next) => {
   const productId = req.params.productId;
   let fetchedProduct;
 
   SecondhandDirectProduct.findById(productId)
     .populate("seller", "fullName")
-    .populate("buyer", "fullName")
+    // Populate the orderIds array with buyer details
+    .populate({
+      path: "orderIds",
+      populate: {
+        path: "buyer",
+        model: "User",
+        select: "fullName"
+      },
+      select: "quantity otp"
+    })
     .then((product) => {
       if (!product) {
         return res.status(404).send("Product not found");
@@ -307,12 +325,22 @@ exports.getSecondHandDetails = (req, res, next) => {
     });
 };
 
+
 exports.getSubscriptionDetails = async (req, res, next) => {
   try {
     const productId = req.params.productId;
     const product = await SubscriptionDirectProduct.findById(productId)
       .populate("seller", "fullName")
-      .populate("buyer", "fullName");
+      // Populate orderIds instead of buyer directly
+      .populate({
+        path: "orderId",
+        populate: {
+          path: "buyer",
+          model: "User",
+          select: "fullName"
+        },
+        select: "quantity otp"
+      });
 
     if (!product) {
       return res.status(404).send("Product not found");
@@ -330,47 +358,49 @@ exports.getSubscriptionDetails = async (req, res, next) => {
   }
 };
 
+
 exports.verifyOTP = async (req, res) => {
   try {
     const { productId, productType, otp } = req.body;
     
-    let Model;
-    switch(productType.toLowerCase()) { // Handle case insensitivity
-      case 'rental':
-        Model = RentalProduct;
-        break;
-      case 'secondhand':
-        Model = SecondhandDirectProduct;
-        break;
-      case 'subscription':
-        Model = SubscriptionDirectProduct;
-        break;
-      default:
-        return res.status(400).json({ success: false, message: 'Invalid product type' });
-    }
-
-    const product = await Model.findById(productId);
+    // Map productType to Order's productModel values
+    const productModelMap = {
+      rental: 'Rental',
+      secondhand: 'SecondHand',
+      subscription: 'Subscription'
+    };
     
-    if (!product) {
-      return res.status(404).json({ success: false, message: 'Product not found' });
+    const productModel = productModelMap[productType.toLowerCase()];
+    if (!productModel) {
+      return res.status(400).json({ success: false, message: 'Invalid product type' });
     }
 
-    // Convert both IDs to string for reliable comparison
+    // Determine product model
+    let Model;
+    switch (productType.toLowerCase()) {
+      case 'rental': Model = RentalProduct; break;
+      case 'secondhand': Model = Product; break;
+      case 'subscription': Model = Ott; break;
+      default: return res.status(400).json({ success: false, message: 'Invalid product type' });
+    }
+
+    // Verify product ownership
+    const product = await Model.findById(productId);
+    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
     if (product.seller.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: 'Unauthorized' });
     }
 
-    const isMatch = product.otp === otp;
-    // Add this debug logging:
-console.log('Comparing OTPs:', {
-  storedOTP: product.otp,
-  receivedOTP: otp,
-  match: product.otp === otp
-});
-    
+    // Check orders for matching OTP
+    const orders = await Order.find({
+      product_id: productId,
+      productModel: productModel,
+      otp: otp
+    });
+
     res.json({
-      success: isMatch,
-      message: isMatch ? 'OTP verified' : 'Invalid OTP'
+      success: orders.length > 0,
+      message: orders.length > 0 ? 'OTP verified' : 'Invalid OTP'
     });
 
   } catch (error) {
