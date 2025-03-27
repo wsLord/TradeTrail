@@ -259,6 +259,7 @@ exports.verifyPayment = async (req, res) => {
             $push: { orderIds: order._id },
             $set: { quantity: remainingQuantity },
           });
+
           console.log(`Buyer updated for product ${item.product}`);
 
           // Handle rentals

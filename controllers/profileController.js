@@ -3,8 +3,12 @@ const User = require("../models/userModel");
 const Product = require("../models/product");
 const RentalProduct = require("../models/rentalProduct");
 const BidProduct = require("../models/bidProduct");
+const SecondhandDirectProduct = require("../models/product");
+const SubscriptionDirectProduct = require("../models/ott");
+const RentalBooking = require("../models/rentalBooking");
 const Subscription = require("../models/ott");
 const Order = require("../models/order");
+
 const bcrypt = require("bcryptjs");
 
 exports.getProfile = async (req, res) => {
@@ -242,3 +246,136 @@ exports.changePassword = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+exports.getRentalDetails = (req, res, next) => {
+  const productId = req.params.productId;
+  let fetchedProduct;
+
+  RentalProduct.findById(productId)
+    .populate("seller", "fullName")
+    .populate("buyer", "fullName")
+    .then((product) => {
+      if (!product) {
+        return res.status(404).send("Product not found");
+      }
+      fetchedProduct = product;
+      // Find an active booking for this product
+      return RentalBooking.findOne({ product: productId, status: "active" }).populate("user", "fullName");
+    })
+    .then((booking) => {
+      if (booking) {
+        // Attach the booking information dynamically
+        fetchedProduct.currentBooking = booking;
+      }
+      // Render the 'rental-details' view from your views folder
+      res.render("rental-details", {
+        pageTitle: fetchedProduct.title,
+        product: fetchedProduct,
+        user: req.user,
+        activePage: "rental",
+      });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error fetching product details");
+    });
+};
+
+exports.getSecondHandDetails = (req, res, next) => {
+  const productId = req.params.productId;
+  let fetchedProduct;
+
+  SecondhandDirectProduct.findById(productId)
+    .populate("seller", "fullName")
+    .populate("buyer", "fullName")
+    .then((product) => {
+      if (!product) {
+        return res.status(404).send("Product not found");
+      }
+      fetchedProduct = product;
+      // Render the 'direct-details' view from your views folder
+      res.render("secondHand-details", {
+        pageTitle: fetchedProduct.title,
+        product: fetchedProduct,
+        user: req.user,
+        activePage: "direct",
+      });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error fetching product details");
+    });
+};
+
+exports.getSubscriptionDetails = async (req, res, next) => {
+  try {
+    const productId = req.params.productId;
+    const product = await SubscriptionDirectProduct.findById(productId)
+      .populate("seller", "fullName")
+      .populate("buyer", "fullName");
+
+    if (!product) {
+      return res.status(404).send("Product not found");
+    }
+
+    res.render("subscription-details", {
+      pageTitle: product.platform_name,
+      user: req.user,
+      product,
+      activePage: "subscription",
+    });
+  } catch (error) {
+    console.error("Error fetching subscription details:", error);
+    res.status(500).send("Error fetching product details");
+  }
+};
+
+exports.verifyOTP = async (req, res) => {
+  try {
+    const { productId, productType, otp } = req.body;
+    
+    let Model;
+    switch(productType.toLowerCase()) { // Handle case insensitivity
+      case 'rental':
+        Model = RentalProduct;
+        break;
+      case 'secondhand':
+        Model = SecondhandDirectProduct;
+        break;
+      case 'subscription':
+        Model = SubscriptionDirectProduct;
+        break;
+      default:
+        return res.status(400).json({ success: false, message: 'Invalid product type' });
+    }
+
+    const product = await Model.findById(productId);
+    
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    // Convert both IDs to string for reliable comparison
+    if (product.seller.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Unauthorized' });
+    }
+
+    const isMatch = product.otp === otp;
+    // Add this debug logging:
+console.log('Comparing OTPs:', {
+  storedOTP: product.otp,
+  receivedOTP: otp,
+  match: product.otp === otp
+});
+    
+    res.json({
+      success: isMatch,
+      message: isMatch ? 'OTP verified' : 'Invalid OTP'
+    });
+
+  } catch (error) {
+    console.error('OTP verification error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+

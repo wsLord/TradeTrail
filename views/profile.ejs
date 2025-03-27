@@ -444,6 +444,7 @@
     <ul>
       <% subscriptionAuction.forEach(product => { %>
         <li>
+
           <a href="/profile/auction/<%= product._id %>" style="text-decoration: none; color: #007bff;">
             <h4>Product: <%= product.title %></h4>
             <% if (product.orderIds && product.orderIds.length > 0) { %>
@@ -517,6 +518,7 @@
     </div>
     
 
+
    <!-- Direct Purchase (Second Hand) Products Section -->
 <div class="direct-products-card">
   <h3>Your Direct secondHand Products</h3>
@@ -565,6 +567,7 @@
     <ul>
       <% directSubscriptionProducts.forEach(product => { %>
         <li>
+
           <a href="/subscription/details/<%= product._id %>" style="text-decoration: none; color: #007bff;">
             <h4>Platform: <%= product.platform_name %></h4>
             
@@ -588,7 +591,7 @@
                     <li>Buyer information not available.</li>
                   <% } %>
                 <% }); %>
-              </ul>
+
             <% } else { %>
               <h4>Not Sold Yet</h4>
             <% } %>

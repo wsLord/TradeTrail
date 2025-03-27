@@ -9,6 +9,13 @@ router.post("/profile", protectRoute, profileController.updateProfile);
 router.post("/profile/change-password", protectRoute, profileController.changePassword);
 router.post("/profile/picture", protectRoute, uploadSingle, profileController.updateProfilePic);
 router.get("/profile/auction/:productId", protectRoute, profileController.getAuctionDetails);
+router.get("/profile/rentals/:productId", protectRoute, profileController.getRentalDetails);
+router.get("/profile/secondHand/:productId", protectRoute, profileController.getSecondHandDetails);
+router.get("/profile/subscription/:productId", protectRoute, profileController.getSubscriptionDetails);
 
 router.post('/profile/accept-bid',protectRoute, profileController.acceptBid);
+
+// Add new route
+router.post('/api/verify-otp', protectRoute, profileController.verifyOTP);
+
 module.exports = router;
