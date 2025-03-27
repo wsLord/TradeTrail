@@ -35,11 +35,11 @@ const rentalProductSchema = new mongoose.Schema({
   },
   seller: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   otp: { type: String },
-  buyer: {
+  orderIds: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      default: null,
-    },
+      ref: "Order",
+      default: [],
+    }],
 });
 
 const RentalProduct = mongoose.model('RentalProduct', rentalProductSchema);

@@ -70,11 +70,11 @@ const OttSchema = new Schema({
     ref: "User",
     default: null,
   },
-  buyer: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    default: null,
-  },
+  orderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Order",
+      default: null,
+    },
 });
 const ottProduct = mongoose.model("Ott", OttSchema);
 module.exports = ottProduct;

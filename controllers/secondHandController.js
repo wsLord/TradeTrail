@@ -25,12 +25,13 @@ exports.getAddProduct = (req, res, next) => {
 
 //creating products for sell
 exports.postAddProduct = (req, res, next) => {
-  const { title, price, min_price, description, location, startDate, endDate } = req.body;
+  const { title, price, min_price, description, location, startDate, endDate } =
+    req.body;
   // Format image URL for consistency
-  // const imageUrls = req.files.map(file => `/uploads/${file.filename}`); 
-  const imageUrls = req.files.map(file => file.path); 
+  // const imageUrls = req.files.map(file => `/uploads/${file.filename}`);
+  const imageUrls = req.files.map((file) => file.path);
 
-   const product = new Product({
+  const product = new Product({
     title,
     imageUrls,
     price: parseFloat(price),
@@ -40,14 +41,15 @@ exports.postAddProduct = (req, res, next) => {
     startDate,
     endDate,
     seller: req.user._id,
-    saleType: 'auction',
+    saleType: "auction",
   });
 
-  product.save()
+  product
+    .save()
     .then(() => {
       res.redirect("/secondHand/buy");
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
       req.flash("error", "Error creating auction listing");
       res.redirect("/secondHand/sell/add-product");
@@ -64,7 +66,7 @@ exports.getProducts = (req, res, next) => {
     filter.$or = [
       { title: { $regex: search, $options: "i" } },
       { description: { $regex: search, $options: "i" } },
-      { location: { $regex: search, $options: "i" } }
+      { location: { $regex: search, $options: "i" } },
     ];
   }
 
@@ -77,7 +79,7 @@ exports.getProducts = (req, res, next) => {
 
   // Location Filter
   if (location) {
-    filter.location = new RegExp(location, 'i');
+    filter.location = new RegExp(location, "i");
   }
 
   // Sale Type Filter
@@ -88,29 +90,29 @@ exports.getProducts = (req, res, next) => {
   Promise.all([
     Product.find(filter).populate("seller", "fullName"),
     Product.distinct("location"),
-    Product.distinct("saleType")
+    Product.distinct("saleType"),
   ])
-  .then(([products, locations, saleTypes]) => {
-    res.render("secondHand/buy", {
-      prods: products,
-      pageTitle: "All Products",
-      path: "/products",
-      user: req.user,
-      searchQuery: search || "",
-      minPrice: minPrice || "",
-      maxPrice: maxPrice || "",
-      location: location || "",
-      saleType: saleType || "",
-      locations: locations.filter(l => l),
-      saleTypes: saleTypes.filter(st => st),
-      activePage: "secondHand"
+    .then(([products, locations, saleTypes]) => {
+      res.render("secondHand/buy", {
+        prods: products,
+        pageTitle: "All Products",
+        path: "/products",
+        user: req.user,
+        searchQuery: search || "",
+        minPrice: minPrice || "",
+        maxPrice: maxPrice || "",
+        location: location || "",
+        saleType: saleType || "",
+        locations: locations.filter((l) => l),
+        saleTypes: saleTypes.filter((st) => st),
+        activePage: "secondHand",
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      req.flash("error", "Error loading products");
+      res.redirect("/secondHand/buy");
     });
-  })
-  .catch((err) => {
-    console.log(err);
-    req.flash("error", "Error loading products");
-    res.redirect("/secondHand/buy");
-  });
 };
 
 //every product auction page
@@ -118,41 +120,41 @@ exports.getProducts = (req, res, next) => {
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
   Product.findById(prodId)
-      .populate("seller", "fullName")
-      .populate('winner', 'fullName')
-      .populate({
-          path: "bids",
-          populate: { path: "bidder", select: "fullName" },
-      })
-      .then((product) => {
-          if (!product) {
-              req.flash("error", "Product not found.");
-              return res.redirect("/secondHand/buy");
-          }
-          
-          const monetaryBids = product.bids.filter(bid => bid.bidAmount !== null);
-          const maxBid = monetaryBids.reduce(
-              (max, bid) => Math.max(max, bid.bidAmount),
-              product.min_price
-          );
+    .populate("seller", "fullName")
+    .populate("winner", "fullName")
+    .populate({
+      path: "bids",
+      populate: { path: "bidder", select: "fullName" },
+    })
+    .then((product) => {
+      if (!product) {
+        req.flash("error", "Product not found.");
+        return res.redirect("/secondHand/buy");
+      }
 
-          res.render("secondHand/auction", {
-              product: product,
-              user: req.user,
-              pageTitle: "Auction",
-              maxBid: maxBid,
-              monetaryBidsCount: monetaryBids.length,
-              MIN_BID_INCREMENT: MIN_BID_INCREMENT,
-              path: "/product",
-              activePage: "secondHand",
-              type:"buy"
-          });
-      })
-      .catch((err) => {
-          console.log(err);
-          req.flash("error", "Error retrieving product.");
-          res.redirect("/secondHand/buy");
+      const monetaryBids = product.bids.filter((bid) => bid.bidAmount !== null);
+      const maxBid = monetaryBids.reduce(
+        (max, bid) => Math.max(max, bid.bidAmount),
+        product.min_price
+      );
+
+      res.render("secondHand/auction", {
+        product: product,
+        user: req.user,
+        pageTitle: "Auction",
+        maxBid: maxBid,
+        monetaryBidsCount: monetaryBids.length,
+        MIN_BID_INCREMENT: MIN_BID_INCREMENT,
+        path: "/product",
+        activePage: "secondHand",
+        type: "buy",
       });
+    })
+    .catch((err) => {
+      console.log(err);
+      req.flash("error", "Error retrieving product.");
+      res.redirect("/secondHand/buy");
+    });
 };
 
 //add product bid page
@@ -163,15 +165,15 @@ exports.getAddBidProduct = (req, res, next) => {
     pageTitle: "Add Bid Product",
     path: "/add-bid-product",
     productId: prodId,
-    activePage: "secondHand",  // Added activePage
-    messages: req.flash()
+    activePage: "secondHand", // Added activePage
+    messages: req.flash(),
   });
 };
 
 //save new bidproduct in db
 exports.postAddBidProduct = async (req, res, next) => {
   if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized: Please log in" });
+    return res.status(401).json({ message: "Unauthorized: Please log in" });
   }
 
   const prodId = req.params.productId;
@@ -179,105 +181,106 @@ exports.postAddBidProduct = async (req, res, next) => {
 
   // Check for existing bid
   const existingBid = await BidProduct.findOne({
-      bidder: req.user._id,
-      auction: prodId
+    bidder: req.user._id,
+    auction: prodId,
   });
 
   if (existingBid) {
-      req.flash(
-          'error',
-          `You already have an active bid. Delete your previous bid (₹${existingBid.bidAmount || "product bid"}) to place a new one.`
-      );
-      return res.redirect(`/secondHand/buy/${prodId}`);
+    req.flash(
+      "error",
+      `You already have an active bid. Delete your previous bid (₹${
+        existingBid.bidAmount || "product bid"
+      }) to place a new one.`
+    );
+    return res.redirect(`/secondHand/buy/${prodId}`);
   }
 
   // Get product with monetary bids
-  const product = await Product.findById(prodId)
-      .populate({
-          path: "bids",
-          match: { bidAmount: { $ne: null } }
-      });
+  const product = await Product.findById(prodId).populate({
+    path: "bids",
+    match: { bidAmount: { $ne: null } },
+  });
 
   // Calculate current max bid and count
-  const monetaryBids = product.bids.filter(bid => bid.bidAmount !== null);
+  const monetaryBids = product.bids.filter((bid) => bid.bidAmount !== null);
   const currentMaxBid = monetaryBids.reduce(
-      (max, bid) => Math.max(max, bid.bidAmount),
-      product.min_price // Start with min_price
+    (max, bid) => Math.max(max, bid.bidAmount),
+    product.min_price // Start with min_price
   );
   const monetaryBidsCount = monetaryBids.length;
 
   // Validate bid amount
   if (bidAmount) {
-      const minRequired = monetaryBidsCount === 0 
-          ? product.min_price 
-          : currentMaxBid + MIN_BID_INCREMENT;
+    const minRequired =
+      monetaryBidsCount === 0
+        ? product.min_price
+        : currentMaxBid + MIN_BID_INCREMENT;
 
-      if (bidAmount < minRequired) {
-          req.flash(
-              'error',
-              monetaryBidsCount === 0 
-                  ? `First bid must be at least ₹${product.min_price}`
-                  : `Bid must be at least ₹${currentMaxBid + MIN_BID_INCREMENT} (Current max: ₹${currentMaxBid})`
-          );
-          return res.redirect(`/secondHand/buy/${prodId}`);
-      }
+    if (bidAmount < minRequired) {
+      req.flash(
+        "error",
+        monetaryBidsCount === 0
+          ? `First bid must be at least ₹${product.min_price}`
+          : `Bid must be at least ₹${
+              currentMaxBid + MIN_BID_INCREMENT
+            } (Current max: ₹${currentMaxBid})`
+      );
+      return res.redirect(`/secondHand/buy/${prodId}`);
+    }
   }
 
   if (!bidAmount && !title) {
-      return res.status(400).send("Error: Provide either a bid amount or a product.");
+    return res
+      .status(400)
+      .send("Error: Provide either a bid amount or a product.");
   }
 
   const bidProduct = new BidProduct({
-      title: title || null,
-      imageUrl: imageUrl || null,
-      description: description || null,
-      location: location || null,
-      bidAmount: bidAmount ? Number(bidAmount) : null,
-      bidder: req.user._id,
-      auction: prodId,
+    title: title || null,
+    imageUrl: imageUrl || null,
+    description: description || null,
+    location: location || null,
+    bidAmount: bidAmount ? Number(bidAmount) : null,
+    bidder: req.user._id,
+    auction: prodId,
   });
 
-  bidProduct.save()
-      .then((savedBidProduct) => {
-          return Promise.all([
-              Product.findByIdAndUpdate(
-                  prodId, 
-                  { $push: { bids: savedBidProduct._id } }, 
-                  { new: true }
-              ),
-              User.findByIdAndUpdate(
-                  req.user._id, 
-                  { $addToSet: { cart: prodId } }
-              ),
-          ]);
-      })
-      .then(() => {
-          res.redirect(`/secondHand/buy/${prodId}`);
-      })
-      .catch((err) => {
-          console.error("Error saving bid:", err);
-          res.status(500).send("Internal Server Error");
-      });
+  bidProduct
+    .save()
+    .then((savedBidProduct) => {
+      return Promise.all([
+        Product.findByIdAndUpdate(
+          prodId,
+          { $push: { bids: savedBidProduct._id } },
+          { new: true }
+        ),
+        User.findByIdAndUpdate(req.user._id, { $addToSet: { cart: prodId } }),
+      ]);
+    })
+    .then(() => {
+      res.redirect(`/secondHand/buy/${prodId}`);
+    })
+    .catch((err) => {
+      console.error("Error saving bid:", err);
+      res.status(500).send("Internal Server Error");
+    });
 };
 
 exports.deleteBid = async (req, res, next) => {
   try {
     const bidId = req.params.bidId;
     const bid = await BidProduct.findByIdAndDelete(bidId);
-    
+
     // Remove bid reference from Product
-    await Product.findByIdAndUpdate(
-      bid.auction,
-      { $pull: { bids: bidId } }
-    );
-    
+    await Product.findByIdAndUpdate(bid.auction, { $pull: { bids: bidId } });
+
     // Add session save before redirect
-    req.session.save(err => {
+    req.session.save((err) => {
       if (err) {
         console.error("Session save error:", err);
         return res.status(500).send("Internal Server Error");
       }
-      req.flash('success', 'Bid deleted successfully');
+      req.flash("success", "Bid deleted successfully");
       res.redirect(`/secondHand/buy/${bid.auction}`);
     });
   } catch (err) {
@@ -289,20 +292,20 @@ exports.deleteBid = async (req, res, next) => {
 exports.getPostType = (req, res) => {
   res.render("secondHand/post-type", {
     pageTitle: "Choose Listing Type",
-    activePage: "secondHand"
+    activePage: "secondHand",
   });
 };
 
 exports.getDirectAddProduct = (req, res) => {
   res.render("secondHand/direct-add-product", {
     pageTitle: "Direct Selling",
-    activePage: "secondHand"
+    activePage: "secondHand",
   });
 };
 
 exports.postDirectAddProduct = async (req, res) => {
   const { title, price, description, location, quantity } = req.body;
-  const imageUrls = req.files.map(file => file.path); 
+  const imageUrls = req.files.map((file) => file.path);
 
   try {
     const product = new Product({
@@ -314,13 +317,13 @@ exports.postDirectAddProduct = async (req, res) => {
       location,
       quantity: parseInt(quantity),
       seller: req.user._id,
-      saleType: 'direct',
+      saleType: "direct",
       startDate: new Date(), // Add current date
-      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
+      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
     });
 
     await product.save();
-    req.flash('success', 'Direct listing created successfully!');
+    req.flash("success", "Direct listing created successfully!");
     res.redirect("/secondHand/buy");
   } catch (err) {
     console.error(err);
@@ -333,6 +336,8 @@ exports.addToCart = async (req, res) => {
   try {
     const userId = req.user._id;
     const productId = req.params.productId;
+    // console.log(productId);
+    
     const quantityToAdd = parseInt(req.body.quantity) || 1;
 
     const product = await Product.findById(productId);
@@ -346,8 +351,10 @@ exports.addToCart = async (req, res) => {
     let existingQuantity = 0;
 
     if (cart) {
+      console.log(cart.items);
       const existingItem = cart.items.find(
         (item) =>
+    
           item.product.toString() === productId &&
           item.productType === "SecondHand"
       );
@@ -368,12 +375,14 @@ exports.addToCart = async (req, res) => {
     if (!cart) {
       const newCart = new Cart({
         user: userId,
-        items: [{
-          productType: "SecondHand",
-          productModel: "Product",
-          product: productId,
-          quantity: quantityToAdd,
-        }],
+        items: [
+          {
+            productType: "SecondHand",
+            productModel: "Product",
+            product: productId,
+            quantity: quantityToAdd,
+          },
+        ],
       });
       await newCart.save();
     } else {
@@ -403,5 +412,3 @@ exports.addToCart = async (req, res) => {
     res.redirect(req.get("Referrer") || "/");
   }
 };
-
-

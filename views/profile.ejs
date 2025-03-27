@@ -399,111 +399,211 @@
     </div>
 
     <!-- Auction Products Section -->
-    <div class="auction-products-card">
-      <h3>Your Auction Products</h3>
-      <% if (auctionProducts.length > 0) { %>
-      <ul>
-        <% auctionProducts.forEach(product => { %>
+<div class="auction-products-card">
+  <h3>secondhand Auction</h3>
+  <% if (secondHandAuction.length > 0) { %>
+    <ul>
+      <% secondHandAuction.forEach(product => { %>
         <li>
           <a href="/profile/auction/<%= product._id %>" style="text-decoration: none; color: #007bff;">
-            <h4><%= product.title %></h4>
-            <% if (product.otp) { %>
-              <p>OTP: Generated</p>
+            <h4>Product: <%= product.title %></h4>
+            <% if (product.orderIds && product.orderIds.length > 0) { %>
+              <h4>Buyers:</h4>
+              <ul>
+                <% product.orderIds.forEach(order => { %>
+                  <% if (order.buyer) { %>
+                    <li>
+                      <p>Buyer: <%= order.buyer.fullName %></p>
+                      <p>Quantity: <%= order.quantity %></p>
+                      <% if (order.otp) { %>
+                        <p>OTP: <%= order.otp %></p>
+                      <% } else { %>
+                        <p>OTP: Not generated yet</p>
+                      <% } %>
+                    </li>
+                  <% } else { %>
+                    <li>Buyer information not available.</li>
+                  <% } %>
+                <% }); %>
+              </ul>
             <% } else { %>
-              <p>OTP: Not generated yet</p>
+              <h4>No Bids Yet</h4>
             <% } %>
           </a>
         </li>
-        <% }); %>
-      </ul>
-      <% } else { %>
-      <p>You haven't posted any auction products yet.</p>
-      <% } %>
-    </div>
+      <% }); %>
+    </ul>
+  <% } else { %>
+    <p>You haven't posted any auction products yet.</p>
+  <% } %>
+</div>
+
+<div class="auction-products-card">
+  <h3>subscription Auction</h3>
+  <% if (subscriptionAuction.length > 0) { %>
+    <ul>
+      <% subscriptionAuction.forEach(product => { %>
+        <li>
+
+          <a href="/profile/auction/<%= product._id %>" style="text-decoration: none; color: #007bff;">
+            <h4>Product: <%= product.title %></h4>
+            <% if (product.orderIds && product.orderIds.length > 0) { %>
+              <h4>Buyers:</h4>
+              <ul>
+                <% product.orderIds.forEach(order => { %>
+                  <% if (order.buyer) { %>
+                    <li>
+                      <p>Buyer: <%= order.buyer.fullName %></p>
+                      <p>Quantity: <%= order.quantity %></p>
+                      <% if (order.otp) { %>
+                        <p>OTP: <%= order.otp %></p>
+                      <% } else { %>
+                        <p>OTP: Not generated yet</p>
+                      <% } %>
+                    </li>
+                  <% } else { %>
+                    <li>Buyer information not available.</li>
+                  <% } %>
+                <% }); %>
+              </ul>
+            <% } else { %>
+              <h4>No Bids Yet</h4>
+            <% } %>
+          </a>
+        </li>
+      <% }); %>
+    </ul>
+  <% } else { %>
+    <p>You haven't posted any auction products yet.</p>
+  <% } %>
+</div>
+
 
     <!-- Rental Products Section -->
     <div class="rental-products-card">
-      <h3>Rental Products you posted</h3>
+      <h3>Rental Products You Posted</h3>
       <% if (rentalProducts.length > 0) { %>
-      <ul>
-        <% rentalProducts.forEach(product => { %>
-        <li>
-          <a href="/profile/rentals/<%= product._id %>" style="text-decoration: none; color: #007bff;">
-            <h4>Product: <%= product.title %></h4>
-            <% if (product.buyer) { %>
-            <h4>Buyer: <%= product.buyer.fullName %></h4>
-            <% if (product.otp) { %>
-              <p>OTP: Generated</p>
-            <% } else { %>
-              <p>OTP: Not generated yet</p>
-            <% } %>
-            <% } else { %>
-            <h4>Not Sold Yet</h4>
-            <% } %>
-          </a>
-        </li>
-        <% }); %>
-      </ul>
+        <ul>
+          <% rentalProducts.forEach(product => { %>
+            <li>
+              <a href="/rental/details/<%= product._id %>" style="text-decoration: none; color: #007bff;">
+                <h4>Product: <%= product.title %></h4>
+                <% if (product.orderIds && product.orderIds.length > 0) { %>
+                  <h4>Buyers:</h4>
+                  <ul>
+                    <% product.orderIds.forEach(order => { %>
+                      <% if (order.buyer) { %>
+                        <li>
+                          <p>Buyer: <%= order.buyer.fullName %></p>
+                          <p>Quantity: <%= order.quantity %></p>
+                          <% if (order.otp) { %>
+                            <p>OTP: <%= order.otp %></p>
+                          <% } else { %>
+                            <p>OTP: Not generated yet</p>
+                          <% } %>
+                        </li>
+                      <% } %>
+                    <% }); %>
+                  </ul>
+                <% } else { %>
+                  <h4>Not Sold Yet</h4>
+                <% } %>
+              </a>
+            </li>
+          <% }); %>
+        </ul>
       <% } else { %>
-      <p>You haven't posted any rental products yet.</p>
+        <p>You haven't posted any rental products yet.</p>
       <% } %>
     </div>
+    
 
-    <!-- Direct Purchase (Second Hand) Products Section -->
-    <div class="direct-products-card">
-      <h3>Your Direct SecondHand Purchase Products</h3>
-      <% if (directSecondhandProducts && directSecondhandProducts.length > 0) { %>
-      <ul>
-        <% directSecondhandProducts.forEach(product => { %>
+
+   <!-- Direct Purchase (Second Hand) Products Section -->
+<div class="direct-products-card">
+  <h3>Your Direct secondHand Products</h3>
+  <% if (directSecondhandProducts && directSecondhandProducts.length > 0) { %>
+    <ul>
+      <% directSecondhandProducts.forEach(product => { %>
         <li>
-          <a href="/profile/secondHand/<%= product._id %>" style="text-decoration: none; color: #007bff;">
+          <a href="/secondHand/buy/<%= product._id %>" style="text-decoration: none; color: #007bff;">
             <h4>Product: <%= product.title %></h4>
-            <% if (product.buyer) { %>
-            <h4>Buyer: <%= product.buyer.fullName %></h4>
-            <% if (product.otp) { %>
-              <p>OTP: Generated</p>
+            
+            <% if (product.orderIds && product.orderIds.length > 0) { %>
+              <h4>Buyers:</h4>
+              <ul>
+                <% product.orderIds.forEach(order => { %>
+                  <% if (order.buyer) { %>
+                    <li>
+                      <p>Buyer: <%= order.buyer.fullName %></p>
+                      <p>Quantity: <%= order.quantity %></p>
+                      <% if (order.otp) { %>
+                        <p>OTP: <%= order.otp %></p>
+                      <% } else { %>
+                        <p>OTP: Not generated yet</p>
+                      <% } %>
+                    </li>
+                  <% } else { %>
+                    <li>Buyer information not available.</li>
+                  <% } %>
+                <% }); %>
+              </ul>
             <% } else { %>
-              <p>OTP: Not generated yet</p>
-            <% } %>
-            <% } else { %>
-            <h4>Not Sold Yet</h4>
+              <h4>Not Sold Yet</h4>
             <% } %>
           </a>
         </li>
-        <% }); %>
-      </ul>
-      <% } else { %>
-      <p>You haven't posted any direct purchase products yet.</p>
-      <% } %>
-    </div>
+      <% }); %>
+    </ul>
+  <% } else { %>
+    <p>You haven't posted any direct purchase products yet.</p>
+  <% } %>
+</div>
 
     <!-- Subscription Products Section -->
-    <div class="subscription-products-card">
-      <h3>Your Subscription Products</h3>
-      <% if (directSubscriptionProducts && directSubscriptionProducts.length > 0) { %>
-      <ul>
-        <% directSubscriptionProducts.forEach(product => { %>
+<div class="subscription-products-card">
+  <h3>Your Direct Subscription Products</h3>
+  <% if (directSubscriptionProducts && directSubscriptionProducts.length > 0) { %>
+    <ul>
+      <% directSubscriptionProducts.forEach(product => { %>
         <li>
-          <a href="/profile/subscription/<%= product._id %>" style="text-decoration: none; color: #007bff;">
-            <h4>Product: <%= product.platform_name %></h4>
-            <% if (product.buyer) { %>
-            <h4>Buyer: <%= product.buyer.fullName %></h4>
-            <% if (product.otp) { %>
-              <p>OTP: Generated</p>
+
+          <a href="/subscription/details/<%= product._id %>" style="text-decoration: none; color: #007bff;">
+            <h4>Platform: <%= product.platform_name %></h4>
+            
+            <% if (product.orderIds && product.orderIds.length > 0) { %>
+              <h4>Buyers:</h4>
+              <ul>
+                <% product.orderIds.forEach(order => { %>
+                  <% if (order.buyer) { %>
+                    <li>
+                      <p>Buyer: <%= order.buyer.fullName %></p>
+                      <% if (order.quantity) { %>
+                        <p>Quantity: <%= order.quantity %></p>
+                      <% } %>
+                      <% if (order.otp) { %>
+                        <p>OTP: <%= order.otp %></p>
+                      <% } else { %>
+                        <p>OTP: Not generated yet</p>
+                      <% } %>
+                    </li>
+                  <% } else { %>
+                    <li>Buyer information not available.</li>
+                  <% } %>
+                <% }); %>
+
             <% } else { %>
-              <p>OTP: Not generated yet</p>
-            <% } %>
-            <% } else { %>
-            <h4>Not Sold Yet</h4>
+              <h4>Not Sold Yet</h4>
             <% } %>
           </a>
         </li>
-        <% }); %>
-      </ul>
-      <% } else { %>
-      <p>You haven't posted any subscription products yet.</p>
-      <% } %>
-    </div>
+      <% }); %>
+    </ul>
+  <% } else { %>
+    <p>You haven't posted any subscription products yet.</p>
+  <% } %>
+</div>
+
 
     <div class="badge-card">
       <p style="margin: 5px; font-size: 20px; color: #2c3e50;"><strong>Badges Earned</strong></p>
