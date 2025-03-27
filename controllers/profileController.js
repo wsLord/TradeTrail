@@ -216,6 +216,7 @@ exports.getRentalDetails = (req, res, next) => {
       res.render("rental-details", {
         pageTitle: fetchedProduct.title,
         product: fetchedProduct,
+        user: req.user,
         activePage: "rental",
       });
     })
@@ -241,6 +242,7 @@ exports.getSecondHandDetails = (req, res, next) => {
       res.render("secondHand-details", {
         pageTitle: fetchedProduct.title,
         product: fetchedProduct,
+        user: req.user,
         activePage: "direct",
       });
     })
@@ -263,12 +265,62 @@ exports.getSubscriptionDetails = async (req, res, next) => {
 
     res.render("subscription-details", {
       pageTitle: product.platform_name,
+      user: req.user,
       product,
       activePage: "subscription",
     });
   } catch (error) {
     console.error("Error fetching subscription details:", error);
     res.status(500).send("Error fetching product details");
+  }
+};
+
+exports.verifyOTP = async (req, res) => {
+  try {
+    const { productId, productType, otp } = req.body;
+    
+    let Model;
+    switch(productType.toLowerCase()) { // Handle case insensitivity
+      case 'rental':
+        Model = RentalProduct;
+        break;
+      case 'secondhand':
+        Model = SecondhandDirectProduct;
+        break;
+      case 'subscription':
+        Model = SubscriptionDirectProduct;
+        break;
+      default:
+        return res.status(400).json({ success: false, message: 'Invalid product type' });
+    }
+
+    const product = await Model.findById(productId);
+    
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    // Convert both IDs to string for reliable comparison
+    if (product.seller.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Unauthorized' });
+    }
+
+    const isMatch = product.otp === otp;
+    // Add this debug logging:
+console.log('Comparing OTPs:', {
+  storedOTP: product.otp,
+  receivedOTP: otp,
+  match: product.otp === otp
+});
+    
+    res.json({
+      success: isMatch,
+      message: isMatch ? 'OTP verified' : 'Invalid OTP'
+    });
+
+  } catch (error) {
+    console.error('OTP verification error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 

@@ -97,6 +97,58 @@
       font-weight: bold;
       text-align: center;
     }
+    .otp-verification-card {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+  border: 1px solid #dee2e6;
+}
+
+.otp-input-group {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.otp-field {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid #3E6B48;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+.verify-otp-btn {
+  background: #3E6B48;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.verify-otp-btn:hover {
+  background: #2d5035;
+}
+
+.otp-result {
+  font-weight: bold;
+  padding: 10px;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.otp-result.success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.otp-result.error {
+  background: #f8d7da;
+  color: #721c24;
+}
   </style>
 </head>
 <body>
@@ -138,13 +190,64 @@
           <% } %>
         </div>
 
-        <div class="price-summary-card">
+        <!-- <div class="price-summary-card">
           <h3>Pricing Details</h3>
           <p><strong>Price:</strong> ₹<%= product.price %></p>
           <p><strong>Available Stock:</strong> <%= product.quantity %></p>
-        </div>
+        </div> -->
+
+        <% if (product.otp && user._id.equals(product.seller._id)) { %>
+          <div class="otp-verification-card">
+            <h4>OTP Verification</h4>
+            <div class="otp-input-group">
+              <input type="text" id="otpInput" class="otp-field" placeholder="Enter buyer's OTP" maxlength="6">
+              <button class="verify-otp-btn" onclick="verifyOTP('<%= product._id %>', 'subscription')">Verify</button>
+            </div>
+            <div id="otpResult" class="otp-result"></div>
+          </div>
+          <% } %>
       </div>
     </div>
   </main>
+  <script>
+    async function verifyOTP(productId, productType) {
+      const otp = document.getElementById('otpInput').value;
+      const resultDiv = document.getElementById('otpResult');
+      
+      if (!otp || otp.length !== 6) {
+        resultDiv.innerHTML = 'Please enter a 6-digit OTP';
+        resultDiv.className = 'otp-result error';
+        return;
+      }
+    
+      try {
+        const response = await fetch('/api/verify-otp', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            productId,
+            productType,
+            otp
+          })
+        });
+    
+        const data = await response.json();
+        
+        if (data.success) {
+          resultDiv.innerHTML = '✅ OTP Verified Successfully!';
+          resultDiv.className = 'otp-result success';
+        } else {
+          resultDiv.innerHTML = '❌ Invalid OTP. Please try again.';
+          resultDiv.className = 'otp-result error';
+        }
+      } catch (error) {
+        console.error('Verification error:', error);
+        resultDiv.innerHTML = '⚠️ Error verifying OTP. Please try again.';
+        resultDiv.className = 'otp-result error';
+      }
+    }
+    </script>
 </body>
 </html>

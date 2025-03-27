@@ -408,9 +408,9 @@
           <a href="/profile/auction/<%= product._id %>" style="text-decoration: none; color: #007bff;">
             <h4><%= product.title %></h4>
             <% if (product.otp) { %>
-            <p>OTP: <%= product.otp %></p>
+              <p>OTP: Generated</p>
             <% } else { %>
-            <p>OTP: Not generated yet</p>
+              <p>OTP: Not generated yet</p>
             <% } %>
           </a>
         </li>
@@ -433,9 +433,9 @@
             <% if (product.buyer) { %>
             <h4>Buyer: <%= product.buyer.fullName %></h4>
             <% if (product.otp) { %>
-            <p>OTP: <%= product.otp %></p>
+              <p>OTP: Generated</p>
             <% } else { %>
-            <p>OTP: Not generated yet</p>
+              <p>OTP: Not generated yet</p>
             <% } %>
             <% } else { %>
             <h4>Not Sold Yet</h4>
@@ -461,9 +461,9 @@
             <% if (product.buyer) { %>
             <h4>Buyer: <%= product.buyer.fullName %></h4>
             <% if (product.otp) { %>
-            <p>OTP: <%= product.otp %></p>
+              <p>OTP: Generated</p>
             <% } else { %>
-            <p>OTP: Not generated yet</p>
+              <p>OTP: Not generated yet</p>
             <% } %>
             <% } else { %>
             <h4>Not Sold Yet</h4>
@@ -489,9 +489,9 @@
             <% if (product.buyer) { %>
             <h4>Buyer: <%= product.buyer.fullName %></h4>
             <% if (product.otp) { %>
-            <p>OTP: <%= product.otp %></p>
+              <p>OTP: Generated</p>
             <% } else { %>
-            <p>OTP: Not generated yet</p>
+              <p>OTP: Not generated yet</p>
             <% } %>
             <% } else { %>
             <h4>Not Sold Yet</h4>

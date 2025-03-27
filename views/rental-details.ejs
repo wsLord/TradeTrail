@@ -136,6 +136,58 @@
     .add-to-cart-button:hover {
       background: #a3c585;
     }
+    .otp-verification-card {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+  border: 1px solid #dee2e6;
+}
+
+.otp-input-group {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.otp-field {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid #3E6B48;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+.verify-otp-btn {
+  background: #3E6B48;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.verify-otp-btn:hover {
+  background: #2d5035;
+}
+
+.otp-result {
+  font-weight: bold;
+  padding: 10px;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.otp-result.success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.otp-result.error {
+  background: #f8d7da;
+  color: #721c24;
+}
   </style>
 </head>
 <body>
@@ -165,7 +217,8 @@
         </div>
         
         <div class="product-meta">
-          <p><strong>Available Stock:</strong> <%= product.quantity %></p>
+          <p><strong>Rate:</strong> ₹<%= product.price %>/<%= product.rate %></p>
+          <p><strong>Security Deposit:</strong> ₹<%= product.securityDeposit %></p>
           <% if (product.currentBooking) { %>
             <p class="availability-notice">
               Next available after: <%= new Date(product.currentBooking.rentalEnd).toLocaleDateString('en-IN') %>
@@ -214,6 +267,17 @@
         </div>
       </div>
     </div> -->
+
+    <% if (product.otp && user._id.equals(product.seller._id)) { %>
+      <div class="otp-verification-card">
+        <h4>OTP Verification</h4>
+        <div class="otp-input-group">
+          <input type="text" id="otpInput" class="otp-field" placeholder="Enter buyer's OTP" maxlength="6">
+          <button class="verify-otp-btn" onclick="verifyOTP('<%= product._id %>', 'rental')">Verify</button>
+        </div>
+        <div id="otpResult" class="otp-result"></div>
+      </div>
+      <% } %>
   </main>
 
   <span id="rateValue" style="display:none;"><%= product.rate %></span>
@@ -236,6 +300,41 @@
     document.getElementById('rentalStart').min = today;
     document.getElementById('rentalEnd').min = today;
   </script>
+  <script>
+    async function verifyOTP(productId, productType) {
+  const resultDiv = document.getElementById('otpResult');
+  resultDiv.innerHTML = 'Verifying...';
+  resultDiv.className = 'otp-result';
+
+  try {
+    const response = await fetch('/api/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        productId,
+        productType: productType.toLowerCase(),
+        otp: document.getElementById('otpInput').value
+      })
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Verification failed');
+    }
+
+    resultDiv.innerHTML = data.success 
+      ? '✅ OTP Verified Successfully!' 
+      : `❌ ${data.message}`;
+    resultDiv.className = `otp-result ${data.success ? 'success' : 'error'}`;
+
+  } catch (error) {
+    console.error('Verification error:', error);
+    resultDiv.innerHTML = `⚠️ ${error.message}`;
+    resultDiv.className = 'otp-result error';
+  }
+}
+    </script>
 
 </body>
 </html>

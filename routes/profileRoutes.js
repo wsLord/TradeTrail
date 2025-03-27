@@ -14,4 +14,8 @@ router.get("/profile/secondHand/:productId", protectRoute, profileController.get
 router.get("/profile/subscription/:productId", protectRoute, profileController.getSubscriptionDetails);
 
 router.post('/profile/accept-bid',protectRoute, profileController.acceptBid);
+
+// Add new route
+router.post('/api/verify-otp', protectRoute, profileController.verifyOTP);
+
 module.exports = router;

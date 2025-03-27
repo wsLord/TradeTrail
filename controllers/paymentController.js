@@ -220,10 +220,11 @@ exports.verifyPayment = async (req, res) => {
           else if (section === "Subscription") model = Ott;
           else if (section === "SecondHand") model = Product;
 
-          // Update the product with buyer info
-          await model.findByIdAndUpdate(item.product, {
-            $set: { buyer: req.user._id },
-          });
+          // Update product with OTP and buyer in single operation
+        await model.findByIdAndUpdate(item.product, {
+          otp,
+          buyer: req.user._id
+        });
 
           console.log(`Buyer updated for product ${item.product}`);
 
