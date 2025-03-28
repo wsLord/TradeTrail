@@ -18,10 +18,8 @@ const razorpayInstance = new Razorpay({
 });
 
 exports.makePayment = async (req, res) => {
-  console.log("hit");
   try {
-    const { section } = req.body; // Amount from the frontend
-    console.log("te", req.body);
+    const { section } = req.body;
 
     let model;
     if (section === "Rental") model = RentalProduct;
@@ -32,23 +30,29 @@ exports.makePayment = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Invalid section" });
     }
+
     // Find user's cart and get relevant product details
-    const cart = await Cart.findOne({ user: req.user._id }).populate({
-      path: "items.product",
-      model: model, // Use dynamically selected model
-    });
+    const cart = await Cart.findOne({ user: req.user._id });
 
     if (!cart) {
       return res
         .status(404)
         .json({ success: false, message: "Cart not found." });
     }
-
     // Filter products based on the section and product IDs
     const filteredProducts = cart.items.filter(
       (item) => item.productType === section
     );
-    console.log("Filtered Products:", filteredProducts);
+
+    const productIds = filteredProducts.map((item) => item.product);
+    const populatedProducts = await model.find({ _id: { $in: productIds } });
+
+    filteredProducts.forEach((item) => {
+      const productDetails = populatedProducts.find(
+        (product) => product._id.toString() === item.product.toString()
+      );
+      item.product = productDetails;
+    });
 
     if (filteredProducts.length === 0) {
       return res.status(404).json({
@@ -60,7 +64,6 @@ exports.makePayment = async (req, res) => {
     let sectionTotal = 0;
     let sectionDeposit = 0;
     filteredProducts.forEach((item) => {
-      console.log("Item Quantity:", item.quantity);
       let totalPrice = 0;
       let itemDeposit = 0;
       if (section === "Rental") {
@@ -73,7 +76,6 @@ exports.makePayment = async (req, res) => {
       sectionTotal += totalPrice;
     });
     let amount = sectionTotal + sectionDeposit;
-    console.log("Amount:", amount);
 
     if (!amount || amount <= 0) {
       return res
@@ -89,7 +91,6 @@ exports.makePayment = async (req, res) => {
     };
 
     const order = await razorpayInstance.orders.create(options);
-    console.log("order done");
 
     res.json({
       success: true,
@@ -119,15 +120,12 @@ exports.getPaymentPage = (req, res) => {
 exports.verifyPayment = async (req, res) => {
   console.log("verify");
   try {
-    console.log("Received verification request:", req.body);
-
     const {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
       section,
     } = req.body;
-    console.log(section);
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return res
@@ -154,7 +152,6 @@ exports.verifyPayment = async (req, res) => {
 
     // Generate a 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log("Generated OTP:", otp);
 
     // Send OTP to buyer via email
     await emailService.sendOtpEmail(req.user.email, otp);
@@ -182,14 +179,12 @@ exports.verifyPayment = async (req, res) => {
     }
 
     // Find user's cart and get relevant product details
-    const cart = await Cart.findOne({ user: req.user._id }).populate({
-      path: "items.product",
-      model: model, // Use dynamically selected model
-    });
+    const cart = await Cart.findOne({ user: req.user._id });
 
     // Filter products based on the section and product IDs
-    const filteredProducts = cart.items
-      .filter((item) => item.productType === section)
+    const filteredProducts = cart.items.filter(
+      (item) => item.productType === section
+    );
 
     if (filteredProducts.length === 0) {
       return res.status(404).json({
@@ -198,6 +193,15 @@ exports.verifyPayment = async (req, res) => {
       });
     }
 
+    const productIds = filteredProducts.map((item) => item.product);
+    const populatedProducts = await model.find({ _id: { $in: productIds } });
+
+    filteredProducts.forEach((item) => {
+      const productDetails = populatedProducts.find(
+        (product) => product._id.toString() === item.product.toString()
+      );
+      item.product = productDetails;
+    });
 
     await Promise.all(
       filteredProducts.map(async (item) => {
@@ -231,10 +235,6 @@ exports.verifyPayment = async (req, res) => {
             0,
             item.product.quantity - item.quantity
           );
-          // await model.findByIdAndUpdate(item.product, {
-          //   $push: { orderIds: order._id },
-          //   $set: { quantity: remainingQuantity },
-          // });
 
           // CHANGE: Update product differently for subscriptions vs. others
           if (section === "Subscription") {
@@ -250,8 +250,6 @@ exports.verifyPayment = async (req, res) => {
             });
           }
 
-          console.log(`Buyer updated for product ${item.product}`);
-
           // Handle rentals
           if (section === "Rental") {
             const booking = new RentalBooking({
@@ -262,7 +260,6 @@ exports.verifyPayment = async (req, res) => {
               status: "active",
             });
             await booking.save();
-            console.log(`Rental booking created for product ${item.product}`);
           }
         } catch (error) {
           console.error(`Error updating product ${item.product}:`, error);
