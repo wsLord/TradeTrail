@@ -37,6 +37,22 @@ const signup = async (req, res) => {
       return res.status(400).json({ message: "Password must be at least 6 characters" });
     }
 
+    // ▼▼▼ NEW: Check for existing OAuth users ▼▼▼
+    const existingOAuthUser = await User.findOne({
+      email,
+      $or: [
+        { googleId: { $exists: true } },
+        { facebookId: { $exists: true } }
+      ]
+    });
+
+    if (existingOAuthUser) {
+      return res.status(400).json({
+        message: "This email is associated with a social login. Please use Google/Facebook to sign in.",
+        shouldUseOAuth: true
+      });
+    }
+
     // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -98,6 +114,15 @@ const login = async (req, res) => {
     if (!isPasswordCorrect) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
+
+    // Check if the account is OAuth-only (i.e., no password set)
+    if (!user.password) {
+      return res.status(401).json({
+        message: "This account uses social login. Please sign in with Google or Facebook.",
+        shouldUseOAuth: true
+      });
+    }
+
 
     // Generate JWT token
     generateToken(user._id, res);
@@ -163,6 +188,20 @@ const logout = (req, res) => {
     res.redirect("/api/auth/login"); // Redirect to login page
 
   })
+  try {
+    res.cookie('jwt', '', {
+      httpOnly: true,
+      expires: new Date(0),
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      path: '/'
+    });
+    
+    res.status(200).json({ message: "Logged out successfully" }); // ✅ Send success response
+  } catch (error) {
+    console.log("Error in logout controller:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 module.exports = { signup, login, checkAuth, resendVerificationEmail, logout };

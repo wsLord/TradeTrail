@@ -7,6 +7,7 @@
   
   <!-- Font Awesome for icons -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/chatbot.css">
   <link rel="icon" type="image/png" href="/assets/logo2.png">
 
   <style>
@@ -101,7 +102,7 @@
     }
 
     button:hover {
-      background: #4b6043;
+      background: #588248;
     }
 
     .login-link {
@@ -119,9 +120,131 @@
       color: #4b6043;
       text-decoration: underline;
     }
+
+    .oauth-providers {
+      margin: 25px 0;
+      text-align: center;
+    }
+
+    .divider {
+  display: flex;
+  align-items: center;
+  margin: 25px 0;
+  color: #666;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid #eee;
+  margin: 0 10px;
+}
+
+    .oauth-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background: white;
+      color: #444;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .oauth-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .oauth-btn i {
+      margin-right: 10px;
+      font-size: 18px;
+    }
+    .oauth-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background: white;
+      color: #444;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .oauth-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Updated Google button styles */
+    .oauth-btn.google {
+      border-color: #000000;
+      color: #3c4043;
+    }
+
+    .oauth-btn.google:hover {
+      background: #eeeeee;
+    }
+
+    .oauth-btn.google .logo {
+      width: 18px;
+      height: 18px;
+      margin-right: 12px;
+    }
+
+    /* Facebook button styles */
+    .oauth-btn.facebook {
+      border-color: #7e93c1;
+      color: #3B5998;
+    }
+
+    .oauth-btn.facebook:hover {
+      background: #eeeeee;
+    }
+
+    .oauth-btn i.fab {
+      font-size: 18px;
+      margin-right: 12px;
+    }
+
+    .loading-spinner {
+  display: none;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.button-loading .loading-spinner {
+  display: inline-block;
+}
+
+    
+
+    .google { border-color: #DB4437; color: #DB4437; }
+    .facebook { border-color: #3B5998; color: #3B5998; }
   </style>
 </head>
 <body>
+
+  <!-- Include Navigation -->
+  <%- include('../common/chatbot.ejs') %>
 
   <div class="container">
     <div class="info-section">
@@ -135,11 +258,23 @@
         <input type="text" id="lastName" placeholder="Last name" required>
         <input type="email" id="email" placeholder="Email address" required>
         <input type="password" id="password" placeholder="Password" required>
-        <label>
-          <input type="checkbox"> Remember Me
-        </label>
-        <button type="submit">SIGN UP</button>
-        
+        <button type="submit" id="signupButton">
+          <span class="loading-spinner"></span>
+          SIGN UP
+        </button>
+
+        <div class="oauth-providers">
+          <p class="divider">Or continue with</p>
+          <button class="oauth-btn google" onclick="window.location.href='/api/auth/google'">
+            <img src="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_18dp.png" 
+                 alt="Google logo" 
+                 class="logo"> Google
+          </button>
+          <button class="oauth-btn facebook" onclick="window.location.href='/api/auth/facebook'">
+            <i class="fab fa-facebook"></i> Facebook
+          </button>
+        </div>
+
         <div class="login-link">
           Already have an account? <a href="/api/auth/login">Login</a>
         </div>
@@ -156,6 +291,11 @@
   
     document.getElementById("signupForm").addEventListener("submit", async function(event) {
       event.preventDefault();
+
+      const button = document.getElementById("signupButton");
+      button.classList.add("button-loading");
+      button.disabled = true;
+      button.innerHTML = `<span class="loading-spinner"></span> Creating account...`;
   
       const firstName = document.getElementById("firstName").value.trim();
       const lastName = document.getElementById("lastName").value.trim();
@@ -197,7 +337,11 @@
       } catch (error) {
         console.error("Error:", error);
         alert("An error occurred. Please try again later.");
-      }
+      } finally {
+    button.classList.remove("button-loading");
+    button.disabled = false;
+    button.innerHTML = "SIGN UP";
+  }
     });
   </script>
 

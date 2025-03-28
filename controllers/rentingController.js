@@ -2,6 +2,24 @@ const RentalProduct = require("../models/rentalProduct");
 const RentalBooking = require("../models/rentalBooking");
 const Cart = require("../models/cartModel");
 
+async function clearExpiredRentals() {
+  const currentDate = new Date();
+  const expiredRentals = await RentalBooking.find({ rentalEnd: { $lt: currentDate }, status: "active" });
+
+  for (const rental of expiredRentals) {
+    await RentalProduct.findByIdAndUpdate(rental.product, {
+      buyer: null,
+      currentBooking: null
+    });
+
+    await RentalBooking.findByIdAndUpdate(rental._id, {
+      status: "completed"
+    });
+  }
+
+  console.log('Expired rentals cleared and updated.');
+}
+
 // Add-to-Cart Controller Method
 exports.addToCart = async (req, res) => {
   try {
@@ -157,33 +175,60 @@ exports.postAddProduct = (req, res, next) => {
 };
 
 // Get all rental items (with search)
-exports.getRentItems = (req, res, next) => {
-  const searchQuery = req.query.search || "";
-  const query = {};
 
-  if (searchQuery) {
-    query.$or = [
-      { title: { $regex: searchQuery, $options: "i" } },
-      { description: { $regex: searchQuery, $options: "i" } },
-      { location: { $regex: searchQuery, $options: "i" } },
-    ];
+exports.getRentItems = async (req, res,next) => {
+  try {
+    const { search, minPrice, maxPrice, location, rate } = req.query;
+    const query = {};
+
+    // Search Filter
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { location: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // Price Range Filter
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = parseFloat(minPrice);
+      if (maxPrice) query.price.$lte = parseFloat(maxPrice);
+    }
+
+    // Location Filter
+    if (location) query.location = location;
+
+    // Rate Type Filter
+    if (rate) query.rate = rate;
+
+    // Get Distinct Locations for Dropdown
+    const locations = await RentalProduct.distinct('location');
+
+    const products = await RentalProduct.find(query);
+    
+    res.render('rentals/rent-items', {
+      products,
+      searchQuery: search,
+      minPrice,
+      maxPrice,
+      location,
+      rate,
+      locations,
+      pageTitle: "Available Rentals",  
+      path: "/rental/rent",           
+      activePage: "rental"   
+    });
+
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server Error');
   }
 
-  RentalProduct.find(query)
-    .then((products) => {
-      res.render("rentals/rent-items", {
-        pageTitle: "Available Rentals",
-        path: "/rental/rent",
-        products: products,
-        searchQuery: searchQuery,
-        activePage: "rental",
-      });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).send("An error occurred while fetching rental items.");
-    });
 };
+
 
 // Controller method to handle the buying action and decrementing quantity
 exports.buyProduct = (req, res, next) => {
@@ -231,7 +276,7 @@ exports.getProductDetails = (req, res, next) => {
 
   RentalProduct.findById(productId)
   .populate("seller", "fullName")
-  .populate('buyer', 'fullName')
+  .populate("orderIds")
     .then((product) => {
       if (!product) {
         return res.status(404).send("Product not found");
@@ -240,12 +285,14 @@ exports.getProductDetails = (req, res, next) => {
       
       fetchedProduct = product;
       // Find an active booking for this product
-      return RentalBooking.findOne({ product: productId, status: "active" });
+      return RentalBooking.findOne({ product: productId, status: "active" }).populate("user", "fullName");
     })
     .then((booking) => {
       if (booking) {
         // Attach the booking information dynamically
         fetchedProduct.currentBooking = booking;
+        // fetchedProduct.populate('booking.user','fullName');
+        console.log(booking);
       }
       res.render("rentals/product-details", {
         pageTitle: fetchedProduct.title,

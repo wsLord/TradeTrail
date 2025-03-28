@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="/css/forms.css">
   <link rel="stylesheet" href="/css/navigation.css">
   <link rel="stylesheet" href="/css/auction.css">
+  <link rel="stylesheet" href="/css/chatbot.css">
   <link rel="icon" type="image/png" href="/assets/logo2.png">
 
   <style>
@@ -227,6 +228,7 @@
 </head>
 <body>
   <%- include('../common/navigation.ejs') %>
+  <%- include('../common/chatbot.ejs') %>
   <main>
     <!-- Flash messages block -->
     <% if (messages.error && messages.error.length > 0) { %>
@@ -533,11 +535,11 @@ if (distance <= 0) {
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     
   <script>
-  function makePayment(event) {
+function makePayment(event) {
+  event.preventDefault(); // Prevent default form submission
 
   const inputElement = document.getElementById("bidAmount");
   const maxBidElement = document.getElementById("max-bid");
-  console.log(inputElement);
 
   if (!inputElement || !maxBidElement) {
     console.error("Required input fields not found!");
@@ -571,7 +573,20 @@ if (distance <= 0) {
       const options = {
         ...data.options,
         handler: function (response) {
-          verifyPayment(response, amount, productId); // Pass productId
+          // Store payment_id in a hidden input field
+          let paymentInput = document.getElementById("paymentId");
+          if (!paymentInput) {
+            paymentInput = document.createElement("input");
+            paymentInput.type = "hidden";
+            paymentInput.name = "paymentId";
+            paymentInput.id = "paymentId";
+            document.getElementById("bidForm").appendChild(paymentInput);
+          }
+          paymentInput.value = response.razorpay_payment_id;
+
+          // Submit the form automatically
+          console.log("this is in form",paymentInput.value);
+          document.getElementById("bidForm").submit();
         },
       };
 
@@ -645,7 +660,8 @@ function verifyPayment(response, amount, productId) {
         },
         body: JSON.stringify({
           paymentId: paymentId,
-          amount: amount * 100, // Convert to paise for Razorpay
+          amount: Math.floor(amount * 100 * 0.9),
+          // Convert to paise for Razorpay
           notes: {
             reason: "Bid deleted by user"
           }
