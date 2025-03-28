@@ -549,3 +549,90 @@ exports.verifyOTP = async (req, res) => {
   }
 };
 
+exports.getSubscriptionAuctionDetails = async (req, res) => {
+  try {
+    const productId = req.params.productId;
+    
+    const product = await Subscription.findById(productId)
+      .populate("seller", "fullName")
+      .populate({
+        path: "bids",
+        populate: { path: "bidder", select: "fullName" }
+      });
+
+    if (!product) {
+      req.flash("error", "Subscription not found.");
+      return res.redirect("/profile");
+    }
+
+    // Separate monetary and product bids
+    const monetaryBids = product.bids.filter(bid => bid.bidAmount);
+    const productBids = product.bids.filter(bid => bid.product);
+
+    res.render("subscription-auction-details", {
+      product: product,
+      monetaryBids: monetaryBids,
+      productBids: productBids,
+      user: req.user
+    });
+
+  } catch (err) {
+    console.error(err);
+    req.flash("error", "Error loading auction details");
+    res.redirect("/profile");
+  }
+};
+
+exports.acceptSubscriptionBid = async (req, res) => {
+  try {
+    const { bidId } = req.body;
+
+    // Find the bid and populate the fields
+    const bid = await BidProduct.findById(bidId).populate("bidder");
+    if (!bid) {
+      req.flash("error", "Bid not found.");
+      return res.redirect("back");
+    }
+
+    // Find the subscription product using Ott model
+    const subscription = await Subscription.findById(bid.auction).populate("bids");
+    if (!subscription) {
+      req.flash("error", "Subscription not found.");
+      return res.redirect("back");
+    }
+
+    // Set the winner and update status
+    subscription.winner = bid.bidder._id;
+    subscription.auctionStatus = "completed";
+    await subscription.save();
+
+    // Process refunds for other monetary bids
+    if (bid.bidAmount !== null) {
+      const otherBids = subscription.bids.filter(
+        (otherBid) => otherBid._id.toString() !== bidId && otherBid.bidAmount
+      );
+
+      await Promise.all(
+        otherBids.map(async (otherBid) => {
+          console.log(`Processing refund for Payment ID: ${otherBid.paymentId}`);
+          await initiateRefund(otherBid.paymentId, otherBid.bidAmount);
+          console.log(`Refund completed for Payment ID: ${otherBid.paymentId}`);
+        })
+      );
+    }
+
+    // Custom message for subscriptions
+    const bidTypeMessage =
+      bid.bidAmount !== null
+        ? `Monetary bid accepted! Winner is ${bid.bidder.fullName}. Other bids refunded.`
+        : `Subscription swap accepted! ${bid.bidder.fullName} will contact you.`;
+
+    req.flash("success", bidTypeMessage);
+    res.redirect(`/subscription/buy/${subscription._id}`);
+  } catch (error) {
+    console.error("Error accepting subscription bid:", error);
+    req.flash("error", "Failed to accept subscription bid.");
+    res.redirect("back");
+  }
+};
+

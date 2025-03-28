@@ -445,8 +445,8 @@
       <% subscriptionAuction.forEach(product => { %>
         <li>
 
-          <a href="/profile/auction/<%= product._id %>" style="text-decoration: none; color: #007bff;">
-            <h4>Product: <%= product.title %></h4>
+          <a href="/profile/subscription-auction/<%= product._id %>" style="text-decoration: none; color: #007bff;">
+            <h4>Product: <%= product.platform_name %></h4>
             <% if (product.orderIds && product.orderIds.length > 0) { %>
               <!-- <h4>Buyers:</h4> -->
               <ul>

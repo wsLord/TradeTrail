@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Subscription Auction Details</title>
+    <link rel="icon" type="image/png" href="/assets/logo2.png">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/navigation.css">
+    <link rel="stylesheet" href="/css/auction.css">
+
+  <style>
+
+    /* Button Styling */
+    button {
+      background-color: #4b6043;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #back-btn {
+      background: linear-gradient(135deg, #4caf50 0%, #357d37 100%);
+      color: white;
+      padding: 1.2rem 2.5rem;
+      border-radius: 30px;
+      font-size: 1.1rem;
+      width: fit-content;
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+      margin: 20px 41% 30px;
+    }
+
+
+    /* Disabled Button */
+    .disabled-button, button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    button:disabled:hover {
+      background-color: #ccc;
+    }
+
+    /* No Bids Message */
+    .no-bids {
+      text-align: center;
+      padding: 20px;
+      background-color: #f9f9f9;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Subscription Auction: <%= product.platform_name %></h1>
+    <p>Seller: <%= product.seller.fullName %></p>
+    <p>Minimum Price: $<%= product.min_price %></p>
+    <p>Platform: <%= product.platform_name %></p>
+    <p>Description: <%= product.description %></p>
+  </header>
+
+  <!-- Monetary Bids Section -->
+  <h2>Monetary Bids</h2>
+  <% if (monetaryBids.length > 0) { %>
+    <table>
+      <thead>
+        <tr>
+          <th>Bidder</th>
+          <th>Amount</th>
+          <th>Payment ID</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% monetaryBids.forEach(bid => { %>
+          <tr>
+            <td><%= bid.bidder.fullName %></td>
+            <td>$<%= bid.bidAmount %></td>
+            <td><%= bid.paymentId %></td>
+            <td>
+              <form action="/subscription/accept-bid" method="POST">
+                <input type="hidden" name="bidId" value="<%= bid._id %>">
+                <button 
+                  type="submit" 
+                  class="<%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled-button' : '' %>"
+                  <%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled' : '' %>>
+                  <%= product.winner ? 'Bid Accepted' : (new Date() < new Date(product.endDate) ? 'Auction Ongoing' : 'Accept') %>
+                </button>
+              </form>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  <% } else { %>
+    <div class="no-bids">No monetary bids yet.</div>
+  <% } %>
+
+  <!-- Product Bids Section -->
+  <h2>Product Bids</h2>
+  <% if (productBids.length > 0) { %>
+    <table>
+      <thead>
+        <tr>
+          <th>Bidder</th>
+          <th>Product Name</th>
+          <th>Description</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% productBids.forEach(bid => { %>
+          <tr>
+            <td><%= bid.bidder.fullName %></td>
+            <td><%= bid.product?.name || 'N/A' %></td>
+            <td><%= bid.product?.description || 'No description' %></td>
+            <td>
+              <form action="/subscription/accept-bid" method="POST">
+                <input type="hidden" name="bidId" value="<%= bid._id %>">
+                <button 
+                  type="submit" 
+                  class="<%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled-button' : '' %>"
+                  <%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled' : '' %>>
+                  <%= product.winner ? 'Bid Accepted' : (new Date() < new Date(product.endDate) ? 'Auction Ongoing' : 'Accept') %>
+                </button>
+              </form>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  <% } else { %>
+    <div class="no-bids">No product bids yet.</div>
+  <% } %>
+
+  <button onclick="window.location.href='/profile'" id="back-btn">Back to Profile</button>
+</body>
+</html>

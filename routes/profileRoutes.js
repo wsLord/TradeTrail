@@ -15,6 +15,18 @@ router.get("/profile/subscription/:productId", protectRoute, profileController.g
 
 router.post('/profile/accept-bid',protectRoute, profileController.acceptBid);
 
+router.post(
+    "/accept-bid",
+    protectRoute,
+    profileController.acceptSubscriptionBid
+  );
+
+router.get(
+    "/profile/subscription-auction/:productId",
+    protectRoute,
+    profileController.getSubscriptionAuctionDetails
+  );
+
 // Add new route
 router.post('/api/verify-otp', protectRoute, profileController.verifyOTP);
 
