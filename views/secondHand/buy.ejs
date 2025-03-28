@@ -6,28 +6,160 @@
   <title><%= pageTitle %></title>
   <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/chatbot.css">
   <link rel="stylesheet" href="/css/rentalStyles.css">
   <link rel="stylesheet" href="/css/navigation.css">
+  <style>
+    /* Filter sidebar styles */
+    .filter-sidebar {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100%;
+      background: white;
+      box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      transition: right 0.3s ease;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .filter-sidebar.active {
+      right: 0;
+    }
+
+    .filter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .filter-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .filter-section {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    .sidebar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 999;
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .filter-sidebar {
+        width: 100%;
+        right: -100%;
+      }
+    }
+  </style>
+
   <link rel="icon" type="image/png" href="/assets/logo2.png">
 
 </head>
 <body>
   <div id="navbar">
     <%- include('../common/navigation.ejs') %>
+    <%- include('../common/chatbot.ejs') %>
   </div>
 
   <main>
-    <h1>Second Hand Products</h1></br>
-    <form action="/secondHand/buy" method="GET" class="search-form">
-      <input 
-        type="text" 
-        name="search" 
-        placeholder="Search products by title, description, or location..."
-        value="<%= searchQuery || '' %>"
-      >
-      <button type="submit">Search</button>
-    </form>
-    <!-- <button type="button" onclick="window.location.href='/secondHand/sell'">POST AN ITEM !</button> -->
+
+    <h1>Second Hand Products</h1>
+
+    <div class="filter-container">
+      <form action="/secondHand/buy" method="GET" class="search-form">
+        <input 
+          type="text" 
+          name="search" 
+          placeholder="Search products..."
+          value="<%= searchQuery || '' %>"
+        >
+        <button type="submit" class="filter-button">Search</button>
+      </form>
+      
+      <button class="filter-toggle" onclick="toggleFilters()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel" viewBox="0 0 16 16">
+          <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5v-2zm1 .5v1.308l4.372 4.858A.5.5 0 0 1 7 8.5v5.306l2-.666V8.5a.5.5 0 0 1 .128-.334L13.5 3.808V2h-11z"/>
+        </svg>
+        Filters
+      </button>
+    </div>
+
+    <!-- Filter Sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeFilters()"></div>
+    <div class="filter-sidebar" id="filterSidebar">
+      <div class="filter-header">
+        <h2>Filters</h2>
+        <button class="filter-close" onclick="closeFilters()">&times;</button>
+      </div>
+
+      <form action="/secondHand/buy" method="GET" id="filterForm">
+        <!-- Price Filter -->
+        <div class="filter-section">
+          <h3>Price Range</h3>
+          <div class="filter-group">
+            <input type="number" name="minPrice" placeholder="Min" 
+                  value="<%= minPrice %>" step="0.01">
+            <span>-</span>
+            <input type="number" name="maxPrice" placeholder="Max" 
+                  value="<%= maxPrice %>" step="0.01">
+          </div>
+        </div>
+
+        <!-- Location Filter -->
+        <div class="filter-section">
+          <h3>Location</h3>
+          <div class="filter-group">
+            <select name="location">
+              <option value="">All Locations</option>
+              <% locations.forEach(loc => { %>
+                <option value="<%= loc %>" <%= location === loc ? 'selected' : '' %>>
+                  <%= loc %>
+                </option>
+              <% }); %>
+            </select>
+          </div>
+        </div>
+
+        <!-- Sale Type Filter -->
+        <div class="filter-section">
+          <h3>Sale Type</h3>
+          <div class="filter-group">
+            <select name="saleType">
+              <option value="">Any Type</option>
+              <% saleTypes.forEach(st => { %>
+                <option value="<%= st %>" <%= saleType === st ? 'selected' : '' %>>
+                  <%= st %>
+                </option>
+              <% }); %>
+            </select>
+          </div>
+        </div>
+
+        <div class="filter-actions">
+          <button type="submit" class="filter-button">Apply Filters</button>
+          <button type="button" class="clear-button" onclick="window.location.href='/secondHand/buy'">Clear All</button>
+        </div>
+      </form>
+    </div>
+
+    <button type="button" onclick="window.location.href='/secondHand/sell'">POST AN ITEM!</button>
+
     
     <% if (prods.length > 0) { %>
       <div class="rental-list">
@@ -41,12 +173,12 @@
         </a>
         </div>
 
-        <% prods.forEach((product, index) => { %>
-
+        <% prods.forEach((product, index) => { 
+          if (!product.buyer) { %>
+     
           <div class="rental-item">
             <div class="product-card">
-
-              <!-- Image Slider Container -->
+              <!-- Image Slider -->
               <div class="image-slider-container">
                 <button class="prev" onclick="prevImage(<%= index %>)">&#10094;</button>
                 <div class="image-slider" id="slider-<%= index %>">
@@ -64,13 +196,14 @@
               <div class="product-info">
                 <h3><%= product.title %></h3>
                 <div class="price-info">
-                  <p class="direct-price">Direct Purchase: ₹<%= product.price %></p>
+                  <p class="direct-price">Price: ₹<%= product.price %></p>
                   <% if (product.saleType === 'auction') { %>
                     <p class="auction-price">Auction Starts At: ₹<%= product.min_price %></p>
                   <% } %>
                 </div>
                 <p class="description"><%= product.description %></p>
                 <p class="location"><%= product.location %></p>
+                <p class="quantity">Quantity: <%= product.quantity %></p>
                 <p class="seller">
                   <b>Seller:</b> <%= product.seller && product.seller.fullName ? product.seller.fullName : 'Unknown' %>
                 </p>
@@ -84,10 +217,9 @@
                   <% } %>
                 </div>
               </div>
-
             </div>
           </div>
-        <% }); %>
+        <%} }); %>
       </div>
     <% } else { %>
       <h1>No Products Found!</h1>
@@ -95,6 +227,18 @@
   </main>
 
   <script>
+    // Filter Sidebar Functions
+    function toggleFilters() {
+      document.getElementById('filterSidebar').classList.toggle('active');
+      document.getElementById('sidebarOverlay').style.display = 'block';
+    }
+
+    function closeFilters() {
+      document.getElementById('filterSidebar').classList.remove('active');
+      document.getElementById('sidebarOverlay').style.display = 'none';
+    }
+
+    // Image Slider Functions
     function nextImage(index) {
       let slider = document.getElementById(`slider-${index}`);
       let images = slider.getElementsByTagName("img");
@@ -118,9 +262,14 @@
         slider.dataset.index = currentIndex;
       }
     }
+
+    // Close sidebar when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.filter-sidebar') && 
+          !e.target.closest('.filter-toggle')) {
+        closeFilters();
+      }
+    });
   </script>
-
 </body>
-
 </html>
-

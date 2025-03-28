@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/cart.css">
   <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/chatbot.css">
   <link rel="stylesheet" href="/css/rentalStyles.css">
   <link rel="icon" type="image/png" href="/assets/logo2.png">
   
@@ -77,6 +78,7 @@
 <body>
   <div id="navbar">
     <%- include('../common/navigation.ejs') %>
+    <%- include('../common/chatbot.ejs') %>
   </div>
   <main class="cart-container">
     <div class="cart-header">
@@ -251,98 +253,32 @@
       }
     });
 
-    // Razorpay Checkout Handlers
-  //   document.querySelectorAll('.checkout-section-btn').forEach(button => {
-  //     button.addEventListener('click', async (e) => {
-  //       const section = button.dataset.section;
-  //       const amount = button.dataset.total;
-        
-  //       try {
-  //         const response = await fetch(`/payment/${section.toLowerCase()}/checkout`, {
-  //           method: 'POST',
-  //           headers: {
-  //             'Content-Type': 'application/json',
-  //             'Authorization': `Bearer ${localStorage.getItem('token')}`
-  //           },
-  //           body: JSON.stringify({ amount })
-  //         });
-
-  //         const { success, order } = await response.json();
-          
-  //         if (success) {
-  //           const options = {
-  //             key: '<%= process.env.RAZORPAY_KEY_ID %>',
-  //             amount: order.amount,
-  //             currency: "INR",
-  //             name: "TradeTrail",
-  //             description: `${section} Payment`,
-  //             order_id: order.id,
-  //             handler: async function(response) {
-  //               const verificationResponse = await fetch(`/payment/${section.toLowerCase()}/verify`, {
-  //                 method: 'POST',
-  //                 headers: {
-  //                   'Content-Type': 'application/json',
-  //                   'Authorization': `Bearer ${localStorage.getItem('token')}`
-  //                 },
-  //                 body: JSON.stringify(response)
-  //               });
-
-  //               const { success: verificationSuccess } = await verificationResponse.json();
-  //               if (verificationSuccess) {
-  //                 window.location.href = `/payment/success/${section.toLowerCase()}`;
-  //               }
-  //             }
-  //           };
-
-  //           const rzp = new Razorpay(options);
-  //           rzp.open();
-  //         }
-  //       } catch (error) {
-  //         console.error('Checkout error:', error);
-  //       }
-  //     });
-  //   });
   // </script>
       <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     
       <script>
-        function collectProductIds() {
-    const productIds = [];
-    const productIdInputs = document.querySelectorAll('.product-id');
-    
-    productIdInputs.forEach(input => {
-      productIds.push(input.value);
-    });
-    return productIds;
-    // console.log(productIds); // This will log the array of product IDs
-    // You can now use the productIds array as needed
-  }
-
-      function makePayment(event) {
+  function makePayment(event) {
   let button = event.target; // Get the button that was clicked
   let section = button.getAttribute("data-section");
-  let amount = parseFloat(button.getAttribute("data-total")) ; 
-  
-  // Call the function to collect IDs
-  const productIds = collectProductIds();
+  // let amount = parseFloat(button.getAttribute("data-total")) ; 
   
   console.log("Section:", section);
-  console.log("Amount:", amount);
-  console.log("Product IDs:", productIds);
+  // console.log("Amount:", amount);
 
   fetch("/api/payment/makePayment", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ amount,section, productIds  }),
+    body: JSON.stringify({section}),
   })
     .then((response) => response.json())
     .then((data) => {
+      
       console.log("data", data);
       if (data.success) {
         const options = {
           ...data.options,
           handler: function (response) {
-            verifyPayment(response, amount,productIds);
+            verifyPayment(response,section);
           },
         };
         console.log(options);
@@ -356,13 +292,13 @@
     .catch(() => alert("Failed to create order"));
 }
 
-function verifyPayment(response, amount,productIds) {
-  console.log("Verifying payment with:", response, "and amount:", amount);
+function verifyPayment(response,section) {
+  console.log("Verifying payment with:", response);
 
   fetch("/api/payment/verifyPayment", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...response, amount,productIds }),
+    body: JSON.stringify({ ...response,section }),
   })
     .then((res) => res.json())
     .then((data) => {
@@ -379,8 +315,7 @@ function verifyPayment(response, amount,productIds) {
       alert("Error verifying payment");
     });
 }
-
   
-      </script>
+</script>
 </body>
 </html>

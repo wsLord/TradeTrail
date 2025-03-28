@@ -18,8 +18,6 @@ const paymentSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  // product: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
-  productIds: [{ type: String }],
   status: {
     type: String,
     enum: ["pending", "completed", "failed", "refunded"],

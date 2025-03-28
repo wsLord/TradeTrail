@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const order = require("./order");
 const Schema = mongoose.Schema;
 
 const productSchema = new Schema({
@@ -58,6 +59,11 @@ const productSchema = new Schema({
     ref: "User",
     default: null,
   },
+  orderIds: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Order",
+    default: null,
+  }],
 });
 
 module.exports = mongoose.model("Product", productSchema);

@@ -136,12 +136,90 @@
     .add-to-cart-button:hover {
       background: #a3c585;
     }
+    .otp-verification-card {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+  border: 1px solid #dee2e6;
+}
+
+.otp-input-group {
+  display: flex;
+  flex-direction: column; /* Stack vertically */
+  gap: 15px; /* Add spacing between elements */
+  margin: 15px 0;
+}
+
+.otp-field {
+  width: 100%; /* Full width */
+  padding: 12px;
+  border: 2px solid #3E6B48;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.otp-field:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(62, 107, 72, 0.2);
+}
+
+.verify-otp-btn {
+  width: 100%; /* Full width */
+  padding: 14px;
+  background: #3E6B48;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.verify-otp-btn:hover {
+  background: #2d5035;
+  transform: translateY(-1px);
+}
+
+.otp-result {
+  font-weight: bold;
+  padding: 10px;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.otp-result.success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.otp-result.error {
+  background: #f8d7da;
+  color: #721c24;
+}
+.payment-status {
+  padding: 8px;
+  margin: 10px 0;
+  border-radius: 4px;
+}
+
+.payment-status.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.payment-status.pending {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
   </style>
 </head>
 <body>
   <div id="navbar">
-    <%- include('../common/navigation.ejs') %>
-    <%- include('../common/chatbot.ejs') %>
+    <%- include('./common/chatbot.ejs') %>
   </div>
 
   <main class="product-details-container">
@@ -166,14 +244,15 @@
         </div>
         
         <div class="product-meta">
-          <p><strong>Available Stock:</strong> <%= product.quantity %></p>
+          <p><strong>Rate:</strong> ₹<%= product.price %>/<%= product.rate %></p>
+          <p><strong>Security Deposit:</strong> ₹<%= product.securityDeposit %></p>
           <% if (product.currentBooking) { %>
             <p class="availability-notice">
               Next available after: <%= new Date(product.currentBooking.rentalEnd).toLocaleDateString('en-IN') %>
             </p>
           <% } %>
         </div>
-
+<!-- 
         <div class="rental-calendar">
           <form action="/rental/add-to-cart/<%= product.id %>" method="POST">
             <div class="date-fields-container">
@@ -214,7 +293,33 @@
           <h4 class="total-price">Total Estimate: ₹<span id="totalPrice">0</span></h4>
         </div>
       </div>
-    </div>
+    </div> -->
+
+    <% if (product.orderIds && product.orderIds.some(order => !order.paymentTransferred) && user._id.equals(product.seller._id)) { %>
+      <div class="otp-verification-card">
+        <h4>OTP Verification & Payment</h4>
+        <div class="otp-input-group">
+          <input type="text" id="upiInput" class="otp-field" placeholder="Enter your UPI ID" pattern=".+@.+\..+">
+          <input type="text" id="otpInput" class="otp-field" placeholder="Enter buyer's OTP" maxlength="6">
+          <button class="verify-otp-btn" onclick="verifyOTP('<%= product._id %>', 'rental')">Verify & Initiate Payment</button>
+        </div>
+        <div id="otpResult" class="otp-result"></div>
+      </div>
+      <% } %>
+
+      <% if (product.orderIds && product.orderIds.length > 0) { %>
+        <% product.orderIds.forEach(order => { %>
+          <% if (order.paymentTransferred) { %>
+            <div class="payment-status success">
+              ✓ Payment transferred (TXID: <%= order.transactionId %>)
+            </div>
+          <% } else { %>
+            <div class="payment-status pending">
+              Payment pending verification
+            </div>
+          <% } %>
+        <% }) %>
+      <% } %>
   </main>
 
   <span id="rateValue" style="display:none;"><%= product.rate %></span>
@@ -237,6 +342,39 @@
     document.getElementById('rentalStart').min = today;
     document.getElementById('rentalEnd').min = today;
   </script>
+  <script>
+    async function verifyOTP(productId, productType) {
+  const upi = document.getElementById('upiInput').value;
+  const otp = document.getElementById('otpInput').value;
+  const resultDiv = document.getElementById('otpResult');
+  
+  try {
+    const response = await fetch('/api/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId, productType, otp, upiId: upi })
+    });
+
+    const data = await response.json();
+    
+    if (data.success) {
+      resultDiv.innerHTML = `
+        ✅ ${data.message}<br>
+        Transaction ID: ${data.transactionId}
+      `;
+      resultDiv.className = 'otp-result success';
+      // Refresh page after 2 seconds
+      setTimeout(() => location.reload(), 2000);
+    } else {
+      resultDiv.innerHTML = `❌ ${data.message}`;
+      resultDiv.className = 'otp-result error';
+    }
+  } catch (error) {
+    resultDiv.innerHTML = '⚠️ Error processing request';
+    resultDiv.className = 'otp-result error';
+  }
+}
+    </script>
 
 </body>
 </html>
