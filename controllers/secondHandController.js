@@ -149,7 +149,13 @@ exports.postAddBidProduct = async (req, res, next) => {
   }
 
   const prodId = req.params.productId;
-  const { title, imageUrl, description, location, bidAmount } = req.body;
+  const { title, imageUrl, description, location, bidAmount, paymentId } = req.body; // Extract paymentId from form submission
+
+  console.log("is in routes",paymentId);
+  if (!paymentId) {
+      req.flash('error', 'Payment verification failed. Please try again.');
+      return res.redirect(`/secondHand/buy/${prodId}`);
+  }
 
   // Check for existing bid
   const existingBid = await BidProduct.findOne({
@@ -176,20 +182,20 @@ exports.postAddBidProduct = async (req, res, next) => {
   const monetaryBids = product.bids.filter(bid => bid.bidAmount !== null);
   const currentMaxBid = monetaryBids.reduce(
       (max, bid) => Math.max(max, bid.bidAmount),
-      product.min_price // Start with min_price
+      product.min_price
   );
   const monetaryBidsCount = monetaryBids.length;
 
   // Validate bid amount
   if (bidAmount) {
-      const minRequired = monetaryBidsCount === 0 
-          ? product.min_price 
+      const minRequired = monetaryBidsCount === 0
+          ? product.min_price
           : currentMaxBid + MIN_BID_INCREMENT;
 
       if (bidAmount < minRequired) {
           req.flash(
               'error',
-              monetaryBidsCount === 0 
+              monetaryBidsCount === 0
                   ? `First bid must be at least ₹${product.min_price}`
                   : `Bid must be at least ₹${currentMaxBid + MIN_BID_INCREMENT} (Current max: ₹${currentMaxBid})`
           );
@@ -207,6 +213,7 @@ exports.postAddBidProduct = async (req, res, next) => {
       description: description || null,
       location: location || null,
       bidAmount: bidAmount ? Number(bidAmount) : null,
+      paymentId, // Store the payment ID
       bidder: req.user._id,
       auction: prodId,
   });
@@ -215,12 +222,12 @@ exports.postAddBidProduct = async (req, res, next) => {
       .then((savedBidProduct) => {
           return Promise.all([
               Product.findByIdAndUpdate(
-                  prodId, 
-                  { $push: { bids: savedBidProduct._id } }, 
+                  prodId,
+                  { $push: { bids: savedBidProduct._id } },
                   { new: true }
               ),
               User.findByIdAndUpdate(
-                  req.user._id, 
+                  req.user._id,
                   { $addToSet: { cart: prodId } }
               ),
           ]);

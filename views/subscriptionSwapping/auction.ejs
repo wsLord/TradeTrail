@@ -533,11 +533,11 @@ if (distance <= 0) {
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     
   <script>
-  function makePayment(event) {
+function makePayment(event) {
+  event.preventDefault(); // Prevent default form submission
 
   const inputElement = document.getElementById("bidAmount");
   const maxBidElement = document.getElementById("max-bid");
-  console.log(inputElement);
 
   if (!inputElement || !maxBidElement) {
     console.error("Required input fields not found!");
@@ -571,7 +571,20 @@ if (distance <= 0) {
       const options = {
         ...data.options,
         handler: function (response) {
-          verifyPayment(response, amount, productId); // Pass productId
+          // Store payment_id in a hidden input field
+          let paymentInput = document.getElementById("paymentId");
+          if (!paymentInput) {
+            paymentInput = document.createElement("input");
+            paymentInput.type = "hidden";
+            paymentInput.name = "paymentId";
+            paymentInput.id = "paymentId";
+            document.getElementById("bidForm").appendChild(paymentInput);
+          }
+          paymentInput.value = response.razorpay_payment_id;
+
+          // Submit the form automatically
+          console.log("this is in form",paymentInput.value);
+          document.getElementById("bidForm").submit();
         },
       };
 
