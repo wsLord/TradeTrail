@@ -64,6 +64,7 @@
       <tr>
         <th>Bidder</th>
         <th>Amount</th>
+        <th>paymentId</th>
         <th>Action</th>
       </tr>
     </thead>
@@ -72,16 +73,19 @@
         <tr>
           <td><%= bid.bidder.fullName %></td>
           <td>$<%= bid.bidAmount %></td>
+          <td> <%=bid.paymentId %></td>
           <td>
-            <form action="/profile/accept-bid" method="POST">
+            <form id="refundForm0" action="/profile/accept-bid" method="POST">
               <input type="hidden" name="bidId" value="<%= bid._id %>">
               <button 
-                type="submit" 
-                class="<%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled-button' : '' %>" 
-                <%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled' : '' %>
-              >
-                <%= product.winner ? 'Bid Accepted' : (new Date() < new Date(product.endDate) ? 'Auction Ongoing' : 'Accept') %>
-              </button>
+                    type="button" 
+                    class="<%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled-button' : '' %>" 
+                    <%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled' : '' %>
+                    onclick="handleBidAcceptance(event, '<%= bid.paymentId %>', '<%= bid.bidAmount %>')"
+                  >
+
+                    <%= product.winner ? 'Bid Accepted' : (new Date() < new Date(product.endDate) ? 'Auction Ongoing' : 'Accept') %>
+            </button>
             </form>
           </td>
           
@@ -118,12 +122,15 @@
                 <form action="/profile/accept-bid" method="POST">
                   <input type="hidden" name="bidId" value="<%= bid._id %>">
                   <button 
-                    type="submit" 
-                    class="<%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled-button' : '' %>" 
-                    <%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled' : '' %>
-                  >
-                    <%= product.winner ? 'Bid Accepted' : (new Date() < new Date(product.endDate) ? 'Auction Ongoing' : 'Accept') %>
-                  </button>
+                  type="button" 
+                  class="<%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled-button' : '' %>" 
+                  <%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled' : '' %>
+                  onclick="handleBidAcceptance(event, '<%= bid.paymentId %>', '<%= bid.bidAmount %>')"
+                >
+
+                  <%= product.winner ? 'Bid Accepted' : (new Date() < new Date(product.endDate) ? 'Auction Ongoing' : 'Accept') %>
+               </button>
+
                 </form>
               </td>
               
@@ -153,5 +160,27 @@
         button.style.cursor = "not-allowed";
       });
     }
+  </script>
+  <script>
+  const monetaryBids = JSON.parse('<%- JSON.stringify(monetaryBids) %>');
+  </script>
+
+<script>
+function handleBidAcceptance(event, selectedPaymentId, selectedBidAmount) {
+    
+    console.log("hitting handle function");
+    event.preventDefault(); // Prevent form submission
+    if (!confirm("Are you sure you want to accept this bid? All other bids will be refunded.")) {
+      return;
+    }
+    event.preventDefault(); 
+    console.log("User confirmed bid acceptance. Processing refunds...");
+
+    // Optionally, you can submit the form manually after refunds are processed
+    // event.target.closest('form').submit();
+    // Submit the form
+    document.getElementById('refundForm0').submit();
+  }
+ 
   </script>
 </html>
