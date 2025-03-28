@@ -2,7 +2,7 @@
 const User = require("../models/userModel");
 const Product = require("../models/product");
 const RentalProduct = require("../models/rentalProduct");
-const BidProduct = require("../models/bidProduct");
+const BidProduct = require("../models/bidproduct");
 const SecondhandDirectProduct = require("../models/product");
 const SubscriptionDirectProduct = require("../models/ott");
 const RentalBooking = require("../models/rentalBooking");
@@ -10,6 +10,9 @@ const Subscription = require("../models/ott");
 const Order = require("../models/order");
 
 const bcrypt = require("bcryptjs");
+
+const { v4: uuidv4 } = require('uuid');
+const Transaction = require('../models/transaction');
 
 exports.getProfile = async (req, res) => {
   try {
@@ -69,6 +72,7 @@ exports.getProfile = async (req, res) => {
     });
     const directSubscriptionProducts = await Subscription.find({
       seller: req.user._id,
+      saleType: "direct",
     }).populate({
       path: "orderId",
       populate: {
@@ -261,7 +265,7 @@ exports.getRentalDetails = (req, res, next) => {
         model: "User",
         select: "fullName"
       },
-      select: "quantity otp"
+      select: "quantity otp paymentTransferred transactionId"
     })
     .then((product) => {
       if (!product) {
@@ -304,7 +308,7 @@ exports.getSecondHandDetails = (req, res, next) => {
         model: "User",
         select: "fullName"
       },
-      select: "quantity otp"
+      select: "quantity otp paymentTransferred transactionId"
     })
     .then((product) => {
       if (!product) {
@@ -339,7 +343,7 @@ exports.getSubscriptionDetails = async (req, res, next) => {
           model: "User",
           select: "fullName"
         },
-        select: "quantity otp"
+        select: "quantity otp paymentTransferred transactionId"
       });
 
     if (!product) {
@@ -361,7 +365,15 @@ exports.getSubscriptionDetails = async (req, res, next) => {
 
 exports.verifyOTP = async (req, res) => {
   try {
-    const { productId, productType, otp } = req.body;
+    const { productId, productType, otp, upiId } = req.body;
+
+    // Validate UPI ID format
+    if (!/^[\w.-]+@[\w]+/.test(upiId)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid UPI ID format. Use format: username@bank' 
+      });
+    }
     
     // Map productType to Order's productModel values
     const productModelMap = {
@@ -380,7 +392,7 @@ exports.verifyOTP = async (req, res) => {
     switch (productType.toLowerCase()) {
       case 'rental': Model = RentalProduct; break;
       case 'secondhand': Model = Product; break;
-      case 'subscription': Model = Ott; break;
+      case 'subscription': Model = Subscription; break;
       default: return res.status(400).json({ success: false, message: 'Invalid product type' });
     }
 
@@ -398,10 +410,47 @@ exports.verifyOTP = async (req, res) => {
       otp: otp
     });
 
-    res.json({
-      success: orders.length > 0,
-      message: orders.length > 0 ? 'OTP verified' : 'Invalid OTP'
-    });
+    // If OTP is valid
+    if (orders.length > 0) {
+      // Create transaction record
+      const transaction = new Transaction({
+        seller: req.user._id,
+        buyer: orders[0].buyer,
+        product: productId,
+        amount: orders[0].amount, // Adjust based on your order structure
+        upiId,
+        transactionId: `TT-${uuidv4()}`,
+        status: 'completed'
+      });
+
+      await transaction.save();
+
+      // Update order status if needed
+      await Order.updateMany(
+        { _id: { $in: orders.map(o => o._id) } },
+        { 
+          $set: { 
+            paymentTransferred: true,
+            transactionId: transaction.transactionId 
+          } 
+        }
+      );
+
+      await Model.findByIdAndUpdate(productId, { 
+        $set: { 
+          orderId: orders[0]._id,
+          quantity: 0 // Mark as sold out
+        } 
+      });
+
+      return res.json({
+        success: true,
+        transactionId: transaction.transactionId,
+        message: 'OTP verified & payment initiated successfully'
+      });
+    }
+
+    res.json({ success: false, message: 'Invalid OTP' });
 
   } catch (error) {
     console.error('OTP verification error:', error);

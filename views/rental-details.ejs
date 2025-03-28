@@ -146,30 +146,40 @@
 
 .otp-input-group {
   display: flex;
-  gap: 10px;
+  flex-direction: column; /* Stack vertically */
+  gap: 15px; /* Add spacing between elements */
   margin: 15px 0;
 }
 
 .otp-field {
-  flex: 1;
-  padding: 10px;
+  width: 100%; /* Full width */
+  padding: 12px;
   border: 2px solid #3E6B48;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.otp-field:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(62, 107, 72, 0.2);
 }
 
 .verify-otp-btn {
+  width: 100%; /* Full width */
+  padding: 14px;
   background: #3E6B48;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
+  border-radius: 8px;
+  font-size: 16px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .verify-otp-btn:hover {
   background: #2d5035;
+  transform: translateY(-1px);
 }
 
 .otp-result {
@@ -187,6 +197,23 @@
 .otp-result.error {
   background: #f8d7da;
   color: #721c24;
+}
+.payment-status {
+  padding: 8px;
+  margin: 10px 0;
+  border-radius: 4px;
+}
+
+.payment-status.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.payment-status.pending {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
 }
   </style>
 </head>
@@ -268,15 +295,30 @@
       </div>
     </div> -->
 
-    <% if (product.orderIds && product.orderIds.length > 0 && user._id.equals(product.seller._id)) { %>
+    <% if (product.orderIds && product.orderIds.some(order => !order.paymentTransferred) && user._id.equals(product.seller._id)) { %>
       <div class="otp-verification-card">
-        <h4>OTP Verification</h4>
+        <h4>OTP Verification & Payment</h4>
         <div class="otp-input-group">
+          <input type="text" id="upiInput" class="otp-field" placeholder="Enter your UPI ID" pattern=".+@.+\..+">
           <input type="text" id="otpInput" class="otp-field" placeholder="Enter buyer's OTP" maxlength="6">
-          <button class="verify-otp-btn" onclick="verifyOTP('<%= product._id %>', 'rental')">Verify</button>
+          <button class="verify-otp-btn" onclick="verifyOTP('<%= product._id %>', 'rental')">Verify & Initiate Payment</button>
         </div>
         <div id="otpResult" class="otp-result"></div>
       </div>
+      <% } %>
+
+      <% if (product.orderIds && product.orderIds.length > 0) { %>
+        <% product.orderIds.forEach(order => { %>
+          <% if (order.paymentTransferred) { %>
+            <div class="payment-status success">
+              ✓ Payment transferred (TXID: <%= order.transactionId %>)
+            </div>
+          <% } else { %>
+            <div class="payment-status pending">
+              Payment pending verification
+            </div>
+          <% } %>
+        <% }) %>
       <% } %>
   </main>
 
@@ -302,35 +344,33 @@
   </script>
   <script>
     async function verifyOTP(productId, productType) {
+  const upi = document.getElementById('upiInput').value;
+  const otp = document.getElementById('otpInput').value;
   const resultDiv = document.getElementById('otpResult');
-  resultDiv.innerHTML = 'Verifying...';
-  resultDiv.className = 'otp-result';
-
+  
   try {
     const response = await fetch('/api/verify-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        productId,
-        productType: productType.toLowerCase(),
-        otp: document.getElementById('otpInput').value
-      })
+      body: JSON.stringify({ productId, productType, otp, upiId: upi })
     });
 
     const data = await response.json();
     
-    if (!response.ok) {
-      throw new Error(data.message || 'Verification failed');
+    if (data.success) {
+      resultDiv.innerHTML = `
+        ✅ ${data.message}<br>
+        Transaction ID: ${data.transactionId}
+      `;
+      resultDiv.className = 'otp-result success';
+      // Refresh page after 2 seconds
+      setTimeout(() => location.reload(), 2000);
+    } else {
+      resultDiv.innerHTML = `❌ ${data.message}`;
+      resultDiv.className = 'otp-result error';
     }
-
-    resultDiv.innerHTML = data.success 
-      ? '✅ OTP Verified Successfully!' 
-      : `❌ ${data.message}`;
-    resultDiv.className = `otp-result ${data.success ? 'success' : 'error'}`;
-
   } catch (error) {
-    console.error('Verification error:', error);
-    resultDiv.innerHTML = `⚠️ ${error.message}`;
+    resultDiv.innerHTML = '⚠️ Error processing request';
     resultDiv.className = 'otp-result error';
   }
 }

@@ -231,10 +231,24 @@ exports.verifyPayment = async (req, res) => {
             0,
             item.product.quantity - item.quantity
           );
-          await model.findByIdAndUpdate(item.product, {
-            $push: { orderIds: order._id },
-            $set: { quantity: remainingQuantity },
-          });
+          // await model.findByIdAndUpdate(item.product, {
+          //   $push: { orderIds: order._id },
+          //   $set: { quantity: remainingQuantity },
+          // });
+
+          // CHANGE: Update product differently for subscriptions vs. others
+          if (section === "Subscription") {
+            // For subscriptions, update singular orderId
+            await model.findByIdAndUpdate(item.product._id, {
+              $set: { orderId: order._id, quantity: remainingQuantity },
+            });
+          } else {
+            // For Rental and SecondHand, push into orderIds array
+            await model.findByIdAndUpdate(item.product._id, {
+              $push: { orderIds: order._id },
+              $set: { quantity: remainingQuantity },
+            });
+          }
 
           console.log(`Buyer updated for product ${item.product}`);
 

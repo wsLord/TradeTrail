@@ -571,30 +571,26 @@
           <a href="/profile/subscription/<%= product._id %>" style="text-decoration: none; color: #007bff;">
             <h4>Platform: <%= product.platform_name %></h4>
             
-            <% if (product.orderIds && product.orderIds.length > 0) { %>
-              <!-- <h4>Buyers:</h4> -->
-              <ul>
-                <% product.orderIds.forEach(order => { %>
-                  <% if (order.buyer) { %>
-                    <li>
-                      <p>Buyer: <%= order.buyer.fullName %></p>
-                      <% if (order.quantity) { %>
-                        <p>Quantity: <%= order.quantity %></p>
-                      <% } %>
-                      <% if (order.otp) { %>
-                        <p>OTP: <%= order.otp %></p>
-                      <% } else { %>
-                        <p>OTP: Not generated yet</p>
-                      <% } %>
-                    </li>
-                  <% } else { %>
-                    <li>Buyer information not available.</li>
-                  <% } %>
-                <% }); %>
-
+            <% if (product.orderId) { %>
+              <div>
+                <% if (product.orderId.buyer) { %>
+                  <p>Buyer: <%= product.orderId.buyer.fullName %></p>
+                <% } else { %>
+                  <p>Buyer information not available.</p>
+                <% } %>
+                <% if (product.orderId.quantity) { %>
+                  <p>Quantity: <%= product.orderId.quantity %></p>
+                <% } %>
+                <% if (product.orderId.otp) { %>
+                  <p>OTP: Generated</p>
+                <% } else { %>
+                  <p>OTP: Not generated yet</p>
+                <% } %>
+              </div>
             <% } else { %>
               <h4>Not Sold Yet</h4>
             <% } %>
+            
           </a>
         </li>
       <% }); %>

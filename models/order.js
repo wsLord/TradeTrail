@@ -35,6 +35,8 @@ const orderSchema = new Schema({
     type: String, // 6-digit OTP as a string
     required: true
   },
+  paymentTransferred: { type: Boolean, default: false },
+  transactionId: String
 });
 
 // Indexing for faster queries
