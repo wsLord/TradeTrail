@@ -3,6 +3,7 @@ const User = require("../models/userModel");
 const Product = require("../models/product");
 const RentalProduct = require("../models/rentalProduct");
 const BidProduct = require("../models/bidproduct");
+const BidProducts=require("../models/BidProducts");
 const axios = require("axios");
 
 const Payment = require("../models/payment");
@@ -564,16 +565,18 @@ exports.getSubscriptionAuctionDetails = async (req, res) => {
       req.flash("error", "Subscription not found.");
       return res.redirect("/profile");
     }
+    const bids = await BidProducts.find({ auction: productId }).populate(
+      "bidder"
+    );
 
     // Separate monetary and product bids
     const monetaryBids = product.bids.filter(bid => bid.bidAmount);
     const productBids = product.bids.filter(bid => bid.product);
 
     res.render("subscription-auction-details", {
-      product: product,
-      monetaryBids: monetaryBids,
-      productBids: productBids,
-      user: req.user
+      product,
+      monetaryBids,
+      productBids,
     });
 
   } catch (err) {

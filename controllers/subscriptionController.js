@@ -224,7 +224,7 @@ exports.postAddBidProduct = async (req, res, next) => {
       return res.status(401).json({ message: "Unauthorized: Please log in" });
   }
   const prodId = req.params.productId;
-  const { title, imageUrl, description, location, bidAmount } = req.body;
+  const { title, imageUrl, description, location, bidAmount, paymentId } = req.body;
 
   // Check for existing bid
   const existingBid = await BidProducts.findOne({
@@ -282,6 +282,7 @@ exports.postAddBidProduct = async (req, res, next) => {
       description: description || null,
       location: location || null,
       bidAmount: bidAmount ? Number(bidAmount) : null,
+      paymentId,
       bidder: req.user._id,
       auction: prodId,
   });

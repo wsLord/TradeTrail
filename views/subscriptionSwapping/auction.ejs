@@ -301,7 +301,7 @@
       <% 
          // Check if the current user already placed a bid on this product.
          const userBid = product.bids.find(bid => String(bid.bidder._id) === String(user._id));
-         const minBidValue = monetaryBidsCount === 0 ? product.min_price : maxBid + 100;
+         const minBidValue = monetaryBidsCount === 0 ? product.min_price : maxBid+100;
       %>
       <% if (!userBid) { %>
         <!-- Bid form shown only if the user hasn't placed a bid -->
@@ -535,70 +535,156 @@ if (distance <= 0) {
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     
   <script>
+// function makePayment(event) {
+//   event.preventDefault(); // Prevent default form submission
+
+//   const inputElement = document.getElementById("bidAmount");
+//   const maxBidElement = document.getElementById("max-bid");
+
+//   if (!inputElement || !maxBidElement) {
+//     console.error("Required input fields not found!");
+//     return;
+//   }
+
+//   const amount = parseFloat(inputElement.value.trim());
+//   const maxBidAmount = parseFloat(maxBidElement.innerText.trim());
+//   const minBidAmount = maxBidAmount + 100;
+
+//   if (isNaN(amount) || amount <= 0) {
+//     alert("Please enter a valid bid amount.");
+//     return;
+//   }
+
+//   if (amount < minBidAmount) {
+//     alert(`Your bid must be at least ₹${minBidAmount}.`);
+//     return;
+//   }
+
+//   const productId = "<%= product._id %>"; // Get productId from EJS
+
+//   fetch("/subscription/api/payment/makePayment", {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify({ amount: amount * 100, productId }), // Include productId
+//   })
+//   .then(response => response.json())
+//   .then(data => {
+//     if (data.success) {
+//       const options = {
+//         ...data.options,
+//         handler: function (response) {
+//           // Store payment_id in a hidden input field
+//           let paymentInput = document.getElementById("paymentId");
+//           if (!paymentInput) {
+//             paymentInput = document.createElement("input");
+//             paymentInput.type = "hidden";
+//             paymentInput.name = "paymentId";
+//             paymentInput.id = "paymentId";
+//             document.getElementById("bidForm").appendChild(paymentInput);
+//           }
+//           paymentInput.value = response.razorpay_payment_id;
+
+//           // Submit the form automatically
+//           console.log("this is in form",paymentInput.value);
+//           document.getElementById("bidForm").submit();
+//         },
+//       };
+
+//       const rzp = new Razorpay(options);
+//       rzp.open();
+//     } else {
+//       alert("Payment initialization failed");
+//     }
+//   })
+//   .catch(() => alert("Failed to create order"));
+// }
+
+
 function makePayment(event) {
-  event.preventDefault(); // Prevent default form submission
 
-  const inputElement = document.getElementById("bidAmount");
-  const maxBidElement = document.getElementById("max-bid");
+const inputElement = document.getElementById("bidAmount");
+const maxBidElement = document.getElementById("max-bid");
+console.log(inputElement);
 
-  if (!inputElement || !maxBidElement) {
-    console.error("Required input fields not found!");
-    return;
-  }
-
-  const amount = parseFloat(inputElement.value.trim());
-  const maxBidAmount = parseFloat(maxBidElement.innerText.trim());
-  const minBidAmount = maxBidAmount + 100;
-
-  if (isNaN(amount) || amount <= 0) {
-    alert("Please enter a valid bid amount.");
-    return;
-  }
-
-  if (amount < minBidAmount) {
-    alert(`Your bid must be at least ₹${minBidAmount}.`);
-    return;
-  }
-
-  const productId = "<%= product._id %>"; // Get productId from EJS
-
-  fetch("/subscription/api/payment/makePayment", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ amount: amount * 100, productId }), // Include productId
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      const options = {
-        ...data.options,
-        handler: function (response) {
-          // Store payment_id in a hidden input field
-          let paymentInput = document.getElementById("paymentId");
-          if (!paymentInput) {
-            paymentInput = document.createElement("input");
-            paymentInput.type = "hidden";
-            paymentInput.name = "paymentId";
-            paymentInput.id = "paymentId";
-            document.getElementById("bidForm").appendChild(paymentInput);
-          }
-          paymentInput.value = response.razorpay_payment_id;
-
-          // Submit the form automatically
-          console.log("this is in form",paymentInput.value);
-          document.getElementById("bidForm").submit();
-        },
-      };
-
-      const rzp = new Razorpay(options);
-      rzp.open();
-    } else {
-      alert("Payment initialization failed");
-    }
-  })
-  .catch(() => alert("Failed to create order"));
+if (!inputElement || !maxBidElement) {
+  console.error("Required input fields not found!");
+  return;
 }
 
+const amount = parseFloat(inputElement.value.trim());
+const maxBidAmount = parseFloat(maxBidElement.innerText.trim());
+const minBidAmount = <%= monetaryBidsCount === 0 ? maxBid : maxBid + 100 %>;
+
+
+
+if (isNaN(amount) || amount <= 0) {
+  alert("Please enter a valid bid amount.");
+  return;
+}
+
+if (amount < minBidAmount) {
+  alert(`Your bid must be at least ₹${minBidAmount}.`);
+  return;
+}
+
+const productId = "<%= product._id %>"; // Get productId from EJS
+
+fetch("/subscription/api/payment/makePayment", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ amount: amount * 100, productId }), // Include productId
+})
+.then(response => response.json())
+.then(data => {
+  if (data.success) {
+    const options = {
+      ...data.options,
+      handler: function (response) {
+        verifyPayment(response, amount, productId); // Pass productId
+      },
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.open();
+  } else {
+    alert("Payment initialization failed");
+  }
+})
+.catch(() => alert("Failed to create order"));
+}
+
+// function verifyPayment(response, amount, productId) {
+//   fetch("/subscription/api/payment/verifyPayment", {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify({ ...response, amount, productId }), // Send productId
+//   })
+//   .then(res => res.json())
+//   .then(data => {
+//     if (data.success) {
+//       alert(`Payment successful with Payment ID: ${response.razorpay_payment_id}! Your bid has been placed.`);
+//       // Store the payment ID temporarily in session storage
+//       sessionStorage.setItem("paymentId", response.razorpay_payment_id);
+
+//       // Inject payment ID into the hidden input field
+//       const paymentInput = document.createElement("input");
+//       paymentInput.type = "hidden";
+//       paymentInput.name = "paymentId";
+//       paymentInput.value = response.razorpay_payment_id;
+//       document.getElementById("bidForm").appendChild(paymentInput);
+
+//       // Submit the form
+//       document.getElementById('bidForm').submit();
+//       // window.location.href = data.redirectUrl;
+//     } else {
+//       alert("Payment verification failed.");
+//     }
+//   })
+//   .catch(error => {
+//     console.error("Error verifying payment:", error);
+//     alert("Error verifying payment.");
+//   });
+// }
 function verifyPayment(response, amount, productId) {
   fetch("/subscription/api/payment/verifyPayment", {
     method: "POST",
@@ -631,6 +717,7 @@ function verifyPayment(response, amount, productId) {
     alert("Error verifying payment.");
   });
 }
+  
   
   // Razorpay refund function based on their API
   function initiateRazorpayRefund(event, amount) {

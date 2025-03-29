@@ -14,6 +14,8 @@ const bidProductsSchema = Schema({
         ref: "Ott",
         required: true,
     },
+    createdAt: { type: Date, default: Date.now },
+  paymentId:{type: String}
 });
 
 bidProductsSchema.pre("save", function(next) {

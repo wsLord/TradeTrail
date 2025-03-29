@@ -579,7 +579,7 @@ if (distance <= 0) {
 
   const amount = parseFloat(inputElement.value.trim());
   const maxBidAmount = parseFloat(maxBidElement.innerText.trim());
-  const minBidAmount = maxBidAmount + 100;
+  const minBidAmount = <%= monetaryBidsCount === 0 ? maxBid : maxBid + 100 %>;
 
   if (isNaN(amount) || amount <= 0) {
     alert("Please enter a valid bid amount.");
