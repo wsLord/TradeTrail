@@ -5,6 +5,7 @@ const { generateToken } = require("../lib/utils");
 const { sendLoginNotification } = require('../services/emailService');
 const { sendVerificationEmail } = require("../services/emailService");
 const dns = require('dns').promises;
+const { sendPasswordResetEmail, sendPasswordResetConfirmation } = require("../services/emailService");
 
 
 const signup = async (req, res) => {
@@ -208,4 +209,76 @@ const logout = (req, res) => {
   }
 };
 
-module.exports = { signup, login, checkAuth, resendVerificationEmail, logout };
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "If that email exists, we'll send a reset link." });
+    }
+
+    if (!user.isVerified) {
+      return res.status(400).json({ 
+        message: "Please verify your email before resetting password",
+        shouldResend: true,
+        email: user.email
+      });
+    }
+
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    const resetExpires = Date.now() + 3600000; // 1 hour
+
+    user.resetToken = resetToken;
+    user.resetExpires = resetExpires;
+    await user.save();
+
+    await sendPasswordResetEmail(user.email, resetToken);
+    res.status(200).json({ message: "Password reset email sent" });
+  } catch (error) {
+    console.error("Error in forgotPassword:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  try {
+    const user = await User.findOne({
+      resetToken: token,
+      resetExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
+    user.resetToken = undefined;
+    user.resetExpires = undefined;
+    await user.save();
+
+    await sendPasswordResetConfirmation(user.email, user.fullName);
+    res.status(200).json({ message: "Password reset successful" });
+  } catch (error) {
+    console.error("Error in resetPassword:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+module.exports = { 
+  signup, 
+  login, 
+  checkAuth, 
+  resendVerificationEmail, 
+  logout,
+  forgotPassword, 
+  resetPassword   
+};

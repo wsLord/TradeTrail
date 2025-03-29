@@ -125,3 +125,29 @@ exports.sendOtpEmail = async (email, otp) => {
     console.error('Error sending OTP email:', error);
   }
 };
+
+exports.sendPasswordResetEmail = async (email, token) => {
+  const resetUrl = `${process.env.BASE_URL}/api/auth/reset-password/${token}`;
+  
+  await transporter.sendMail({
+    to: email,
+    subject: 'Password Reset Request',
+    html: `
+      <p>You requested a password reset. Click the link below to reset your password:</p>
+      <a href="${resetUrl}">${resetUrl}</a>
+      <p>This link expires in 1 hour.</p>
+    `
+  });
+};
+
+exports.sendPasswordResetConfirmation = async (email, name) => {
+  await transporter.sendMail({
+    to: email,
+    subject: 'Password Reset Successful',
+    html: `
+      <p>Hi ${name},</p>
+      <p>Your password has been successfully reset.</p>
+      <p>If you didn't make this change, please contact us immediately.</p>
+    `
+  });
+};

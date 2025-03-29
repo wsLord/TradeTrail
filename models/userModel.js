@@ -12,6 +12,8 @@ const userSchema = new mongoose.Schema({
   city: String,
   state: String,
   country: String,
+  resetToken: String,
+  resetExpires: Date,
   phone: String,
   rating: { type: Number, default: 4.5 },
   badges: { 

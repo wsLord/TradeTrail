@@ -1,5 +1,5 @@
 const express = require("express");
-const { signup, login, checkAuth, resendVerificationEmail, logout } = require("../controllers/authController");
+const { signup, login, checkAuth, resendVerificationEmail, logout, forgotPassword, resetPassword  } = require("../controllers/authController");
 const { protectRoute } = require("../middleware/authMiddleware");
 const User = require("../models/userModel"); 
 const { sendWelcomeEmail } = require("../services/emailService");
@@ -175,6 +175,19 @@ router.get('/facebook/callback', async (req, res) => {
     res.redirect('/api/auth/login?error=Facebook+login+failed');
   }
 });
+
+// Forgot Password Routes
+router.get('/forgot-password', (req, res) => {
+  res.render('login-signup/forgot-password');
+});
+
+router.post('/forgot-password', forgotPassword);
+
+router.get('/reset-password/:token', (req, res) => {
+  res.render('login-signup/reset-password', { token: req.params.token });
+});
+
+router.post('/reset-password/:token', resetPassword);
 
 
 module.exports = router;
