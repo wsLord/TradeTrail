@@ -279,7 +279,7 @@
     <% const winningBid = product.bids.find(bid => bid.bidder._id.toString() === product.winner._id.toString()); %>
     
     <% if (winningBid?.bidAmount !== undefined) { %>
-      <p>Winning Bid: $<%= winningBid.bidAmount %></p>
+      <p>Winning Bid: ₹<%= winningBid.bidAmount %></p>
     <% } else { %>
       <p>Winner's Product: <%= winningBid?.title || 'N/A' %></p>
     <% } %>
@@ -580,6 +580,7 @@ function makePayment(event) {
 
   const amount = parseFloat(inputElement.value.trim());
   const maxBidAmount = parseFloat(maxBidElement.innerText.trim());
+
   const productMinPrice = parseFloat(minBidElement.innerText.trim());
 
   // Calculate the minimum bid amount:
@@ -591,6 +592,7 @@ function makePayment(event) {
   } else {
     minBidAmount = maxBidAmount + 100;
   }
+
 
   if (isNaN(amount) || amount <= 0) {
     alert("Please enter a valid bid amount.");

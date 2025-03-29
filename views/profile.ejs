@@ -9,6 +9,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/rentalStyles.css">
   <link rel="icon" type="image/png" href="/assets/logo2.png">
   <style>
     body {
@@ -46,7 +47,6 @@
       color: #2c3e50;
       text-align: center;
       width: 100%;
-      position: relative;
     }
 
     h3::after {
@@ -72,7 +72,7 @@
     }
 
     .edit-btn {
-      background: linear-gradient(135deg, #3E6B48, #2d5035);
+      background: linear-gradient(135deg, #44a559, #3c6d47);
       color: white;
       padding: 12px 35px;
       border: none;
@@ -144,7 +144,7 @@
       display: flex;
       gap: 20px;
       flex-wrap: wrap;
-      justify-content: center;
+      justify-content: space-evenly;
       padding: 20px 0;
     }
 
@@ -153,7 +153,6 @@
       height: 180px;
       object-fit: cover;
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       transition: transform 0.2s ease;
     }
 
@@ -172,15 +171,13 @@
     }
 
     .profile-pic-section {
-      position: relative;
       margin-left: 30px;
     }
 
     .upload-overlay {
-      position: absolute;
       bottom: 15px;
       right: 15px;
-      background: rgba(255, 255, 255, 0.95);
+      background: #e6efdf;
       padding: 8px 15px;
       border-radius: 25px;
       font-size: 14px;
@@ -190,10 +187,12 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      margin-top: 10px;
+      z-index: 1;
     }
 
     .upload-overlay:hover {
-      background: white;
+      background: #c7ddb5;
       transform: scale(1.05);
     }
 
@@ -221,12 +220,41 @@
       color: #2c3e50;
     }
 
+    .auction-products-card h4,
+    .rental-products-card h4,
+    .direct-products-card h4,
+    .subscription-products-card h4 {
+      background: linear-gradient(135deg, #137c73, #074641);
+      color: white;
+      padding: 12px 35px;
+      border-radius: 30px;
+      font-size: 20px;
+      letter-spacing: 0.6px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(62, 107, 72, 0.2);
+      width: fit-content;
+      margin: 15px auto 20px;
+    }
+
+    .auction-products-card h4:hover,
+    .rental-products-card h4:hover,
+    .direct-products-card h4:hover,
+    .subscription-products-card h4:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(62, 107, 72, 0.3);
+    }
+
     .auction-products-card ul,
     .rental-products-card ul,
     .direct-products-card ul,
     .subscription-products-card ul {
       list-style: none;
       padding: 0;
+      margin: auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20%;
     }
 
     .auction-products-card li,
@@ -250,6 +278,17 @@
     .subscription-products-card li a:hover {
       color: #0056b3;
     }
+
+
+    .rental-products-card li ul, 
+    .direct-products-card li li, 
+    .subscription-products-card li div{
+      background-color: #13a89c24;
+      padding: 10px;
+      border-radius: 4%;
+      width: 100%;
+    }
+
 
     @media (max-width: 768px) {
       .auction-products-card,
@@ -292,12 +331,12 @@
       }
     }
     .profile-actions {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-top: 20px;
-}
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin-top: 20px;
+    }
 
   </style>
 </head>
@@ -319,9 +358,9 @@
           <p><strong>Phone:</strong> <span id="phoneText"><%= user.phone || 'Not specified' %></span></p>
           <div class="profile-actions">
             <button class="edit-btn" onclick="toggleEditMode()">Edit Profile</button>
-            <button class="edit-btn" onclick="logout()" style="background: #e74c3c;">Logout</button>
+            <button class="edit-btn" onclick="logout()" style="background: linear-gradient(135deg, #f46c43, #b52b27)">Logout</button>
             <% if (user.password) { %>
-              <button class="edit-btn" data-toggle="modal" data-target="#changePasswordModal" style="background: #3498db;">Change Password</button>
+              <button class="edit-btn" data-toggle="modal" data-target="#changePasswordModal" style="background: linear-gradient(135deg, #3498db, #105c8f);">Change Password</button>
             <% } %>
             
           </div>
@@ -405,7 +444,7 @@
     <ul>
       <% secondHandAuction.forEach(product => { %>
         <li>
-          <a href="/profile/auction/<%= product._id %>" style="text-decoration: none; color: #007bff;">
+          <a href="/profile/auction/<%= product._id %>" style="linear-gradient(135deg, #137c73, #074641)">
             <h4>Product: <%= product.title %></h4>
             <% if (product.orderIds && product.orderIds.length > 0) { %>
               <!-- <h4>Buyers:</h4> -->
@@ -427,7 +466,7 @@
                 <% }); %>
               </ul>
             <% } else { %>
-              <h4>No Bids Yet</h4>
+              <p>No Bids Yet</p>
             <% } %>
           </a>
         </li>
@@ -467,7 +506,7 @@
                 <% }); %>
               </ul>
             <% } else { %>
-              <h4>No Bids Yet</h4>
+              <p>No Bids Yet</p>
             <% } %>
           </a>
         </li>
@@ -506,7 +545,7 @@
                     <% }); %>
                   </ul>
                 <% } else { %>
-                  <h4>Not Sold Yet</h4>
+                  <p>Not Sold Yet</p>
                 <% } %>
               </a>
             </li>
@@ -549,7 +588,7 @@
                 <% }); %>
               </ul>
             <% } else { %>
-              <h4>Not Sold Yet</h4>
+              <p>Not Sold Yet</p>
             <% } %>
           </a>
         </li>
@@ -588,7 +627,7 @@
                 <% } %>
               </div>
             <% } else { %>
-              <h4>Not Sold Yet</h4>
+              <p>Not Sold Yet</p>
             <% } %>
             
           </a>

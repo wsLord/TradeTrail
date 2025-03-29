@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="/css/chatbot.css">
   <link rel="icon" type="image/png" href="/assets/logo2.png">
   <style>
+
     /* Verification badges */
     .verified-badge {
       color: #155724;
@@ -122,6 +123,7 @@
         right: -100%;
       }
     }
+
   </style>
 </head>
 <body>
@@ -167,7 +169,7 @@
           <div class="filter-group">
             <input type="number" name="minPrice" placeholder="Min" 
                   value="<%= minPrice %>" step="0.01">
-            <span>-</span>
+            <span></span>
             <input type="number" name="maxPrice" placeholder="Max" 
                   value="<%= maxPrice %>" step="0.01">
           </div>
@@ -204,14 +206,12 @@
       </div>
 
         <div class="filter-actions">
-          <button type="submit" class="filter-button">Apply Filters</button>
+          <button type="submit" class="filter-button" style="background: linear-gradient(135deg, #469e49 0%, #275d28 100%); margin-top: 20px;">Apply Filters</button>
           <button type="button" class="clear-button" onclick="window.location.href='/subscription/buy'">Clear All</button>
         </div>
       </form>
     </div>
 
-    <button type="button" onclick="window.location.href='/subscription/sell'">POST A SUBSCRIPTION!</button>
-    
     <% if (prods.length > 0) { %>
       <div class="rental-list">
 
