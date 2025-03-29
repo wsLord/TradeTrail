@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/forms.css">
   <link rel="stylesheet" href="/css/navigation.css">
+  <link rel="stylesheet" href="/css/rentalStyles.css">
   <link rel="stylesheet" href="/css/auction.css">
   <style>
 
@@ -57,60 +58,66 @@
       border-radius: 5px;
     }
 
+    section{
+      text-align: left;
+    }
 
   </style>
 
 </head>
 <body>
-  <header>
+  <main>
+    <br>
+  <section>
     <h1>Auction Details for <%= product.title %></h1>
     <p>Seller: <%= product.seller.fullName %></p>
-    <p>Minimum Price: $<%= product.min_price %></p>
-  </header>
+    <p>Minimum Price: ₹<%= product.min_price %></p>
+  </section>
   
 <!-- Monetary Bids Section -->
-<h2>Monetary Bids</h2>
-<% if (monetaryBids.length > 0) { %>
-  <table>
-    <thead>
-      <tr>
-        <th>Bidder</th>
-        <th>Amount</th>
-        <th>paymentId</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% monetaryBids.forEach(bid => { %>
+<section>
+  <h2>Monetary Bids</h2>
+  <% if (monetaryBids.length > 0) { %>
+    <table>
+      <thead>
         <tr>
-          <td><%= bid.bidder.fullName %></td>
-          <td>$<%= bid.bidAmount %></td>
-          <td> <%=bid.paymentId %></td>
-          <td>
-            <form id="refundForm0" action="/profile/accept-bid" method="POST">
-              <input type="hidden" name="bidId" value="<%= bid._id %>">
-              <button 
-                    type="button" 
-                    class="<%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled-button' : '' %>" 
-                    <%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled' : '' %>
-                    onclick="handleBidAcceptance(event, '<%= bid.paymentId %>', '<%= bid.bidAmount %>')"
-                  >
-
-                    <%= product.winner ? 'Bid Accepted' : (new Date() < new Date(product.endDate) ? 'Auction Ongoing' : 'Accept') %>
-            </button>
-            </form>
-          </td>
-          
-          
+          <th>Bidder</th>
+          <th>Amount</th>
+          <th>paymentId</th>
+          <th>Action</th>
         </tr>
-      <% }); %>
-    </tbody>
-  </table>
-<% } else { %>
-  <div class="no-bids">No monetary bids yet.</div>
-<% } %>
+      </thead>
+      <tbody>
+        <% monetaryBids.forEach(bid => { %>
+          <tr>
+            <td><%= bid.bidder.fullName %></td>
+            <td>₹<%= bid.bidAmount %></td>
+            <td> <%=bid.paymentId %></td>
+            <td>
+              <form id="refundForm0" action="/profile/accept-bid" method="POST">
+                <input type="hidden" name="bidId" value="<%= bid._id %>">
+                <button 
+                      type="button" 
+                      class="<%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled-button' : '' %>" 
+                      <%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled' : '' %>
+                      onclick="handleBidAcceptance(event, '<%= bid.paymentId %>', '<%= bid.bidAmount %>')"
+                    >
+
+                      <%= product.winner ? 'Bid Accepted' : (new Date() < new Date(product.endDate) ? 'Auction Ongoing' : 'Accept') %>
+              </button>
+              </form>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  <% } else { %>
+    <div class="no-bids">No monetary bids yet.</div>
+  <% } %>
+</section>
 
   <!-- Product Bids Section -->
+<section>
   <h2>Product Bids</h2>
   <% if (productBids.length > 0) { %>
     <table>
@@ -154,6 +161,7 @@
   <% } else { %>
     <div class="no-bids">No product bids yet.</div>
   <% } %>
+</section>
 
     <button onclick="window.location.href='/profile'" id="back-btn">Back to Profile</button>
 

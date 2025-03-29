@@ -279,7 +279,7 @@
     <% const winningBid = product.bids.find(bid => bid.bidder._id.toString() === product.winner._id.toString()); %>
     
     <% if (winningBid?.bidAmount !== undefined) { %>
-      <p>Winning Bid: $<%= winningBid.bidAmount %></p>
+      <p>Winning Bid: ₹<%= winningBid.bidAmount %></p>
     <% } else { %>
       <p>Winner's Product: <%= winningBid?.title || 'N/A' %></p>
     <% } %>

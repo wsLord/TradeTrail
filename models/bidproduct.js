@@ -11,7 +11,7 @@ const BidProduct = mongoose.models.BidProduct || mongoose.model("BidProduct", ne
   bidder: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   auction: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
   createdAt: { type: Date, default: Date.now },
-  paymentId:{type: String}
+  paymentId:{type: String, default: null }
 }));
 
 // Validation to ensure either a bid amount or title is provided

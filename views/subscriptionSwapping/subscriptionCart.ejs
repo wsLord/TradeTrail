@@ -49,14 +49,14 @@
                   <% } %>
                 </td>
                 <td><%= item.product.platform_name %></td>
-                <td>$<%= item.product.price.toFixed(2) %></td>
+                <td>₹<%= item.product.price.toFixed(2) %></td>
                 <td>
                   <form action="/subscription/update-cart/<%= item.product._id %>" method="POST">
                     <input type="number" name="quantity" value="<%= item.quantity %>" min="1" max="<%= item.product.quantity %>" class="quantity-input">
                     <button type="submit">Update</button>
                   </form>
                 </td>
-                <td>$<%= totalPrice.toFixed(2) %></td>
+                <td>₹<%= totalPrice.toFixed(2) %></td>
                 <td>
                   <form action="/subscription/cart/delete-item/<%= item.product._id %>" method="POST">
                     <button type="submit" class="delete-button" aria-label="Remove Item" style="background-color: black; color: white;">Delete</button>
@@ -72,7 +72,7 @@
         </tbody>
       </table>
       <div class="cart-total">
-        Grand Total: $<%= grandTotal.toFixed(2) %>
+        Grand Total: ₹<%= grandTotal.toFixed(2) %>
       </div>
       <div style="clear: both;"></div>
       <button class="checkout-button">Proceed to Checkout</button>

@@ -281,6 +281,7 @@ body {
   flex-direction: column;
   gap: 1rem;
   margin-bottom: 2rem;
+  margin-top: 50px;
   align-items: center;
 }
 
@@ -302,7 +303,7 @@ body {
 
 .search-form button {
   padding: 0.75rem 1.5rem;
-  background: #087024;
+  background: linear-gradient(135deg, #4caf50 0%, #216224 100%);
   color: white;
   border: none;
   border-radius: 30px;
@@ -314,11 +315,11 @@ body {
 }
 
 .search-form button:hover {
-  background: #2c8d12;
+  background: #1a5b08;
 }
 
 .filter-toggle {
-  background: #087024;
+  background: linear-gradient(135deg, #4caf50 0%, #216224 100%);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -331,7 +332,7 @@ body {
 }
 
 .filter-toggle:hover {
-  background: #2c8d12;
+  background: #1a5b08;
 }
 
 .search-icon {
@@ -351,7 +352,7 @@ body {
 }
 
 .clear-button {
-  background: #dc3545;
+  background: linear-gradient(135deg, #f46c43, #b52b27);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -819,7 +820,7 @@ body {
         padding: 5px 10px;
         border-radius: 5px;
         white-space: nowrap;
-        font-size: 12px;
+        font-size: 16px;
         text-align: center;
         opacity: 1;
         visibility: visible;
@@ -832,4 +833,133 @@ body {
         transition: opacity 0.3s ease-in-out;
     }
     
+
+    /* Verification badges */
+    .verified-badge {
+      color: #155724;
+      background-color: #d4edda;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.8em;
+      margin-left: 10px;
+      display: inline-block;
+    }
+    .pending-badge {
+      color: #856404;
+      background-color: #fff3cd;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.8em;
+      margin-left: 10px;
+      display: inline-block;
+    }
+    /* Verification button */
+    .verify-btn {
+        background: linear-gradient(135deg, #44a559, #3c6d47);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-size: 0.9em;
+        margin-top: 10px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(76, 175, 80, 0.2);
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+
+    .verify-btn:hover {
+        background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 8px rgba(76, 175, 80, 0.3);
+        text-decoration: none;
+    }
+
+    .verify-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+    }
+
+    /* Add icon using Font Awesome */
+    .verify-btn i {
+        font-size: 1.1em;
+    }
+
+    .filter-sidebar {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100%;
+      background: #F5F8F2;
+      box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      transition: right 0.3s ease;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .filter-sidebar.active {
+      right: 0;
+    }
+
+    .filter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .filter-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .filter-section {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    .sidebar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 999;
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .filter-sidebar {
+        width: 100%;
+        right: -100%;
+      }
+    }
+
+
+    .filter-group {
+      display: grid;
+      align-items: center;
+      margin: auto;
+    }
+    
+    .filter-group input, .filter-group select {
+      width: 100%; 
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      text-align: center;
+      font-size: 14px;
+      margin: 0 auto 10px;
+    }
 
