@@ -185,6 +185,7 @@ exports.acceptBid = async (req, res) => {
     // Set the winner and update status to completed
     product.winner = bid.bidder._id;
     product.auctionStatus = "completed";
+    product.endDate = Date.now(); // Add this line to close auction immediately
     await product.save();
 
     // Process refunds for other monetary bids

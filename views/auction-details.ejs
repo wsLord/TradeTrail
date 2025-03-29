@@ -90,14 +90,13 @@
             <form id="refundForm0" action="/profile/accept-bid" method="POST">
               <input type="hidden" name="bidId" value="<%= bid._id %>">
               <button 
-                    type="button" 
-                    class="<%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled-button' : '' %>" 
-                    <%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled' : '' %>
-                    onclick="handleBidAcceptance(event, '<%= bid.paymentId %>', '<%= bid.bidAmount %>')"
-                  >
-
-                    <%= product.winner ? 'Bid Accepted' : (new Date() < new Date(product.endDate) ? 'Auction Ongoing' : 'Accept') %>
-            </button>
+                type="button" 
+                class="<%= product.winner ? 'disabled-button' : '' %>" 
+                <%= product.winner ? 'disabled' : '' %>
+                onclick="handleBidAcceptance(event, '<%= bid.paymentId %>', '<%= bid.bidAmount %>')"
+                >
+                <%= product.winner ? 'Bid Accepted' : 'Accept' %>
+                </button>
             </form>
           </td>
           
@@ -133,15 +132,15 @@
             <td>
                 <form action="/profile/accept-bid" method="POST">
                   <input type="hidden" name="bidId" value="<%= bid._id %>">
-                  <button 
-                  type="button" 
-                  class="<%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled-button' : '' %>" 
-                  <%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled' : '' %>
-                  onclick="handleBidAcceptance(event, '<%= bid.paymentId %>', '<%= bid.bidAmount %>')"
+                  <!-- Change both button blocks (monetary and product bids) to: -->
+                <button 
+                type="button" 
+                class="<%= product.winner ? 'disabled-button' : '' %>" 
+                <%= product.winner ? 'disabled' : '' %>
+                onclick="handleBidAcceptance(event, '<%= bid.paymentId %>', '<%= bid.bidAmount %>')"
                 >
-
-                  <%= product.winner ? 'Bid Accepted' : (new Date() < new Date(product.endDate) ? 'Auction Ongoing' : 'Accept') %>
-               </button>
+                <%= product.winner ? 'Bid Accepted' : 'Accept' %>
+                </button>
 
                 </form>
               </td>
@@ -159,20 +158,7 @@
 
     </main>
 </body>
-<!-- JavaScript to Control Button State -->
-<script>
-    const endDate = new Date("<%= product.endDate.toISOString() %>");
-    const currentTime = new Date();
-    
-    if (currentTime < endDate) {
-      document.querySelectorAll('.accept-button').forEach(button => {
-        button.disabled = true;
-        button.textContent = "Auction Ongoing";
-        button.style.backgroundColor = "#ccc";
-        button.style.cursor = "not-allowed";
-      });
-    }
-  </script>
+
   <script>
   const monetaryBids = JSON.parse('<%- JSON.stringify(monetaryBids) %>');
   </script>
