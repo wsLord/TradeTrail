@@ -540,15 +540,26 @@ function makePayment(event) {
 
   const inputElement = document.getElementById("bidAmount");
   const maxBidElement = document.getElementById("max-bid");
+  const minBidElement = document.getElementById("min-bid");
 
-  if (!inputElement || !maxBidElement) {
+  if (!inputElement || !maxBidElement || !minBidElement) {
     console.error("Required input fields not found!");
     return;
   }
 
   const amount = parseFloat(inputElement.value.trim());
   const maxBidAmount = parseFloat(maxBidElement.innerText.trim());
-  const minBidAmount = maxBidAmount + 100;
+  const productMinPrice = parseFloat(minBidElement.innerText.trim());
+
+  // Calculate the minimum bid amount:
+  // If no bid has been placed yet (maxBid equals the product's min price), allow bidding at min price.
+  // Otherwise, require an increment of ₹100.
+  let minBidAmount;
+  if (maxBidAmount === productMinPrice) {
+    minBidAmount = productMinPrice;
+  } else {
+    minBidAmount = maxBidAmount + 100;
+  }
 
   if (isNaN(amount) || amount <= 0) {
     alert("Please enter a valid bid amount.");
@@ -565,39 +576,39 @@ function makePayment(event) {
   fetch("/subscription/api/payment/makePayment", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ amount: amount * 100, productId }), // Include productId
+    body: JSON.stringify({ amount: amount * 100, productId }), // Convert to smallest currency unit (paise)
   })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      const options = {
-        ...data.options,
-        handler: function (response) {
-          // Store payment_id in a hidden input field
-          let paymentInput = document.getElementById("paymentId");
-          if (!paymentInput) {
-            paymentInput = document.createElement("input");
-            paymentInput.type = "hidden";
-            paymentInput.name = "paymentId";
-            paymentInput.id = "paymentId";
-            document.getElementById("bidForm").appendChild(paymentInput);
-          }
-          paymentInput.value = response.razorpay_payment_id;
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        const options = {
+          ...data.options,
+          handler: function (response) {
+            // Store payment_id in a hidden input field
+            let paymentInput = document.getElementById("paymentId");
+            if (!paymentInput) {
+              paymentInput = document.createElement("input");
+              paymentInput.type = "hidden";
+              paymentInput.name = "paymentId";
+              paymentInput.id = "paymentId";
+              document.getElementById("bidForm").appendChild(paymentInput);
+            }
+            paymentInput.value = response.razorpay_payment_id;
+            console.log("Payment ID stored:", paymentInput.value);
+            // Submit the form automatically
+            document.getElementById("bidForm").submit();
+          },
+        };
 
-          // Submit the form automatically
-          console.log("this is in form",paymentInput.value);
-          document.getElementById("bidForm").submit();
-        },
-      };
-
-      const rzp = new Razorpay(options);
-      rzp.open();
-    } else {
-      alert("Payment initialization failed");
-    }
-  })
-  .catch(() => alert("Failed to create order"));
+        const rzp = new Razorpay(options);
+        rzp.open();
+      } else {
+        alert("Payment initialization failed");
+      }
+    })
+    .catch(() => alert("Failed to create order"));
 }
+
 
 function verifyPayment(response, amount, productId) {
   fetch("/subscription/api/payment/verifyPayment", {

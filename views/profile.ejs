@@ -661,16 +661,21 @@
   try {
     const response = await fetch('/api/auth/logout', { 
       method: 'POST',
-      credentials: 'include' // This is crucial for sending cookies
+      credentials: 'include'
     });
     
+    const result = await response.json();
+    
     if (response.ok) {
+      // Redirect after successful logout response
       window.location.href = '/api/auth/login';
     } else {
-      console.error('Logout failed');
+      console.error('Logout failed:', result.message);
+      alert('Logout failed. Please try again.');
     }
   } catch (error) {
     console.error('Error logging out:', error);
+    alert('Network error. Please check your connection.');
   }
 }
   </script>
