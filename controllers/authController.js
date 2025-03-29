@@ -182,22 +182,26 @@ const checkAuth = (req, res) => {
 };
 
 const logout = (req, res) => {
-  // res.clearCookie("jwt", { httpOnly: true, secure: process.env.NODE_ENV === "production" });
-  req.session.destroy(err =>{
-    console.log(err);
-    res.redirect("/api/auth/login"); // Redirect to login page
-
-  })
   try {
-    res.cookie('jwt', '', {
-      httpOnly: true,
-      expires: new Date(0),
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      path: '/'
+    // Clear session first
+    req.session.destroy(err => {
+      if (err) {
+        console.error('Session destruction error:', err);
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      
+      // Clear cookies after session is destroyed
+      res.clearCookie('connect.sid'); // Clear session cookie
+      res.clearCookie('jwt', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        path: '/'
+      });
+
+      // Send JSON response instead of redirect
+      res.status(200).json({ message: "Logged out successfully" });
     });
-    
-    res.status(200).json({ message: "Logged out successfully" }); // ✅ Send success response
   } catch (error) {
     console.log("Error in logout controller:", error.message);
     res.status(500).json({ message: "Internal server error" });

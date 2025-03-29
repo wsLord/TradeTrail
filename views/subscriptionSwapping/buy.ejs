@@ -11,7 +11,118 @@
   <link rel="stylesheet" href="/css/chatbot.css">
   <link rel="icon" type="image/png" href="/assets/logo2.png">
   <style>
-    
+
+    /* Verification badges */
+    .verified-badge {
+      color: #155724;
+      background-color: #d4edda;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.8em;
+      margin-left: 10px;
+      display: inline-block;
+    }
+    .pending-badge {
+      color: #856404;
+      background-color: #fff3cd;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.8em;
+      margin-left: 10px;
+      display: inline-block;
+    }
+    /* Verification button */
+    .verify-btn {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-size: 0.9em;
+        margin: 5px 0 0 0;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(76, 175, 80, 0.2);
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+
+    .verify-btn:hover {
+        background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 8px rgba(76, 175, 80, 0.3);
+        text-decoration: none;
+    }
+
+    .verify-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+    }
+
+    /* Add icon using Font Awesome */
+    .verify-btn i {
+        font-size: 1.1em;
+    }
+
+    .filter-sidebar {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100%;
+      background: white;
+      box-shadow: -2px 0 8px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      transition: right 0.3s ease;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .filter-sidebar.active {
+      right: 0;
+    }
+
+    .filter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .filter-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .filter-section {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    .sidebar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 999;
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .filter-sidebar {
+        width: 100%;
+        right: -100%;
+      }
+    }
 
   </style>
 </head>
@@ -113,53 +224,61 @@
         </a>
         </div>
 
+        <!-- MODIFIED PRODUCT LOOP START -->
         <% for (let product of prods) { 
-          if (!product.buyer) { %>     
-          
-          <div class="rental-item">
-            <div class="product-card">
-              <div class="card__image">
-                <img src="<%= product.imageUrl %>" alt="<%= product.platform_name %>">
-              </div>
-              <div class="product-info">
-                <h3>
-                  <%= product.platform_name %>
-                  <% if (product.credentialsVerified) { %>
-                    <span class="verified-badge">✓ Verified</span>
-                  <% } else if (product.verificationPending) { %>
-                    <span class="pending-badge">Pending Verification</span>
-                    <% if (user && product.seller && product.seller._id.toString() === user._id.toString()) { %>
-                      <a href="/subscription/verify-credentials?productId=<%= product._id %>" class="verify-btn">
-                        <i class="fas fa-shield-alt"></i>
-                        Verify Now
-                      </a>
+          if (!product.buyer) { 
+            const showProduct = !product.verificationPending || 
+                              (product.verificationPending && 
+                               user && 
+                               product.seller && 
+                               product.seller._id.toString() === user._id.toString()) %>
+            <% if (showProduct) { %>
+              <div class="rental-item">
+                <div class="product-card">
+                  <div class="card__image">
+                    <img src="<%= product.imageUrl %>" alt="<%= product.platform_name %>">
+                  </div>
+                  <div class="product-info">
+                    <h3>
+                      <%= product.platform_name %>
+                      <% if (product.credentialsVerified) { %>
+                        <span class="verified-badge">✓ Verified</span>
+                      <% } else if (product.verificationPending) { %>
+                        <span class="pending-badge">Pending Verification</span>
+                        <% if (user && product.seller && product.seller._id.toString() === user._id.toString()) { %>
+                          <a href="/subscription/verify-credentials?productId=<%= product._id %>" class="verify-btn">
+                            <i class="fas fa-shield-alt"></i>
+                            Verify Now
+                          </a>
+                        <% } %>
+                      <% } %>
+                    </h3>
+                    
+                    <div class="price-group">
+                      <p class="price">Actual Price: ₹<%= product.price %></p>
+                      <% if (product.saleType === 'auction') { %>
+                          <p class="min-price">Auction Starts At: ₹<%= product.min_price %></p>
+                      <% } %>
+                    </div>
+                    <p class="description"><%= product.description %></p>
+                    <% if (product.seller && product.seller.fullName) { %>
+                      <p class="seller"><b>Seller:</b> <%= product.seller.fullName %></p>
                     <% } %>
-                  <% } %>
-                </h3>
-                
-                <div class="price-group">
-                  <p class="price">Actual Price: ₹<%= product.price %></p>
-                  <% if (product.saleType === 'auction') { %>
-                      <p class="min-price">Auction Starts At: ₹<%= product.min_price %></p>
-                  <% } %>
-                </div>
-                <p class="description"><%= product.description %></p>
-                <% if (product.seller && product.seller.fullName) { %>
-                  <p class="seller"><b>Seller:</b> <%= product.seller.fullName %></p>
-                <% } %>
-                <div class="button-group vertical">
-                  <% if (product.saleType === 'direct') { %>
-                    <form action="/subscription/add-to-cart/<%= product._id %>" method="POST">
-                      <button class="add-to-cart-button">Add to Cart</button>
-                    </form>
-                  <% } else { %>
-                    <a href="/subscription/buy/<%= product._id %>" class="btn auction-btn">Auction</a>
-                  <% } %>
+                    <div class="button-group vertical">
+                      <% if (product.saleType === 'direct') { %>
+                        <form action="/subscription/add-to-cart/<%= product._id %>" method="POST">
+                          <button class="add-to-cart-button">Add to Cart</button>
+                        </form>
+                      <% } else { %>
+                        <a href="/subscription/buy/<%= product._id %>" class="btn auction-btn">Auction</a>
+                      <% } %>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            <% } %>
         <% }} %>
+        <!-- MODIFIED PRODUCT LOOP END -->
       </div>
     <% } else { %>
       <h1>No Products Found!</h1>
@@ -178,7 +297,6 @@
       document.getElementById('sidebarOverlay').style.display = 'none';
     }
 
-    // Close sidebar when clicking outside
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.filter-sidebar') && 
           !e.target.closest('.filter-toggle')) {

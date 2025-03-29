@@ -85,6 +85,7 @@
           <th>Amount</th>
           <th>paymentId</th>
           <th>Action</th>
+
         </tr>
       </thead>
       <tbody>
@@ -140,15 +141,15 @@
             <td>
                 <form action="/profile/accept-bid" method="POST">
                   <input type="hidden" name="bidId" value="<%= bid._id %>">
-                  <button 
-                  type="button" 
-                  class="<%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled-button' : '' %>" 
-                  <%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled' : '' %>
-                  onclick="handleBidAcceptance(event, '<%= bid.paymentId %>', '<%= bid.bidAmount %>')"
+                  <!-- Change both button blocks (monetary and product bids) to: -->
+                <button 
+                type="button" 
+                class="<%= product.winner ? 'disabled-button' : '' %>" 
+                <%= product.winner ? 'disabled' : '' %>
+                onclick="handleBidAcceptance(event, '<%= bid.paymentId %>', '<%= bid.bidAmount %>')"
                 >
-
-                  <%= product.winner ? 'Bid Accepted' : (new Date() < new Date(product.endDate) ? 'Auction Ongoing' : 'Accept') %>
-               </button>
+                <%= product.winner ? 'Bid Accepted' : 'Accept' %>
+                </button>
 
                 </form>
               </td>
@@ -165,22 +166,102 @@
 
     <button onclick="window.location.href='/profile'" id="back-btn">Back to Profile</button>
 
+    <!-- Add after winner section -->
+<% if (product.auctionStatus === 'completed' && product.orderIds && product.orderIds.length > 0) { 
+  const order = product.orderIds.find(o => !o.paymentTransferred); %>
+  <% if (order && user._id.equals(product.seller._id)) { %>
+    <section class="otp-verification-card">
+      <h3>Complete Payment Transfer</h3>
+      <div class="otp-instructions">
+        <p>Ask the buyer for the OTP sent to their email to complete the transaction</p>
+      </div>
+      <div class="otp-input-group">
+        <input type="text" id="upiInput" class="otp-field" 
+              placeholder="Your UPI ID (e.g. name@bank)" 
+              pattern=".+@.+\..+"
+              required>
+        <input type="text" id="otpInput" class="otp-field" 
+              placeholder="Enter buyer's OTP" 
+              maxlength="6"
+              required>
+        <button class="verify-otp-btn" 
+                onclick="verifyAuctionOTP('<%= product._id %>')">
+          Verify & Transfer
+        </button>
+      </div>
+      <div id="otpResult" class="otp-result"></div>
+    </section>
+
+    <script>
+    async function verifyAuctionOTP(productId) {
+      const upi = document.getElementById('upiInput').value;
+      const otp = document.getElementById('otpInput').value;
+      const resultDiv = document.getElementById('otpResult');
+      
+      if (!/^[\w.-]+@[\w]+/.test(upi)) {
+        resultDiv.innerHTML = '❌ Invalid UPI ID format';
+        resultDiv.className = 'otp-result error';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            productId: productId,
+            otp: otp,
+            upiId: upi,
+            productType: 'secondhand'
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          resultDiv.innerHTML = `
+            <div class="success-message">
+              ✅ ${data.message}<br>
+              Transaction ID: ${data.transactionId}
+            </div>
+          `;
+          resultDiv.className = 'otp-result success';
+          setTimeout(() => location.reload(), 2000);
+        } else {
+          resultDiv.innerHTML = `❌ ${data.message}`;
+          resultDiv.className = 'otp-result error';
+        }
+      } catch (error) {
+        resultDiv.innerHTML = '⚠️ Network error - please try again';
+        resultDiv.className = 'otp-result error';
+      }
+    }
+    </script>
+  <% } %>
+<% } %>
+
+<!-- Payment status display -->
+<% if (product.orderIds && product.orderIds.length > 0) { %>
+  <% product.orderIds.forEach(order => { %>
+    <% if (order.paymentTransferred) { %>
+      <div class="payment-status success">
+        ✓ Payment completed (TXID: <%= order.transactionId %>)
+      </div>
+    <% } else if (user._id.equals(product.seller._id)) { %>
+      <div class="payment-status pending">
+        ⏳ Waiting for OTP verification from buyer
+      </div>
+    <% } else if (user._id.equals(order.buyer._id)) { %>
+      <div class="payment-status info">
+        ℹ️ OTP sent to your email - please share with seller
+      </div>
+    <% } %>
+  <% }) %>
+<% } %>
+
     </main>
 </body>
-<!-- JavaScript to Control Button State -->
-<script>
-    const endDate = new Date("<%= product.endDate.toISOString() %>");
-    const currentTime = new Date();
-    
-    if (currentTime < endDate) {
-      document.querySelectorAll('.accept-button').forEach(button => {
-        button.disabled = true;
-        button.textContent = "Auction Ongoing";
-        button.style.backgroundColor = "#ccc";
-        button.style.cursor = "not-allowed";
-      });
-    }
-  </script>
+
   <script>
   const monetaryBids = JSON.parse('<%- JSON.stringify(monetaryBids) %>');
   </script>
