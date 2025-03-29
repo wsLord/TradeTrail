@@ -11,6 +11,7 @@ const SubscriptionDirectProduct = require("../models/ott");
 const RentalBooking = require("../models/rentalBooking");
 const Subscription = require("../models/ott");
 const Order = require("../models/order");
+const emailService = require("../services/emailService");
 
 const bcrypt = require("bcryptjs");
 
@@ -154,6 +155,7 @@ exports.getAuctionDetails = async (req, res) => {
       product,
       monetaryBids,
       productBids,
+      user: req.user
       // Pass the payment IDs to the template
     });
   } catch (error) {
@@ -176,17 +178,52 @@ exports.acceptBid = async (req, res) => {
     }
 
     // Find the product related to the bid
-    const product = await Product.findById(bid.auction).populate("bids");
+    const product = await Product.findById(bid.auction).populate({
+      path: 'bids',
+      populate: { path: 'bidder' }
+    });
     if (!product) {
       req.flash("error", "Product not found.");
       return res.redirect("back");
     }
 
+    // Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // --- Create a dummy Payment record to satisfy the required Payment field ---
+    const dummyPayment = new Payment({
+      orderId: `dummy_${Date.now()}`,
+      paymentId: "NA",
+      buyer: bid.bidder._id,
+      signature: "NA",
+      amount: 0,
+      status: "success"
+    });
+    await dummyPayment.save();
+
+    // Create order record associated with buyer,
+    // Set productModel to "SecondHand" (valid enum) and include the Payment field.
+    const order = new Order({
+      Payment: dummyPayment._id, // now provided to satisfy the required field
+      product_id: product._id,
+      productModel: 'SecondHand', // changed from 'Auction' to a valid enum value
+      buyer: bid.bidder._id,
+      seller: product.seller._id,
+      quantity: 1,
+      otp: otp,
+      amount: bid.bidAmount || 0
+    });
+    await order.save()
+
     // Set the winner and update status to completed
     product.winner = bid.bidder._id;
     product.auctionStatus = "completed";
     product.endDate = Date.now(); // Add this line to close auction immediately
+    product.orderIds.push(order._id);
     await product.save();
+
+    // Send OTP to BUYER's email
+    await emailService.sendOtpEmail(bid.bidder.email, otp);
 
     // Process refunds for other monetary bids
     if (bid.bidAmount !== null) {
