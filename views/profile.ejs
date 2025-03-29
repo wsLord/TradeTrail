@@ -455,7 +455,7 @@
                       <p>Buyer: <%= order.buyer.fullName %></p>
                       <p>Quantity: <%= order.quantity %></p>
                       <% if (order.otp) { %>
-                        <p>OTP: <%= order.otp %></p>
+                        <p>OTP: Generated</p>
                       <% } else { %>
                         <p>OTP: Not generated yet</p>
                       <% } %>
@@ -483,30 +483,27 @@
     <ul>
       <% subscriptionAuction.forEach(product => { %>
         <li>
-
           <a href="/profile/subscription-auction/<%= product._id %>" style="text-decoration: none; color: #007bff;">
             <h4>Product: <%= product.platform_name %></h4>
-            <% if (product.orderIds && product.orderIds.length > 0) { %>
-              <!-- <h4>Buyers:</h4> -->
+            <% if (product.orderId) { %>  <!-- Changed: Removed .forEach since orderId is a single object -->
               <ul>
-                <% product.orderIds.forEach(order => { %>
-                  <% if (order.buyer) { %>
-                    <li>
-                      <p>Buyer: <%= order.buyer.fullName %></p>
-                      <p>Quantity: <%= order.quantity %></p>
-                      <% if (order.otp) { %>
-                        <p>OTP: <%= order.otp %></p>
-                      <% } else { %>
-                        <p>OTP: Not generated yet</p>
-                      <% } %>
-                    </li>
-                  <% } else { %>
-                    <li>Buyer information not available.</li>
-                  <% } %>
-                <% }); %>
+                <% /* Removed iteration; instead, directly check product.orderId */ %>
+                <% if (product.orderId.buyer) { %>  <!-- Added: Direct check on product.orderId -->
+                  <li>
+                    <p>Buyer: <%= product.orderId.buyer.fullName %></p>
+                    <p>Quantity: <%= product.orderId.quantity %></p>
+                    <% if (product.orderId.otp) { %>
+                      <p>OTP: Generated</p>
+                    <% } else { %>
+                      <p>OTP: Not generated yet</p>
+                    <% } %>
+                  </li>
+                <% } else { %>
+                  <li>Buyer information not available.</li>
+                <% } %>
               </ul>
             <% } else { %>
-              <p>No Bids Yet</p>
+              <p>Not sold yet</p>
             <% } %>
           </a>
         </li>
@@ -516,6 +513,7 @@
     <p>You haven't posted any auction products yet.</p>
   <% } %>
 </div>
+
 
 
     <!-- Rental Products Section -->

@@ -164,8 +164,6 @@
   <% } %>
 </section>
 
-    <button onclick="window.location.href='/profile'" id="back-btn">Back to Profile</button>
-
     <!-- Add after winner section -->
 <% if (product.auctionStatus === 'completed' && product.orderIds && product.orderIds.length > 0) { 
   const order = product.orderIds.find(o => !o.paymentTransferred); %>
@@ -258,6 +256,8 @@
     <% } %>
   <% }) %>
 <% } %>
+
+    <button onclick="window.location.href='/profile'" id="back-btn">Back to Profile</button>
 
     </main>
 </body>

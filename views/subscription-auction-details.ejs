@@ -96,14 +96,24 @@
               <td>₹<%= bid.bidAmount %></td>
               <td><%= bid.paymentId %></td>
               <td>
-                <form action="/subscription/accept-bid" method="POST">
+                <form action="/accept-bid" method="POST">
                   <input type="hidden" name="bidId" value="<%= bid._id %>">
-                  <button 
+                  <!-- <button 
                     type="submit" 
-                    class="<%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled-button' : '' %>"
-                    <%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled' : '' %>>
-                    <%= product.winner ? 'Bid Accepted' : (new Date() < new Date(product.endDate) ? 'Auction Ongoing' : 'Accept') %>
-                  </button>
+                    class="<%= product.winner ? 'disabled-button' : '' %>"
+                    <%= product.winner ? 'disabled' : '' %>
+                  >
+                    <%= product.winner ? 'Bid Accepted' : 'Accept' %>
+                  </button> -->
+
+                  <button 
+                  type="button" 
+                  class="<%= product.winner ? 'disabled-button' : '' %>" 
+                  <%= product.winner ? 'disabled' : '' %>
+                  onclick="handleBidAcceptance(event, '<%= bid.paymentId %>', '<%= bid.bidAmount %>')"
+                >
+                  <%= product.winner ? 'Bid Accepted' : 'Accept' %>
+                </button>
                 </form>
               </td>
             </tr>
@@ -135,14 +145,16 @@
               <td><%= bid.product?.name || 'N/A' %></td>
               <td><%= bid.product?.description || 'No description' %></td>
               <td>
-                <form action="/subscription/accept-bid" method="POST">
+                <form action="/accept-bid" method="POST">
                   <input type="hidden" name="bidId" value="<%= bid._id %>">
                   <button 
-                    type="submit" 
-                    class="<%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled-button' : '' %>"
-                    <%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled' : '' %>>
-                    <%= product.winner ? 'Bid Accepted' : (new Date() < new Date(product.endDate) ? 'Auction Ongoing' : 'Accept') %>
-                  </button>
+                  type="button" 
+                  class="<%= product.winner ? 'disabled-button' : '' %>" 
+                  <%= product.winner ? 'disabled' : '' %>
+                  onclick="handleBidAcceptance(event, '<%= bid.paymentId %>', '<%= bid.bidAmount %>')"
+                >
+                  <%= product.winner ? 'Bid Accepted' : 'Accept' %>
+                </button>
                 </form>
               </td>
             </tr>
@@ -153,8 +165,99 @@
       <div class="no-bids">No product bids yet.</div>
     <% } %>
   </section>
+  <% if (user && user._id.equals(product.seller._id) && product.orderId && !product.orderId.paymentTransferred) { %>  <!-- CHANGED: combined condition -->
+    <section class="otp-verification-card">
+      <h3>Complete Payment Transfer</h3>
+      <div class="otp-instructions">
+        <p>Ask the buyer for the OTP sent to their email to complete the transaction</p>
+      </div>
+      <div class="otp-input-group">
+        <input type="text" id="upiInput" class="otp-field" 
+               placeholder="Your UPI ID (e.g. name@bank)" 
+               pattern=".+@.+\..+" required>
+        <input type="text" id="otpInput" class="otp-field" 
+               placeholder="Enter buyer's OTP" maxlength="6" required>
+        <button class="verify-otp-btn" onclick="verifyAuctionOTP('<%= product._id %>', 'subscription')">
+          Verify & Transfer
+        </button>
+      </div>
+      <div id="otpResult" class="otp-result"></div>
+    </section>
+  <% } %>
+  
+  
+  <!-- Payment status display -->
+  <% if (product.orderId) { %>
+    <% if (product.orderId.paymentTransferred) { %>
+      <div class="payment-status success">
+        ✓ Payment completed (TXID: <%= product.orderId.transactionId %>)
+      </div>
+    <% } else if (user._id.equals(product.seller._id)) { %>
+      <div class="payment-status pending">
+        ⏳ Waiting for OTP verification from buyer
+      </div>
+    <% } else if (user._id.equals(product.orderId.buyer._id)) { %>
+      <div class="payment-status info">
+        ℹ️ OTP sent to your email - please share with seller
+      </div>
+    <% } %>
+  <% } %>
+  
 
   <button onclick="window.location.href='/profile'" id="back-btn">Back to Profile</button>
 </main>
+<script>
+  async function verifyAuctionOTP(productId, productType) {
+    const upi = document.getElementById('upiInput').value;
+    const otp = document.getElementById('otpInput').value;
+    const resultDiv = document.getElementById('otpResult');
+    
+    try {
+      const response = await fetch('/api/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: productId,
+          otp: otp,
+          upiId: upi,
+          productType: productType
+        })
+      });
+  
+      const data = await response.json();
+      
+      if (data.success) {
+        resultDiv.innerHTML = `
+          <div class="success-message">
+            ✅ ${data.message}<br>
+            Transaction ID: ${data.transactionId}
+          </div>
+        `;
+        resultDiv.className = 'otp-result success';
+        setTimeout(() => location.reload(), 2000);
+      } else {
+        resultDiv.innerHTML = `❌ ${data.message}`;
+        resultDiv.className = 'otp-result error';
+      }
+    } catch (error) {
+      resultDiv.innerHTML = '⚠️ Network error - please try again';
+      resultDiv.className = 'otp-result error';
+    }
+  }
+  </script>
 </body>
+<script>
+  function handleBidAcceptance(event, selectedPaymentId, selectedBidAmount) {
+    console.log("hitting handle function");
+    event.preventDefault(); // Prevent default behavior
+    if (!confirm("Are you sure you want to accept this bid? All other bids will be refunded.")) {
+      return;
+    }
+    console.log("User confirmed bid acceptance. Processing refunds...");
+    // Submit the form that contains the clicked button:
+    event.target.closest('form').submit();
+}
+
+   
+    </script>
 </html>

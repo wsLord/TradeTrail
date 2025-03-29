@@ -604,10 +604,21 @@ exports.getSubscriptionAuctionDetails = async (req, res) => {
     const productId = req.params.productId;
     
     const product = await Subscription.findById(productId)
-      .populate("seller", "fullName")
+      .populate("seller")
       .populate({
         path: "bids",
-        populate: { path: "bidder", select: "fullName" }
+        populate: { 
+          path: "bidder", 
+          select: "fullName" 
+        }
+      })
+      .populate({
+        path: "orderId",
+        select: "paymentTransferred transactionId",
+        populate: {
+          path: "buyer",
+          select: "fullName"
+        }
       });
 
     if (!product) {
@@ -626,6 +637,7 @@ exports.getSubscriptionAuctionDetails = async (req, res) => {
       product,
       monetaryBids,
       productBids,
+      user: req.user
     });
 
   } catch (err) {
@@ -647,16 +659,53 @@ exports.acceptSubscriptionBid = async (req, res) => {
     }
 
     // Find the subscription product using Ott model
-    const subscription = await Subscription.findById(bid.auction).populate("bids");
+    const subscription = await Subscription.findById(bid.auction)
+      .populate({
+        path: "bids",
+        populate: { path: "bidder" }
+      });
     if (!subscription) {
       req.flash("error", "Subscription not found.");
       return res.redirect("back");
     }
 
-    // Set the winner and update status
-    subscription.winner = bid.bidder._id;
-    subscription.auctionStatus = "completed";
-    await subscription.save();
+     // Generate OTP
+     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+     // --- Create a dummy Payment record to satisfy the required Payment field ---
+    const dummyPayment = new Payment({
+      orderId: `dummy_${Date.now()}`,
+      paymentId: "NA",
+      buyer: bid.bidder._id,
+      signature: "NA",
+      amount: 0,
+      status: "completed"
+    });
+    await dummyPayment.save();
+
+     // Create order
+     const order = new Order({
+      Payment: dummyPayment._id,  
+       product_id: subscription._id,
+       productModel: 'Subscription',
+       buyer: bid.bidder._id,
+       seller: subscription.seller,
+       quantity: 1,
+       otp: otp,
+       amount: bid.bidAmount || 0
+     });
+     await order.save();
+ 
+     // Update subscription
+     subscription.winner = bid.bidder._id;
+     subscription.auctionStatus = "completed";
+     subscription.endDate = Date.now();
+     subscription.orderId = order._id;
+     await subscription.save();
+
+     // Send OTP email
+    await emailService.sendOtpEmail(bid.bidder.email, otp);
+
 
     // Process refunds for other monetary bids
     if (bid.bidAmount !== null) {
