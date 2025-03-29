@@ -131,7 +131,18 @@ exports.getAuctionDetails = async (req, res) => {
     const { productId } = req.params;
     console.log("the entering auction detaiils");
     // Find product details
-    const product = await Product.findById(productId).populate("seller");
+    // In profileController.js, modify getAuctionDetails
+const product = await Product.findById(productId)
+.populate("seller")
+.populate({
+  path: "orderIds",
+  select: "paymentTransferred transactionId buyer",
+  populate: {
+    path: "buyer",
+    model: "User",
+    select: "fullName"
+  }
+});
     if (!product) {
       return res.status(404).send("Product not found.");
     }
@@ -205,16 +216,16 @@ exports.acceptBid = async (req, res) => {
     // Create order record associated with buyer,
     // Set productModel to "SecondHand" (valid enum) and include the Payment field.
     const order = new Order({
-      Payment: dummyPayment._id, // now provided to satisfy the required field
+      Payment: dummyPayment._id,
       product_id: product._id,
-      productModel: 'SecondHand', // changed from 'Auction' to a valid enum value
+      productModel: 'SecondHand', // Must match enum
       buyer: bid.bidder._id,
       seller: product.seller._id,
       quantity: 1,
       otp: otp,
       amount: bid.bidAmount || 0
     });
-    await order.save()
+    await order.save();
 
     // Set the winner and update status to completed
     product.winner = bid.bidder._id;
