@@ -129,9 +129,6 @@ exports.updateProfile = async (req, res) => {
 exports.getAuctionDetails = async (req, res) => {
   try {
     const { productId } = req.params;
-    console.log("the entering auction detaiils");
-    // Find product details
-    // In profileController.js, modify getAuctionDetails
     const product = await Product.findById(productId)
       .populate("seller")
       .populate({
@@ -139,10 +136,10 @@ exports.getAuctionDetails = async (req, res) => {
         select: "paymentTransferred transactionId buyer",
         populate: {
           path: "buyer",
-          model: "User",
           select: "fullName",
         },
       });
+    console.log(product);
     if (!product) {
       return res.status(404).send("Product not found.");
     }
@@ -154,13 +151,7 @@ exports.getAuctionDetails = async (req, res) => {
 
     // Separate bids into monetary and product bids
     const monetaryBids = bids.filter((bid) => bid.bidAmount !== null);
-    const productBids = bids.filter((bid) => bid.bidAmount === null);
-
-    console.log("these are bids", monetaryBids);
-    // Extract payment IDs from bids that have a paymentId
-    // const paymentIDs = bids
-    //   .filter((bid) => bid.paymentId) // Only keep bids where paymentId exists
-    //   .map((bid) => bid.paymentId);  // Extract paymentId values
+    const productBids = bids.filter((bid) => bid.location);
 
     res.render("auction-details", {
       product,
@@ -178,7 +169,6 @@ exports.getAuctionDetails = async (req, res) => {
 exports.acceptBid = async (req, res) => {
   try {
     const { bidId } = req.body;
-
     // Find the bid and populate the fields
     const bid = await BidProduct.findById(bidId).populate("bidder");
     if (!bid) {
@@ -239,12 +229,18 @@ exports.acceptBid = async (req, res) => {
       const otherBids = product.bids.filter(
         (otherBid) => otherBid._id.toString() !== bidId && otherBid.bidAmount
       );
-
-      // for (const otherBid of otherBids) {
-      //   console.log("all done successfully");
-      //   await initiateRefund(otherBid.paymentId, otherBid.bidAmount);
-      //   console.log("all doneedoneee");
-      // }
+      // Process refunds for all other bids concurrently
+      await Promise.all(
+        otherBids.map(async (otherBid) => {
+          console.log(
+            `Processing refund for Payment ID: ${otherBid.paymentId}`
+          );
+          await initiateRefund(otherBid.paymentId, otherBid.bidAmount);
+          console.log(`Refund completed for Payment ID: ${otherBid.paymentId}`);
+        })
+      );
+    } else {
+      const otherBids = product.bids.filter((otherBid) => otherBid.bidAmount);
       // Process refunds for all other bids concurrently
       await Promise.all(
         otherBids.map(async (otherBid) => {
@@ -263,15 +259,11 @@ exports.acceptBid = async (req, res) => {
         ? `Monetary bid accepted! Winner is ${bid.bidder.fullName}. Other bids have been refunded.`
         : `Product bid accepted! Winner is ${bid.bidder.fullName}.`;
 
-    console.log("flash message aarha h");
-
     req.flash("success", bidTypeMessage);
-    console.log("hoagyajsdkj");
     res.redirect(`/secondHand/buy/${product._id}`);
   } catch (error) {
     console.error("Error accepting bid:", error);
     req.flash("error", "An error occurred while accepting the bid.");
-    // res.redirect('/');
   }
 };
 
@@ -720,6 +712,18 @@ exports.acceptSubscriptionBid = async (req, res) => {
         (otherBid) => otherBid._id.toString() !== bidId && otherBid.bidAmount
       );
 
+      await Promise.all(
+        otherBids.map(async (otherBid) => {
+          console.log(
+            `Processing refund for Payment ID: ${otherBid.paymentId}`
+          );
+          await initiateRefund(otherBid.paymentId, otherBid.bidAmount);
+          console.log(`Refund completed for Payment ID: ${otherBid.paymentId}`);
+        })
+      );
+    } else {
+      const otherBids = product.bids.filter((otherBid) => otherBid.bidAmount);
+      // Process refunds for all other bids concurrently
       await Promise.all(
         otherBids.map(async (otherBid) => {
           console.log(

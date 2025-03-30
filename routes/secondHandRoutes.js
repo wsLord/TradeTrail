@@ -16,8 +16,6 @@ router.post("/sell/add-product",uploadMultiple, protectRoute, secondHandControll
 
 router.post("/add-to-cart/:productId", protectRoute, secondHandController.addToCart);
 
-
-
 // Product browsing and bidding
 router.get("/buy", protectRoute, secondHandController.getProducts);
 router.get("/buy/:productId", protectRoute, secondHandController.getProduct);

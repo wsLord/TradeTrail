@@ -21,32 +21,36 @@ const productSchema = new Schema({
   },
   saleType: {
     type: String,
-    enum: ['direct', 'auction'],
-    required: true
+    enum: ["direct", "auction"],
+    required: true,
   },
   quantity: {
     type: Number,
     required: true,
-    default: 1
+    default: 1,
   },
   location: {
     type: String,
     required: true,
   },
-  min_price: { 
-    type: Number, 
-    required: function() { return this.saleType === 'auction'; }
+  min_price: {
+    type: Number,
+    required: function () {
+      return this.saleType === "auction";
+    },
   },
   startDate: {
     type: Date,
-    required: function() { return this.saleType === 'auction'; }
+    required: function () {
+      return this.saleType === "auction";
+    },
   },
-  endDate: { 
-    type: Date, 
-    required: function() { return this.saleType === 'auction'; }
+  endDate: {
+    type: Date,
+    required: function () {
+      return this.saleType === "auction";
+    },
   },
-  // maxBid: { type: Number, default: 0 }, // Store highest bid
-  //need to add user
   bids: [{ type: mongoose.Schema.Types.ObjectId, ref: "BidProduct" }], // Store bid product references
   seller: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   auctionStatus: {
@@ -59,11 +63,13 @@ const productSchema = new Schema({
     ref: "User",
     default: null,
   },
-  orderIds: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Order",
-    default: null,
-  }],
+  orderIds: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Order",
+      default: null,
+    },
+  ],
 });
 
 module.exports = mongoose.model("Product", productSchema);
