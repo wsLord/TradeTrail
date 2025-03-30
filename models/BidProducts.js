@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 //for products i am bidding against other product
+//subscription
 
 const bidProductsSchema = Schema({
     title: { type: String },

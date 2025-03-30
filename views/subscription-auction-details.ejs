@@ -142,8 +142,8 @@
           <% productBids.forEach(bid => { %>
             <tr>
               <td><%= bid.bidder.fullName %></td>
-              <td><%= bid.product?.name || 'N/A' %></td>
-              <td><%= bid.product?.description || 'No description' %></td>
+              <td><%= bid.title || 'N/A' %></td>
+              <td><%= bid.description || 'No description' %></td>
               <td>
                 <form action="/accept-bid" method="POST">
                   <input type="hidden" name="bidId" value="<%= bid._id %>">
