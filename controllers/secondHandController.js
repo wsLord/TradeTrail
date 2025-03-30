@@ -177,9 +177,10 @@ exports.postAddBidProduct = async (req, res, next) => {
   }
 
   const prodId = req.params.productId;
-  const { title, imageUrl, description, location, bidAmount, paymentId } = req.body; // Extract paymentId from form submission
+  const { title, imageUrl, description, location, bidAmount, paymentId } =
+    req.body; // Extract paymentId from form submission
 
-  console.log("is in routes",paymentId);
+  console.log("is in routes", paymentId);
 
   // Check for existing bid
   const existingBid = await BidProduct.findOne({
@@ -190,9 +191,7 @@ exports.postAddBidProduct = async (req, res, next) => {
   if (existingBid) {
     req.flash(
       "error",
-      `You already have an active bid. Delete your previous bid (₹${
-        existingBid.bidAmount || "product bid"
-      }) to place a new one.`
+      `You already have an active bid. Delete your previous bid to place a new one.`
     );
     return res.redirect(`/secondHand/buy/${prodId}`);
   }
@@ -213,19 +212,22 @@ exports.postAddBidProduct = async (req, res, next) => {
 
   // Validate bid amount
   if (bidAmount) {
-      const minRequired = monetaryBidsCount === 0
-          ? product.min_price
-          : currentMaxBid + MIN_BID_INCREMENT;
+    const minRequired =
+      monetaryBidsCount === 0
+        ? product.min_price
+        : currentMaxBid + MIN_BID_INCREMENT;
 
-      if (bidAmount < minRequired) {
-          req.flash(
-              'error',
-              monetaryBidsCount === 0
-                  ? `First bid must be at least ₹${product.min_price}`
-                  : `Bid must be at least ₹${currentMaxBid + MIN_BID_INCREMENT} (Current max: ₹${currentMaxBid})`
-          );
-          return res.redirect(`/secondHand/buy/${prodId}`);
-      }
+    if (bidAmount < minRequired) {
+      req.flash(
+        "error",
+        monetaryBidsCount === 0
+          ? `First bid must be at least ₹${product.min_price}`
+          : `Bid must be at least ₹${
+              currentMaxBid + MIN_BID_INCREMENT
+            } (Current max: ₹${currentMaxBid})`
+      );
+      return res.redirect(`/secondHand/buy/${prodId}`);
+    }
   }
 
   if (!bidAmount && !title) {
@@ -235,37 +237,35 @@ exports.postAddBidProduct = async (req, res, next) => {
   }
 
   const bidProduct = new BidProduct({
-      title: title || null,
-      imageUrl: imageUrl || null,
-      description: description || null,
-      location: location || null,
-      bidAmount: bidAmount ? Number(bidAmount) : null,
-      paymentId, // Store the payment ID
-      bidder: req.user._id,
-      auction: prodId,
+    title: title || null,
+    imageUrl: imageUrl || null,
+    description: description || null,
+    location: location || null,
+    bidAmount: bidAmount ? Number(bidAmount) : null,
+    paymentId, // Store the payment ID
+    bidder: req.user._id,
+    auction: prodId,
   });
 
-  bidProduct.save()
-      .then((savedBidProduct) => {
-          return Promise.all([
-              Product.findByIdAndUpdate(
-                  prodId,
-                  { $push: { bids: savedBidProduct._id } },
-                  { new: true }
-              ),
-              User.findByIdAndUpdate(
-                  req.user._id,
-                  { $addToSet: { cart: prodId } }
-              ),
-          ]);
-      })
-      .then(() => {
-          res.redirect(`/secondHand/buy/${prodId}`);
-      })
-      .catch((err) => {
-          console.error("Error saving bid:", err);
-          res.status(500).send("Internal Server Error");
-      });
+  bidProduct
+    .save()
+    .then((savedBidProduct) => {
+      return Promise.all([
+        Product.findByIdAndUpdate(
+          prodId,
+          { $push: { bids: savedBidProduct._id } },
+          { new: true }
+        ),
+        User.findByIdAndUpdate(req.user._id, { $addToSet: { cart: prodId } }),
+      ]);
+    })
+    .then(() => {
+      res.redirect(`/secondHand/buy/${prodId}`);
+    })
+    .catch((err) => {
+      console.error("Error saving bid:", err);
+      res.status(500).send("Internal Server Error");
+    });
 };
 
 exports.deleteBid = async (req, res, next) => {
@@ -339,7 +339,7 @@ exports.addToCart = async (req, res) => {
     const userId = req.user._id;
     const productId = req.params.productId;
     // console.log(productId);
-    
+
     const quantityToAdd = parseInt(req.body.quantity) || 1;
 
     const product = await Product.findById(productId);
@@ -356,7 +356,6 @@ exports.addToCart = async (req, res) => {
       console.log(cart.items);
       const existingItem = cart.items.find(
         (item) =>
-    
           item.product.toString() === productId &&
           item.productType === "SecondHand"
       );

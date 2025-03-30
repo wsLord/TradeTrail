@@ -324,7 +324,7 @@
       <% } else { %>
         <!-- If a bid exists, prompt the user to delete it first -->
         <div class="alert-info">
-          <p>You have already placed a bid of ₹<%= userBid.bidAmount %> on this auction.</p>
+          <p>You have already placed a bid on this auction.</p>
           <p>Please delete your existing bid before placing a new one.</p>
           <form action="/subscription/delete-bid/<%= userBid._id %>" method="POST">
             <!-- <button type="submit" class="btn btn-delete">Delete Your Bid</button> -->
