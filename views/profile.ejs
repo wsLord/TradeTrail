@@ -282,7 +282,8 @@
 
     .rental-products-card li ul, 
     .direct-products-card li li, 
-    .subscription-products-card li div{
+    .subscription-products-card li div,
+    .auction-products-card ul ul{
       background-color: #13a89c24;
       padding: 10px;
       border-radius: 4%;
@@ -444,7 +445,7 @@
     <ul>
       <% secondHandAuction.forEach(product => { %>
         <li>
-          <a href="/profile/auction/<%= product._id %>" style="linear-gradient(135deg, #137c73, #074641)">
+          <a href="/profile/auction/<%= product._id %>" style="linear-gradient(135deg, #137c73, #074641);">
             <h4>Product: <%= product.title %></h4>
             <% if (product.orderIds && product.orderIds.length > 0) { %>
               <!-- <h4>Buyers:</h4> -->

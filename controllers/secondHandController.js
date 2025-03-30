@@ -180,10 +180,6 @@ exports.postAddBidProduct = async (req, res, next) => {
   const { title, imageUrl, description, location, bidAmount, paymentId } = req.body; // Extract paymentId from form submission
 
   console.log("is in routes",paymentId);
-  if (!paymentId) {
-      req.flash('error', 'Payment verification failed. Please try again.');
-      return res.redirect(`/secondHand/buy/${prodId}`);
-  }
 
   // Check for existing bid
   const existingBid = await BidProduct.findOne({
