@@ -126,14 +126,13 @@
               <form id="refundForm0" action="/profile/accept-bid" method="POST">
                 <input type="hidden" name="bidId" value="<%= bid._id %>">
                 <button 
-                      type="button" 
-                      class="<%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled-button' : '' %>" 
-                      <%= product.winner || (new Date() < new Date(product.endDate)) ? 'disabled' : '' %>
-                      onclick="handleBidAcceptance(event, '<%= bid.paymentId %>', '<%= bid.bidAmount %>')"
-                    >
-
-                      <%= product.winner ? 'Bid Accepted' : (new Date() < new Date(product.endDate) ? 'Auction Ongoing' : 'Accept') %>
-              </button>
+                  type="button" 
+                  class="<%= product.winner ? 'disabled-button' : '' %>" 
+                  <%= product.winner ? 'disabled' : '' %>
+                  onclick="handleBidAcceptance(event, '<%= bid.paymentId %>', '<%= bid.bidAmount %>')"
+                >
+                  <%= product.winner ? 'Bid Accepted' : 'Accept' %>
+                </button>
               </form>
             </td>
           </tr>
