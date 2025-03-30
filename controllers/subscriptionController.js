@@ -151,6 +151,7 @@ exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
   Ott.findById(prodId)
     .populate("seller", "fullName")
+    .populate("winner", "fullName")
     .populate({
       path: "bids",
       populate: { path: "bidder", select: "fullName" },

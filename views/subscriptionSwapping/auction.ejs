@@ -255,7 +255,13 @@
       <p><b>Seller:</b> <%= product.seller ? product.seller.fullName : "Unknown Seller" %></p>
       <p>Start: <span id="start-date"><%= product.startDate %></span></p>
       <p>End: <span id="end-date"><%= product.endDate %></span></p>
-
+      <% if ( product.winner) { %>
+        <section class="winner-section">
+          <h2>Auction Completed</h2>
+          <p>Congratulations! The winner is <strong><%= product.winner.fullName %></strong>.</p>
+          
+        </section>
+      <% } %>
       <!-- Add this below the end date section and above the price display -->
       <div class="countdown-timer">
         <div class="timer-container">

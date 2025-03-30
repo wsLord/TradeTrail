@@ -271,7 +271,7 @@
       <p>End: <span id="end-date"><%= product.endDate %></span></p>
 
       <!-- Winner Display Section -->
-<% if (product.auctionStatus === 'completed' && product.winner) { %>
+<% if ( product.winner) { %>
   <section class="winner-section">
     <h2>Auction Completed</h2>
     <p>Congratulations! The winner is <strong><%= product.winner.fullName %></strong>.</p>
