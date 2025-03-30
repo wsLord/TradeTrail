@@ -722,7 +722,7 @@ exports.acceptSubscriptionBid = async (req, res) => {
         })
       );
     } else {
-      const otherBids = product.bids.filter((otherBid) => otherBid.bidAmount);
+      const otherBids = subscription.bids.filter((otherBid) => otherBid.bidAmount);
       // Process refunds for all other bids concurrently
       await Promise.all(
         otherBids.map(async (otherBid) => {
