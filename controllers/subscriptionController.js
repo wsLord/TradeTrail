@@ -215,7 +215,8 @@ exports.getAddBidProduct = (req, res, next) => {
         pageTitle: "Add Bid Product",
         path: "/add-bid-product",
         productId: prodId,
-        activePage: "subscription" // added for navbar active highlighting
+        activePage: "subscription" ,// added for navbar active highlighting
+        messages: req.flash(),
     });
 };
 

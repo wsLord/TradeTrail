@@ -15,7 +15,7 @@ const bidProductsSchema = Schema({
         required: true,
     },
     createdAt: { type: Date, default: Date.now },
-  paymentId:{type: String}
+  paymentId:{type: String, default: null}
 });
 
 bidProductsSchema.pre("save", function(next) {
