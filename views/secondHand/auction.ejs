@@ -275,14 +275,7 @@
   <section class="winner-section">
     <h2>Auction Completed</h2>
     <p>Congratulations! The winner is <strong><%= product.winner.fullName %></strong>.</p>
-    
-    <% const winningBid = product.bids.find(bid => bid.bidder._id.toString() === product.winner._id.toString()); %>
-    
-    <% if (winningBid?.bidAmount !== undefined) { %>
-      <p>Winning Bid: ₹<%= winningBid.bidAmount %></p>
-    <% } else { %>
-      <p>Winner's Product: <%= winningBid?.title || 'N/A' %></p>
-    <% } %>
+
   </section>
 <% } %>
 

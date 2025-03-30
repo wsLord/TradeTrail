@@ -120,10 +120,11 @@
         <% monetaryBids.forEach(bid => { %>
           <tr>
             <td><%= bid.bidder.fullName %></td>
+            <td><%= bid.bidder._id %></td>
             <td>₹<%= bid.bidAmount %></td>
             <td> <%=bid.paymentId %></td>
             <td>
-              <form id="refundForm0" action="/profile/accept-bid" method="POST">
+              <form id="refundForm0" action="/profile/secondHand/accept-bid" method="POST">
                 <input type="hidden" name="bidId" value="<%= bid._id %>">
                 <button 
                   type="button" 
@@ -162,13 +163,13 @@
         <% productBids.forEach(bid => { %>
           <tr>
             <td><%= bid.bidder.fullName %></td>
-            <td><%= bid.product?.name || 'N/A' %></td>
-            <td><%= bid.product?.description || 'No description' %></td>
-            <td><%= bid.product?.location || 'Unknown' %></td>
+            <td><%= bid.bidder._id %></td>
+            <td><%= bid.title || 'N/A' %></td>
+            <td><%= bid.description || 'No description' %></td>
+            <td><%= bid.location || 'Unknown' %></td>
             <td>
-                <form action="/profile/accept-bid" method="POST">
+                <form action="/profile/secondHand/accept-bid" method="POST">
                   <input type="hidden" name="bidId" value="<%= bid._id %>">
-                  <!-- Change both button blocks (monetary and product bids) to: -->
                 <button 
                 type="button" 
                 class="<%= product.winner ? 'disabled-button' : '' %>" 
@@ -180,8 +181,6 @@
 
                 </form>
               </td>
-              
-              
           </tr>
         <% }); %>
       </tbody>
@@ -303,10 +302,6 @@ function handleBidAcceptance(event, selectedPaymentId, selectedBidAmount) {
     }
     event.preventDefault(); 
     console.log("User confirmed bid acceptance. Processing refunds...");
-
-    // Optionally, you can submit the form manually after refunds are processed
-    // event.target.closest('form').submit();
-    // Submit the form
     document.getElementById('refundForm0').submit();
   }
  

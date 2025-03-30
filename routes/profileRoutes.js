@@ -13,10 +13,10 @@ router.get("/profile/rentals/:productId", protectRoute, profileController.getRen
 router.get("/profile/secondHand/:productId", protectRoute, profileController.getSecondHandDetails);
 router.get("/profile/subscription/:productId", protectRoute, profileController.getSubscriptionDetails);
 
-router.post('/profile/accept-bid',protectRoute, profileController.acceptBid);
+router.post('/profile/subscription/accept-bid',protectRoute, profileController.acceptBid);
 
 router.post(
-    "/accept-bid",
+    "profile/secondHand/accept-bid",
     protectRoute,
     profileController.acceptSubscriptionBid
   );

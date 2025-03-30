@@ -124,7 +124,7 @@
               <td>₹<%= bid.bidAmount %></td>
               <td><%= bid.paymentId %></td>
               <td>
-                <form action="/accept-bid" method="POST">
+                <form action="profile/subscription/accept-bid" method="POST">
                   <input type="hidden" name="bidId" value="<%= bid._id %>">
                   <!-- <button 
                     type="submit" 
@@ -173,7 +173,7 @@
               <td><%= bid.title || 'N/A' %></td>
               <td><%= bid.description || 'No description' %></td>
               <td>
-                <form action="/accept-bid" method="POST">
+                <form action="profile/subscription/accept-bid" method="POST">
                   <input type="hidden" name="bidId" value="<%= bid._id %>">
                   <button 
                   type="button" 
