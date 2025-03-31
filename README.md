@@ -92,7 +92,7 @@ iii) Start Ollama Service:
    npm install
 ```
 
-### 4. Pull a Model. In a new terminal window run:
+### 4.Pull a model (only needed once). In a new terminal window, run:
 
 ```bash
    Ollama pull mistral
