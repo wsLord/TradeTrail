@@ -60,19 +60,41 @@ This project fosters sustainability by promoting reuse and smart trading while i
 
 To deploy this project run
 
-1. Clone the repository using:
+### 1. Clone the repository using:
 
 ```bash
   https://github.com/wsLord/TradeTrail
 ```
 
-2. Run the following
+### 2. Install Ollama on you pc/mac
+
+i) Open Terminal
+
+ii) Run:
+
+```bash
+   brew install Ollama
+```
+
+iii) Start Ollama Service:
+
+```bash
+   Ollama serve
+```
+
+### 3. Run the following
 
 ```bash
    npm install
 ```
 
-3. Start MongoDB and set up following ENV files:
+### 4. Pull a Model. In a new terminal window run:
+
+```bash
+   Ollama pull mistral
+```
+
+### 5. Start MongoDB and set up following ENV files:
 
 ```bash
 MONGO_DB_URI
@@ -97,7 +119,7 @@ PORT
 
 ```
 
-4. Run the following command
+### 6. Run the following command
 
 ```bash
    npm start
