@@ -1,7 +1,7 @@
 ## TradeTrail
 
 <p align="center">
-    <img src="./assets/logo.png" alt="TradeTrail Image">
+    <img src="./assets/logo.png" alt="TradeTrail Image" style="width: 200px; height: auto;">
 </p>
 
 <p style="text-align: center; font-size: 32px; font-weight: bold;">
@@ -14,7 +14,7 @@
 
 ## Introduction
 
-Desis Ascend Educare project by Juniher Group-3 2024-2025
+DESIS Ascend Educare project by Juniher Group-3 2024-2025
 
 ## Description
 
@@ -135,35 +135,20 @@ PORT
 
 ## Tech-Stack Used
 
-NodeJS (ExpressJS)
-
-EJS
-
-CSS
-
-Bootstrap
-
-JavaScript
-
-MongoDB (as Database)
-
-Ollama AI
-
-## API Keys used
-
-Razorpay
-
-Ollama Api
+- **NodeJS** (ExpressJS)
+- **EJS**
+- **CSS**
+- **Bootstrap**
+- **JavaScript**
+- **MongoDB** (as Database)
+- **Ollama AI**
 
 ## 🔗 Contributors
 
-Aarya Kotalwar- [Github](https://github.com/Aaryakotalwar)
-
-Anjali tiwali- [Github](https://github.com/Anjali-2807)
-
-Leshya Jain- [Github](https://github.com/Leshya09)
-
-Nikki Gautam- [Github](https://github.com/nix-per)
+- **Aarya Kotalwar** - [GitHub](https://github.com/Aaryakotalwar)
+- **Anjali Tiwari** - [GitHub](https://github.com/Anjali-2807)
+- **Leshya Jain** - [GitHub](https://github.com/Leshya09)
+- **Nikki Gautam** - [GitHub](https://github.com/nix-per)
 
 ## Mentor
 
