@@ -148,7 +148,7 @@ PORT
 
 ## Mentor
 
-Priyanshu Gupta - [Github](https://github.com/wsLord)
+**Priyanshu Gupta** - [Github](https://github.com/wsLord)
 
 ## Feedback
 
