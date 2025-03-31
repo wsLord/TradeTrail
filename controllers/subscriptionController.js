@@ -1,5 +1,5 @@
 const Ott = require("../models/ott");
-const BidProducts = require("../models/BidProducts");
+const BidProducts = require("../models/bidSubscription");
 const Cart = require("../models/cartModel");
 const User = require("../models/userModel");
 

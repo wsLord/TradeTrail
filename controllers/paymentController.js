@@ -117,7 +117,6 @@ exports.getPaymentPage = (req, res) => {
 };
 
 exports.verifyPayment = async (req, res) => {
-  console.log("verify");
   try {
     const {
       razorpay_order_id,
@@ -222,7 +221,6 @@ exports.verifyPayment = async (req, res) => {
             otp: otp,
           });
           await order.save();
-          console.log("Order is saved");
 
           const remainingQuantity = Math.max(
             0,

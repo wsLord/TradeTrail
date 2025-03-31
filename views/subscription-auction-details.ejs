@@ -268,12 +268,12 @@
 </body>
 <script>
   function handleBidAcceptance(event, selectedPaymentId, selectedBidAmount) {
-    console.log("hitting handle function");
+    
     event.preventDefault(); 
     if (!confirm("Are you sure you want to accept this bid? All other bids will be refunded.")) {
       return;
     }
-    console.log("User confirmed bid acceptance. Processing refunds...");
+    
     event.target.closest('form').submit();
 }
 

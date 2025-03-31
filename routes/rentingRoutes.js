@@ -1,6 +1,5 @@
 const express = require("express");
 const rentingController = require("../controllers/rentingController");
-const cartController = require("../controllers/rentalCartController");
 const { protectRoute } = require("../middleware/authMiddleware");
 const { uploadMultiple } = require("../middleware/multerConfig");
 
@@ -35,8 +34,6 @@ router.post("/add-to-cart/:productId", protectRoute, (req, res) => {
   };
   rentingController.addToCart(req, res);
 });
-
-router.get("/cart", protectRoute, cartController.getCart);
 
 router.post(
   "/update-cart/:productId",

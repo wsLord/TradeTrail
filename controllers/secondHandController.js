@@ -1,5 +1,5 @@
 const Product = require("../models/product");
-const BidProduct = require("../models/bidproduct");
+const BidProduct = require("../models/bidSecondHand");
 const User = require("../models/userModel");
 const Cart = require("../models/cartModel");
 
@@ -330,7 +330,6 @@ exports.addToCart = async (req, res) => {
     let existingQuantity = 0;
 
     if (cart) {
-      console.log(cart.items);
       const existingItem = cart.items.find(
         (item) =>
           item.product.toString() === productId &&

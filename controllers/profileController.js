@@ -3,8 +3,8 @@ const User = require("../models/userModel");
 const Product = require("../models/product");
 const RentalProduct = require("../models/rentalProduct");
 const Subscription = require("../models/ott");
-const BidProduct = require("../models/bidproduct");
-const BidProducts = require("../models/BidProducts");
+const BidProduct = require("../models/bidSecondHand");
+const BidProducts = require("../models/bidSubscription");
 const RentalBooking = require("../models/rentalBooking");
 const Payment = require("../models/payment");
 
@@ -134,7 +134,7 @@ exports.getAuctionDetails = async (req, res) => {
           select: "fullName",
         },
       });
-    console.log(product);
+
     if (!product) {
       return res.status(404).send("Product not found.");
     }
@@ -146,7 +146,7 @@ exports.getAuctionDetails = async (req, res) => {
     const monetaryBids = bids.filter((bid) => bid.bidAmount !== null);
     const productBids = bids.filter((bid) => bid.location);
 
-    res.render("auction-details", {
+    res.render("secondHand-auction-details", {
       product,
       monetaryBids,
       productBids,
