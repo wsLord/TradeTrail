@@ -66,7 +66,9 @@ To deploy this project run
   https://github.com/wsLord/TradeTrail
 ```
 
-### 2. Install Ollama on you pc/mac
+### 2. Install Ollama
+
+For mac:
 
 i) Open Terminal
 
@@ -81,6 +83,8 @@ iii) Start Ollama Service:
 ```bash
    Ollama serve
 ```
+
+(keep this terminal running)
 
 ### 3. Run the following
 
