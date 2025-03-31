@@ -129,10 +129,6 @@ PORT
    npm start
 ```
 
-## Go through video
-
-###
-
 ## Tech-Stack Used
 
 - **NodeJS** (ExpressJS)
