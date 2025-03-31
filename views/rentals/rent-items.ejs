@@ -12,7 +12,7 @@
 </head>
 
 <body>
-  <!-- Include Navbar -->
+  
   <div id="navbar">
     <%- include('../common/navigation.ejs') %>
     <%- include('../common/chatbot.ejs') %>
@@ -40,7 +40,7 @@
       </button>
     </div>
 
-    <!-- Filter Sidebar -->
+    
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeFilters()"></div>
     <div class="filter-sidebar" id="filterSidebar">
       <div class="filter-header">
@@ -61,7 +61,7 @@
           </div>
         </div>
 
-        <!-- Location Filter -->
+        
         <div class="filter-section">
           <h3>Location</h3>
           <div class="filter-group">
@@ -76,7 +76,7 @@
           </div>
         </div>
 
-        <!-- Rental Rate Filter -->
+        
         <div class="filter-section">
           <h3>Rental Rate</h3>
           <div class="filter-group">
@@ -114,7 +114,7 @@
           <div class="rental-item">
             <div class="product-card">
               
-              <!-- Image Slider Container -->
+              
               <div class="image-slider-container">
                 <button class="prev" onclick="prevImage(<%= index %>)">&#10094;</button>
                 <div class="image-slider" id="slider-<%= index %>">
@@ -153,7 +153,7 @@
   </main>
 
   <script>
-    // Filter Sidebar Functions
+    
     function toggleFilters() {
       document.getElementById('filterSidebar').classList.toggle('active');
       document.getElementById('sidebarOverlay').style.display = 'block';
@@ -164,7 +164,7 @@
       document.getElementById('sidebarOverlay').style.display = 'none';
     }
 
-    // Original Image Slider Functions
+    
     function nextImage(index) {
       let slider = document.getElementById(`slider-${index}`);
       let images = slider.getElementsByTagName("img");
@@ -189,7 +189,7 @@
       }
     }
 
-    // Close sidebar when clicking outside
+    
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.filter-sidebar') && 
           !e.target.closest('.filter-toggle')) {

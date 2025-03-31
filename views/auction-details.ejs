@@ -12,7 +12,6 @@
   <link rel="stylesheet" href="/css/auction.css">
   <style>
 
-    /* Button Styling */
     button {
       background-color: #4b6043;
       color: white;
@@ -39,7 +38,7 @@
     }
 
 
-    /* Disabled Button */
+    
     .disabled-button, button:disabled {
       background-color: #ccc;
       cursor: not-allowed;
@@ -49,7 +48,7 @@
       background-color: #ccc;
     }
 
-    /* No Bids Message */
+   
     .no-bids {
       text-align: center;
       padding: 20px;
@@ -189,7 +188,7 @@
   <% } %>
 </section>
 
-    <!-- Add after winner section -->
+  
 <% if (product.auctionStatus === 'completed' && product.orderIds && product.orderIds.length > 0) { 
   const order = product.orderIds.find(o => !o.paymentTransferred); %>
   <% if (order && user._id.equals(product.seller._id)) { %>
@@ -263,7 +262,7 @@
   <% } %>
 <% } %>
 
-<!-- Payment status display -->
+
 <% if (product.orderIds && product.orderIds.length > 0) { %>
   <% product.orderIds.forEach(order => { %>
     <% if (order.paymentTransferred) { %>
@@ -299,7 +298,7 @@ function handleBidAcceptance(event, selectedPaymentId, selectedBidAmount) {
       return;
     }
     console.log("User confirmed bid acceptance. Processing refunds...");
-    // Submit the form that contains the clicked button:
+    
     event.target.closest('form').submit();
 }
  

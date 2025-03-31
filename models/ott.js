@@ -38,9 +38,9 @@ const OttSchema = new Schema({
     },
   },
 
-  maxBid: { type: Number, default: 0 }, // Store highest bid
-  //need to add user
-  bids: [{ type: mongoose.Schema.Types.ObjectId, ref: "BidProducts" }], // Store bid product references
+  maxBid: { type: Number, default: 0 },
+
+  bids: [{ type: mongoose.Schema.Types.ObjectId, ref: "BidProducts" }],
   seller: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   quantity: {
     type: Number,
@@ -70,10 +70,10 @@ const OttSchema = new Schema({
     default: null,
   },
   orderId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Order",
-      default: null,
-    },
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Order",
+    default: null,
+  },
 });
 const ottProduct = mongoose.model("Ott", OttSchema);
 module.exports = ottProduct;

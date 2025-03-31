@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" href="/assets/logo2.png">
   
   <style>
-    /* Image slider styles */
+    
     .slider {
       position: relative;
       width: 90%;
@@ -55,7 +55,7 @@
       color: #666;
       cursor: not-allowed;
     }
-    /* Layout styles */
+    
     .details-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -115,8 +115,8 @@
       margin-top: 20px;
     }
     .sold-info {
-      background-color: #afedf3; /* Light red background */
-      color: #060001;            /* Dark red text color */
+      background-color: #afedf3; 
+      color: #060001;            
       padding: 10px 15px;
       border-radius: 6px;
       font-weight: bold;
@@ -132,13 +132,13 @@
 
     .otp-input-group {
       display: flex;
-      flex-direction: column; /* Stack vertically */
-      gap: 15px; /* Add spacing between elements */
+      flex-direction: column; 
+      gap: 15px; 
       margin: 15px 0;
     }
 
     .otp-field {
-      width: 100%; /* Full width */
+      width: 100%; 
       padding: 12px;
       border: 2px solid #3E6B48;
       border-radius: 8px;
@@ -152,7 +152,7 @@
     }
 
     .verify-otp-btn {
-      width: 100%; /* Full width */
+      width: 100%; 
       padding: 14px;
       background: #3E6B48;
       color: white;
@@ -222,7 +222,7 @@
 
   <main class="product-details-container">
     <div class="details-grid">
-      <!-- Product Image Slider -->
+      
       <div class="product-image-column">
         <div class="slider">
           <% product.imageUrls.forEach((image, index) => { %>
@@ -234,7 +234,7 @@
         <h1><%= product.title %></h1>
       </div>
       
-      <!-- Product Information -->
+      
       <div class="product-info-column">
         <h2 class="section-title">Product Details</h2>
         <p class="description"><%= product.description %></p>
@@ -244,7 +244,7 @@
         </div>
         
         <div class="product-meta">
-          <!-- <p><strong>Available Stock:</strong> <%= product.quantity %></p> -->
+         
           <p><strong>Price:</strong> ₹<%= product.price %></p>
         </div>
 
@@ -266,10 +266,7 @@
           <% if (product.buyer) { %>
             <p class="sold-info">Sold to: <%= product.buyer.fullName %></p>
           <% } else { %>
-            <!-- <form action="/direct/buy" method="POST">
-              <input type="hidden" name="productId" value="<%= product._id %>">
-              <button type="submit" class="buy-button">Buy Now</button>
-            </form> -->
+            
           <% } %>
         </div>
 
@@ -287,11 +284,7 @@
           <% }) %>
         <% } %>
 
-        <!-- <div class="price-summary-card">
-          <h3>Pricing Details</h3>
-          <p><strong>Price:</strong> ₹<%= product.price %></p>
-          <p><strong>Available Stock:</strong> <%= product.quantity %></p>
-        </div> -->
+        
   <button onclick="window.location.href='/profile'" id="back-btn">Back to Profile</button>
 
       </div>
@@ -329,7 +322,7 @@
         Transaction ID: ${data.transactionId}
       `;
       resultDiv.className = 'otp-result success';
-      // Refresh page after 2 seconds
+      
       setTimeout(() => location.reload(), 2000);
     } else {
       resultDiv.innerHTML = `❌ ${data.message}`;

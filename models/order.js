@@ -4,39 +4,39 @@ const Schema = mongoose.Schema;
 const orderSchema = new Schema({
   Payment: {
     type: Schema.Types.ObjectId,
-    ref: "Payment", // Payment model'Payment'
-    required: true
+    ref: "Payment",
+    required: true,
   },
   product_id: {
     type: Schema.Types.ObjectId,
-    refPath: 'productModel', 
-    required: true
+    refPath: "productModel",
+    required: true,
   },
   productModel: {
     type: String,
-    enum: ['Rental', 'Subscription', 'SecondHand'], // Dynamic model names
-    required: true
+    enum: ["Rental", "Subscription", "SecondHand"],
+    required: true,
   },
   buyer: {
     type: Schema.Types.ObjectId,
     ref: "User",
-    required: true
+    required: true,
   },
   quantity: {
     type: Number,
     required: true,
-    min: 1
+    min: 1,
   },
   amount: {
     type: Number,
-    required: true
+    required: true,
   },
   otp: {
-    type: String, // 6-digit OTP as a string
-    required: true
+    type: String,
+    required: true,
   },
   paymentTransferred: { type: Boolean, default: false },
-  transactionId: String
+  transactionId: String,
 });
 
 // Indexing for faster queries

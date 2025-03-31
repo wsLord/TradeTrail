@@ -16,7 +16,7 @@ const productSchema = new Schema({
     required: true,
   },
   imageUrls: {
-    type: [String], // Array of image paths
+    type: [String],
     required: true,
   },
   saleType: {
@@ -51,7 +51,7 @@ const productSchema = new Schema({
       return this.saleType === "auction";
     },
   },
-  bids: [{ type: mongoose.Schema.Types.ObjectId, ref: "BidProduct" }], // Store bid product references
+  bids: [{ type: mongoose.Schema.Types.ObjectId, ref: "BidProduct" }],
   seller: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   auctionStatus: {
     type: String,

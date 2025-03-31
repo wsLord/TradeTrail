@@ -41,7 +41,7 @@
       </button>
     </div>
 
-    <!-- Filter Sidebar -->
+    
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeFilters()"></div>
     <div class="filter-sidebar" id="filterSidebar">
       <div class="filter-header">
@@ -62,7 +62,7 @@
           </div>
         </div>
 
-        <!-- Location Filter -->
+        
         <div class="filter-section">
           <h3>Location</h3>
           <div class="filter-group">
@@ -77,7 +77,7 @@
           </div>
         </div>
 
-        <!-- Sale Type Filter -->
+        
         <div class="filter-section">
           <h3>Sale Type</h3>
           <div class="filter-group">
@@ -165,7 +165,7 @@
   </main>
 
   <script>
-    // Filter Sidebar Functions
+    
     function toggleFilters() {
       document.getElementById('filterSidebar').classList.toggle('active');
       document.getElementById('sidebarOverlay').style.display = 'block';
@@ -176,7 +176,7 @@
       document.getElementById('sidebarOverlay').style.display = 'none';
     }
 
-    // Image Slider Functions
+    
     function nextImage(index) {
       let slider = document.getElementById(`slider-${index}`);
       let images = slider.getElementsByTagName("img");
@@ -201,7 +201,7 @@
       }
     }
 
-    // Close sidebar when clicking outside
+   
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.filter-sidebar') && 
           !e.target.closest('.filter-toggle')) {

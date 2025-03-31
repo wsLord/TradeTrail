@@ -1,20 +1,20 @@
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
   service: process.env.EMAIL_SERVICE,
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD
-  }
+    pass: process.env.EMAIL_PASSWORD,
+  },
 });
 
 exports.sendWelcomeEmail = async (email, fullName) => {
-    try {
-      await transporter.sendMail({
-        from: `"TradeTrail" <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: 'Welcome to TradeTrail!',
-        html: `
+  try {
+    await transporter.sendMail({
+      from: `"TradeTrail" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Welcome to TradeTrail!",
+      html: `
         <!DOCTYPE html>
         <html>
           <head>
@@ -67,49 +67,48 @@ exports.sendWelcomeEmail = async (email, fullName) => {
             </div>
           </body>
         </html>
-        `
-      });
-    } catch (error) {
-      console.error('Error sending welcome email:', error);
-    }
-  };
-  
+        `,
+    });
+  } catch (error) {
+    console.error("Error sending welcome email:", error);
+  }
+};
 
 exports.sendLoginNotification = async (email, fullName) => {
   try {
     await transporter.sendMail({
       from: `"TradeTrail Security" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: 'New Login Detected',
+      subject: "New Login Detected",
       html: `
         <h1>Hello ${fullName}</h1>
         <p>There was a recent login to your TradeTrail account.</p>
         <p>If this was you, no action is needed.</p>
         <p>If you didn't initiate this login, please contact support immediately.</p>
-      `
+      `,
     });
   } catch (error) {
-    console.error('Error sending login notification:', error);
+    console.error("Error sending login notification:", error);
   }
 };
 
 exports.sendVerificationEmail = async (email, token) => {
   try {
     const verificationUrl = `${process.env.BASE_URL}/api/auth/verify-email?token=${token}`;
-    
+
     await transporter.sendMail({
       from: `"TradeTrail" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: 'Verify Your Email Address',
+      subject: "Verify Your Email Address",
       html: `
         <h1>Email Verification</h1>
         <p>Click this link to verify your email:</p>
         <a href="${verificationUrl}">Verify Email</a>
         <p>Link expires in 24 hours</p>
-      `
+      `,
     });
   } catch (error) {
-    console.error('Error sending verification email:', error);
+    console.error("Error sending verification email:", error);
   }
 };
 
@@ -118,36 +117,36 @@ exports.sendOtpEmail = async (email, otp) => {
     await transporter.sendMail({
       from: `"TradeTrail" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: 'Your OTP for Your Purchase',
-      html: `<p>Your OTP is: <strong>${otp}</strong></p>`
+      subject: "Your OTP for Your Purchase",
+      html: `<p>Your OTP is: <strong>${otp}</strong></p>`,
     });
   } catch (error) {
-    console.error('Error sending OTP email:', error);
+    console.error("Error sending OTP email:", error);
   }
 };
 
 exports.sendPasswordResetEmail = async (email, token) => {
   const resetUrl = `${process.env.BASE_URL}/api/auth/reset-password/${token}`;
-  
+
   await transporter.sendMail({
     to: email,
-    subject: 'Password Reset Request',
+    subject: "Password Reset Request",
     html: `
       <p>You requested a password reset. Click the link below to reset your password:</p>
       <a href="${resetUrl}">${resetUrl}</a>
       <p>This link expires in 1 hour.</p>
-    `
+    `,
   });
 };
 
 exports.sendPasswordResetConfirmation = async (email, name) => {
   await transporter.sendMail({
     to: email,
-    subject: 'Password Reset Successful',
+    subject: "Password Reset Successful",
     html: `
       <p>Hi ${name},</p>
       <p>Your password has been successfully reset.</p>
       <p>If you didn't make this change, please contact us immediately.</p>
-    `
+    `,
   });
 };

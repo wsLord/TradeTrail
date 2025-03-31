@@ -1,44 +1,42 @@
-<!-- <nav class="navbar">
-    <div class="nav-container">
-        <a href="/" class="logo">TradeTrail</a>
-        <ul class="nav-links">
-            <li><a href="/rentals">Renting</a></li>
-            <li><a href="/secondHand">Second-Hand Buying</a></li>
-            <li><a href="/subscriptions">Subscription Swapping</a></li>
-        </ul>
-        <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-    </div>
-</nav> -->
-
 <nav class="navbar">
-    <div class="logo">
-        <a href="/">TradeTrail</a>
-    </div>
-    <ul>
-        <li class="<%= typeof activePage !== 'undefined' && activePage === 'rental' ? 'active' : '' %>">
-            <a href="/rental">Renting Items</a>
-        </li>
-        <li class="<%= typeof activePage !== 'undefined' && activePage === 'subscription' ? 'active' : '' %>">
-            <a href="/subscription">Subscriptions</a>
-        </li>
-        <li class="<%= typeof activePage !== 'undefined' && activePage === 'secondHand' ? 'active' : '' %>">
-            <a href="/secondHand" >Second-Hand Buying</a>
-        </li>
-        <li class="<%= typeof activePage !== 'undefined' && activePage === 'cart' ? 'active' : '' %>">
-          <a href="/cart">Cart</a>
-        </li>   
-        <li class="<%= typeof activePage !== 'undefined' && activePage === 'profile' ? 'active' : '' %>">
-            <a href="/profile" id="profileLink" data-toggle="popover">Profile</a>
-        </li>
-    </ul>
+  <div class="logo">
+    <a href="/">TradeTrail</a>
+  </div>
+  <ul>
+    <li
+      class="<%= typeof activePage !== 'undefined' && activePage === 'rental' ? 'active' : '' %>"
+    >
+      <a href="/rental">Renting Items</a>
+    </li>
+    <li
+      class="<%= typeof activePage !== 'undefined' && activePage === 'subscription' ? 'active' : '' %>"
+    >
+      <a href="/subscription">Subscriptions</a>
+    </li>
+    <li
+      class="<%= typeof activePage !== 'undefined' && activePage === 'secondHand' ? 'active' : '' %>"
+    >
+      <a href="/secondHand">Second-Hand Buying</a>
+    </li>
+    <li
+      class="<%= typeof activePage !== 'undefined' && activePage === 'cart' ? 'active' : '' %>"
+    >
+      <a href="/cart">Cart</a>
+    </li>
+    <li
+      class="<%= typeof activePage !== 'undefined' && activePage === 'profile' ? 'active' : '' %>"
+    >
+      <a href="/profile" id="profileLink" data-toggle="popover">Profile</a>
+    </li>
+  </ul>
 </nav>
 
 <% if (messages.error && messages.error.length > 0) { %>
-    <div class="flash-message error">
-        <% messages.error.forEach(msg => { %>
-            <p><%= msg %></p>
-        <% }); %>
-    </div>
+<div class="flash-message error">
+  <% messages.error.forEach(msg => { %>
+  <p><%= msg %></p>
+  <% }); %>
+</div>
 <% } %>
 
 <style>
@@ -96,21 +94,17 @@
   .navbar ul li a:hover {
     color: #242e20;
   }
-  
-  /* Active link styling: turns the text color to black when active */
+
   .navbar ul li.active a {
     color: black;
   }
 </style>
 
 <script>
-  // Auto-dismiss flash messages after 3 seconds
-  setTimeout(function() {
-      const flashMessages = document.querySelectorAll('.flash-message');
-      flashMessages.forEach(function(msg) {
-          msg.style.display = 'none';
-      });
+  setTimeout(function () {
+    const flashMessages = document.querySelectorAll(".flash-message");
+    flashMessages.forEach(function (msg) {
+      msg.style.display = "none";
+    });
   }, 3000);
 </script>
-
-

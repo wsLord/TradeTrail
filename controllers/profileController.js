@@ -2,19 +2,17 @@
 const User = require("../models/userModel");
 const Product = require("../models/product");
 const RentalProduct = require("../models/rentalProduct");
+const Subscription = require("../models/ott");
 const BidProduct = require("../models/bidproduct");
 const BidProducts = require("../models/BidProducts");
-const axios = require("axios");
-
-const Payment = require("../models/payment");
-const SecondhandDirectProduct = require("../models/product");
-const SubscriptionDirectProduct = require("../models/ott");
 const RentalBooking = require("../models/rentalBooking");
-const Subscription = require("../models/ott");
+const Payment = require("../models/payment");
+
 const Order = require("../models/order");
 const emailService = require("../services/emailService");
 
 const bcrypt = require("bcryptjs");
+const axios = require("axios");
 
 const { v4: uuidv4 } = require("uuid");
 const Transaction = require("../models/transaction");
@@ -22,7 +20,7 @@ const Transaction = require("../models/transaction");
 exports.getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
-    //renting products
+
     const rentalProducts = await RentalProduct.find({
       seller: req.user._id,
     }).populate({
@@ -35,7 +33,6 @@ exports.getProfile = async (req, res) => {
       select: "quantity otp",
     });
 
-    //secondHand auction
     const secondHandAuction = await Product.find({
       seller: req.user._id,
       saleType: "auction",
@@ -48,7 +45,7 @@ exports.getProfile = async (req, res) => {
       },
       select: "quantity otp",
     });
-    //subscription auction
+
     const subscriptionAuction = await Subscription.find({
       seller: req.user._id,
       saleType: "auction",
@@ -62,7 +59,6 @@ exports.getProfile = async (req, res) => {
       select: "quantity otp",
     });
 
-    //direct secondhand and subscription products
     const directSecondhandProducts = await Product.find({
       seller: req.user._id,
       saleType: "direct",
@@ -88,7 +84,6 @@ exports.getProfile = async (req, res) => {
       select: "quantity otp",
     });
 
-    // Add default badges if none exist
     if (!user.badges || user.badges.length === 0) {
       user.badges = [
         "/badges/badgeone.png",
@@ -144,12 +139,10 @@ exports.getAuctionDetails = async (req, res) => {
       return res.status(404).send("Product not found.");
     }
 
-    // Find all bids related to this product and populate bidder details
     const bids = await BidProduct.find({ auction: productId }).populate(
       "bidder"
     );
 
-    // Separate bids into monetary and product bids
     const monetaryBids = bids.filter((bid) => bid.bidAmount !== null);
     const productBids = bids.filter((bid) => bid.location);
 
@@ -158,7 +151,6 @@ exports.getAuctionDetails = async (req, res) => {
       monetaryBids,
       productBids,
       user: req.user,
-      // Pass the payment IDs to the template
     });
   } catch (error) {
     console.error("Error fetching auction details:", error);
@@ -169,14 +161,13 @@ exports.getAuctionDetails = async (req, res) => {
 exports.acceptBid = async (req, res) => {
   try {
     const { bidId } = req.body;
-    // Find the bid and populate the fields
+
     const bid = await BidProduct.findById(bidId).populate("bidder");
     if (!bid) {
       req.flash("error", "Bid not found.");
       return res.redirect("back");
     }
 
-    // Find the product related to the bid
     const product = await Product.findById(bid.auction).populate({
       path: "bids",
       populate: { path: "bidder" },
@@ -189,7 +180,7 @@ exports.acceptBid = async (req, res) => {
     // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // --- Create a dummy Payment record to satisfy the required Payment field ---
+    // Create a dummy Payment record to satisfy the required Payment field
     const dummyPayment = new Payment({
       orderId: `dummy_${Date.now()}`,
       paymentId: "NA",
@@ -200,12 +191,11 @@ exports.acceptBid = async (req, res) => {
     });
     await dummyPayment.save();
 
-    // Create order record associated with buyer,
-    // Set productModel to "SecondHand" (valid enum) and include the Payment field.
+    // Create order record associated with buyer
     const order = new Order({
       Payment: dummyPayment._id,
       product_id: product._id,
-      productModel: "SecondHand", // Must match enum
+      productModel: "SecondHand",
       buyer: bid.bidder._id,
       seller: product.seller._id,
       quantity: 1,
@@ -214,17 +204,15 @@ exports.acceptBid = async (req, res) => {
     });
     await order.save();
 
-    // Set the winner and update status to completed
     product.winner = bid.bidder._id;
     product.auctionStatus = "completed";
-    product.endDate = Date.now(); // Add this line to close auction immediately
+    product.endDate = Date.now();
     product.orderIds.push(order._id);
     await product.save();
 
     // Send OTP to BUYER's email
     await emailService.sendOtpEmail(bid.bidder.email, otp);
 
-    // Process refunds for other monetary bids
     if (bid.bidAmount !== null) {
       const otherBids = product.bids.filter(
         (otherBid) => otherBid._id.toString() !== bidId && otherBid.bidAmount
@@ -232,28 +220,19 @@ exports.acceptBid = async (req, res) => {
       // Process refunds for all other bids concurrently
       await Promise.all(
         otherBids.map(async (otherBid) => {
-          console.log(
-            `Processing refund for Payment ID: ${otherBid.paymentId}`
-          );
           await initiateRefund(otherBid.paymentId, otherBid.bidAmount);
-          console.log(`Refund completed for Payment ID: ${otherBid.paymentId}`);
         })
       );
     } else {
       const otherBids = product.bids.filter((otherBid) => otherBid.bidAmount);
-      // Process refunds for all other bids concurrently
+
       await Promise.all(
         otherBids.map(async (otherBid) => {
-          console.log(
-            `Processing refund for Payment ID: ${otherBid.paymentId}`
-          );
           await initiateRefund(otherBid.paymentId, otherBid.bidAmount);
-          console.log(`Refund completed for Payment ID: ${otherBid.paymentId}`);
         })
       );
     }
 
-    // Flash success message
     const bidTypeMessage =
       bid.bidAmount !== null
         ? `Monetary bid accepted! Winner is ${bid.bidder.fullName}. Other bids have been refunded.`
@@ -267,26 +246,19 @@ exports.acceptBid = async (req, res) => {
   }
 };
 
-// Function to handle Razorpay refund
+// Handle Razorpay refund
 const initiateRefund = async (paymentId, amount) => {
-  console.log(paymentId);
-  console.log(amount);
   if (!paymentId) {
-    console.log(`${paymentId} toh hai`);
     console.error("Refund failed: Missing payment ID");
     return;
   }
 
   if (!amount || isNaN(amount) || amount <= 0) {
-    console.log("amount bhi zero nhi h");
     console.error("Refund failed: Invalid amount", amount);
     return;
   }
 
-  console.log(`Initiating refund for payment: ${paymentId}, amount: ${amount}`);
-
   try {
-    // Razorpay API authentication
     const auth = Buffer.from(
       `${process.env.RAZORPAY_KEY_ID}:${process.env.RAZORPAY_KEY_SECRET}`
     ).toString("base64");
@@ -300,16 +272,14 @@ const initiateRefund = async (paymentId, amount) => {
         Authorization: `Basic ${auth}`,
       },
       data: {
-        amount: Math.floor(amount * 100 * 0.9), // Convert to paise
+        amount: Math.floor(amount * 100 * 0.9),
         notes: { reason: "Bid refund due to another bid being accepted" },
         speed: "normal",
       },
     });
 
     const refundData = response.data;
-    console.log("Refund successful:", refundData);
 
-    // Update payment record
     const paymentRecord = await Payment.findOne({ paymentId: paymentId });
     if (paymentRecord) {
       paymentRecord.status = "refunded";
@@ -317,7 +287,6 @@ const initiateRefund = async (paymentId, amount) => {
       paymentRecord.refundedAt = new Date();
       paymentRecord.refundAmount = amount;
       await paymentRecord.save();
-      console.log(`Payment record updated to refunded. ID: ${paymentId}`);
     } else {
       console.warn(`Payment record not found for ID: ${paymentId}`);
     }
@@ -345,20 +314,17 @@ exports.changePassword = async (req, res) => {
     const { currentPassword, newPassword, confirmPassword } = req.body;
     const user = await User.findById(req.user._id);
 
-    // Check if user has password (OAuth users shouldn't have one)
     if (!user.password) {
       return res.status(400).json({
         message: "Password change not available for social login users",
       });
     }
 
-    // Validate current password
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Current password is incorrect" });
     }
 
-    // Validate new password
     if (newPassword !== confirmPassword) {
       return res.status(400).json({ message: "New passwords do not match" });
     }
@@ -387,7 +353,7 @@ exports.getRentalDetails = (req, res, next) => {
 
   RentalProduct.findById(productId)
     .populate("seller", "fullName")
-    // Instead of populating a "buyer" field, populate orderIds and within that, buyer details.
+
     .populate({
       path: "orderIds",
       populate: {
@@ -402,7 +368,7 @@ exports.getRentalDetails = (req, res, next) => {
         return res.status(404).send("Product not found");
       }
       fetchedProduct = product;
-      // Find an active booking for this product
+
       return RentalBooking.findOne({
         product: productId,
         status: "active",
@@ -412,7 +378,7 @@ exports.getRentalDetails = (req, res, next) => {
       if (booking) {
         fetchedProduct.currentBooking = booking;
       }
-      // Render the 'rental-details' view from your views folder
+
       res.render("rental-details", {
         pageTitle: fetchedProduct.title,
         product: fetchedProduct,
@@ -430,9 +396,9 @@ exports.getSecondHandDetails = (req, res, next) => {
   const productId = req.params.productId;
   let fetchedProduct;
 
-  SecondhandDirectProduct.findById(productId)
+  Product.findById(productId)
     .populate("seller", "fullName")
-    // Populate the orderIds array with buyer details
+
     .populate({
       path: "orderIds",
       populate: {
@@ -447,7 +413,7 @@ exports.getSecondHandDetails = (req, res, next) => {
         return res.status(404).send("Product not found");
       }
       fetchedProduct = product;
-      // Render the 'direct-details' view from your views folder
+
       res.render("secondHand-details", {
         pageTitle: fetchedProduct.title,
         product: fetchedProduct,
@@ -464,9 +430,9 @@ exports.getSecondHandDetails = (req, res, next) => {
 exports.getSubscriptionDetails = async (req, res, next) => {
   try {
     const productId = req.params.productId;
-    const product = await SubscriptionDirectProduct.findById(productId)
+    const product = await Subscription.findById(productId)
       .populate("seller", "fullName")
-      // Populate orderIds instead of buyer directly
+
       .populate({
         path: "orderId",
         populate: {
@@ -497,7 +463,6 @@ exports.verifyOTP = async (req, res) => {
   try {
     const { productId, productType, otp, upiId } = req.body;
 
-    // Validate UPI ID format
     if (!/^[\w.-]+@[\w]+/.test(upiId)) {
       return res.status(400).json({
         success: false,
@@ -505,7 +470,6 @@ exports.verifyOTP = async (req, res) => {
       });
     }
 
-    // Map productType to Order's productModel values
     const productModelMap = {
       rental: "Rental",
       secondhand: "SecondHand",
@@ -519,7 +483,6 @@ exports.verifyOTP = async (req, res) => {
         .json({ success: false, message: "Invalid product type" });
     }
 
-    // Determine product model
     let Model;
     switch (productType.toLowerCase()) {
       case "rental":
@@ -537,7 +500,6 @@ exports.verifyOTP = async (req, res) => {
           .json({ success: false, message: "Invalid product type" });
     }
 
-    // Verify product ownership
     const product = await Model.findById(productId);
     if (!product)
       return res
@@ -547,7 +509,6 @@ exports.verifyOTP = async (req, res) => {
       return res.status(403).json({ success: false, message: "Unauthorized" });
     }
 
-    // Check orders for matching OTP
     const orders = await Order.find({
       product_id: productId,
       productModel: productModel,
@@ -556,12 +517,11 @@ exports.verifyOTP = async (req, res) => {
 
     // If OTP is valid
     if (orders.length > 0) {
-      // Create transaction record
       const transaction = new Transaction({
         seller: req.user._id,
         buyer: orders[0].buyer,
         product: productId,
-        amount: orders[0].amount, // Adjust based on your order structure
+        amount: orders[0].amount,
         upiId,
         transactionId: `TT-${uuidv4()}`,
         status: "completed",
@@ -569,7 +529,6 @@ exports.verifyOTP = async (req, res) => {
 
       await transaction.save();
 
-      // Update order status if needed
       await Order.updateMany(
         { _id: { $in: orders.map((o) => o._id) } },
         {
@@ -583,7 +542,7 @@ exports.verifyOTP = async (req, res) => {
       await Model.findByIdAndUpdate(productId, {
         $set: {
           orderId: orders[0]._id,
-          quantity: 0, // Mark as sold out
+          quantity: 0,
         },
       });
 
@@ -631,7 +590,6 @@ exports.getSubscriptionAuctionDetails = async (req, res) => {
       "bidder"
     );
 
-    // Separate monetary and product bids
     const monetaryBids = product.bids.filter((bid) => bid.bidAmount);
     const productBids = product.bids.filter((bid) => bid.location);
 
@@ -652,14 +610,12 @@ exports.acceptSubscriptionBid = async (req, res) => {
   try {
     const { bidId } = req.body;
 
-    // Find the bid and populate the fields
     const bid = await BidProduct.findById(bidId).populate("bidder");
     if (!bid) {
       req.flash("error", "Bid not found.");
       return res.redirect("back");
     }
 
-    // Find the subscription product using Ott model
     const subscription = await Subscription.findById(bid.auction).populate({
       path: "bids",
       populate: { path: "bidder" },
@@ -672,7 +628,7 @@ exports.acceptSubscriptionBid = async (req, res) => {
     // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // --- Create a dummy Payment record to satisfy the required Payment field ---
+    // Create a dummy Payment record to satisfy the required Payment field
     const dummyPayment = new Payment({
       orderId: `dummy_${Date.now()}`,
       paymentId: "NA",
@@ -683,7 +639,6 @@ exports.acceptSubscriptionBid = async (req, res) => {
     });
     await dummyPayment.save();
 
-    // Create order
     const order = new Order({
       Payment: dummyPayment._id,
       product_id: subscription._id,
@@ -696,17 +651,14 @@ exports.acceptSubscriptionBid = async (req, res) => {
     });
     await order.save();
 
-    // Update subscription
     subscription.winner = bid.bidder._id;
     subscription.auctionStatus = "completed";
     subscription.endDate = Date.now();
     subscription.orderId = order._id;
     await subscription.save();
 
-    // Send OTP email
     await emailService.sendOtpEmail(bid.bidder.email, otp);
 
-    // Process refunds for other monetary bids
     if (bid.bidAmount !== null) {
       const otherBids = subscription.bids.filter(
         (otherBid) => otherBid._id.toString() !== bidId && otherBid.bidAmount
@@ -714,28 +666,21 @@ exports.acceptSubscriptionBid = async (req, res) => {
 
       await Promise.all(
         otherBids.map(async (otherBid) => {
-          console.log(
-            `Processing refund for Payment ID: ${otherBid.paymentId}`
-          );
           await initiateRefund(otherBid.paymentId, otherBid.bidAmount);
-          console.log(`Refund completed for Payment ID: ${otherBid.paymentId}`);
         })
       );
     } else {
-      const otherBids = subscription.bids.filter((otherBid) => otherBid.bidAmount);
-      // Process refunds for all other bids concurrently
+      const otherBids = subscription.bids.filter(
+        (otherBid) => otherBid.bidAmount
+      );
+
       await Promise.all(
         otherBids.map(async (otherBid) => {
-          console.log(
-            `Processing refund for Payment ID: ${otherBid.paymentId}`
-          );
           await initiateRefund(otherBid.paymentId, otherBid.bidAmount);
-          console.log(`Refund completed for Payment ID: ${otherBid.paymentId}`);
         })
       );
     }
 
-    // Custom message for subscriptions
     const bidTypeMessage =
       bid.bidAmount !== null
         ? `Monetary bid accepted! Winner is ${bid.bidder.fullName}. Other bids refunded.`

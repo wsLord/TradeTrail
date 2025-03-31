@@ -14,14 +14,14 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: "uploads", // Cloudinary folder name
-    format: async (req, file) => "png", // Convert all images to PNG (optional)
-    public_id: (req, file) => `${Date.now()}-${file.originalname}`, // Unique filename
+    folder: "uploads",
+    format: async (req, file) => "png",
+    public_id: (req, file) => `${Date.now()}-${file.originalname}`,
   },
 });
 
 // 🔹 Multer Middleware
-const uploadSingle = multer({ storage }).single("image"); // Single file upload
-const uploadMultiple = multer({ storage }).array("images", 10); // Multiple files upload
+const uploadSingle = multer({ storage }).single("image");
+const uploadMultiple = multer({ storage }).array("images", 10);
 
 module.exports = { uploadSingle, uploadMultiple };

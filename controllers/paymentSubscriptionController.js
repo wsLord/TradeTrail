@@ -4,21 +4,19 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 const payment = require("../models/payment");
-//const Bid = require('../models/bidproduct');
-const Bid = require("../models/bid"); // Adjust path as needed
+
 const axios = require("axios");
 
 // Initialize Razorpay with your test keys
 const razorpayInstance = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID, // Using your test key directly
+  key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
 exports.makePayment = async (req, res) => {
   try {
-    console.log("Received request body:", req.body); // Debug request body
     const { amount } = req.body;
-    console.log(amount)
+
     if (!amount || amount <= 0) {
       return res
         .status(400)
@@ -26,7 +24,7 @@ exports.makePayment = async (req, res) => {
     }
 
     const options = {
-      amount: amount, // Keep amount as is, no extra multiplication
+      amount: amount,
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
       payment_capture: 1,
@@ -55,26 +53,23 @@ exports.makePayment = async (req, res) => {
 
 exports.getPaymentPage = (req, res) => {
   res.render("subscriptionSwapping/auction", {
-    razorpayKeyId: process.env.RAZORPAY_KEY_ID, // Using your test key directly
+    razorpayKeyId: process.env.RAZORPAY_KEY_ID,
   });
 };
 
 exports.createOrder = async (req, res) => {
   try {
-    const { amount } = req.body; // Amount in INR (e.g., 100.50)
+    const { amount } = req.body;
 
-    // Convert to paise (smallest currency unit) by multiplying by 100
     const amountInPaise = Math.round(amount * 100);
 
     const options = {
-      amount: amountInPaise, // Already in paise
+      amount: amountInPaise,
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
     };
 
-    console.log("Creating order with options:", options);
     const order = await razorpayInstance.orders.create(options);
-    console.log("Order created:", order);
 
     res.status(200).json({
       success: true,
@@ -93,14 +88,11 @@ exports.createOrder = async (req, res) => {
 };
 exports.verifyPayment = async (req, res) => {
   try {
-    console.log("Received verification request:", req.body);
-
     const {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
       amount,
-      productId,
     } = req.body;
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
@@ -116,9 +108,6 @@ exports.verifyPayment = async (req, res) => {
       .update(sign)
       .digest("hex");
 
-    console.log("Expected signature:", expectedSign);
-    console.log("Received signature:", razorpay_signature);
-
     if (razorpay_signature !== expectedSign) {
       console.log("Signature verification failed!");
       return res
@@ -126,7 +115,6 @@ exports.verifyPayment = async (req, res) => {
         .json({ success: false, message: "Invalid signature" });
     }
 
-    // Save the payment details in the database
     const newPayment = new payment({
       orderId: razorpay_order_id,
       paymentId: razorpay_payment_id,
@@ -135,15 +123,11 @@ exports.verifyPayment = async (req, res) => {
       status: "completed",
     });
 
-    console.log("Saving payment:", newPayment);
     await newPayment.save();
-
-    // req.session.lastPaymentId = razorpay_payment_id;
 
     return res.json({
       success: true,
       redirectUrl: "/subscription",
-      // paymentId: razorpay_payment_id,
     });
   } catch (error) {
     console.error("Error verifying payment:", error);
@@ -157,12 +141,11 @@ exports.paymentSuccess = (req, res) => {
   res.render("cart/success");
 };
 
-// New function for handling Razorpay refunds
+// Handling Razorpay refunds
 exports.razorpayRefund = async (req, res) => {
   try {
     const { paymentId, amount, notes } = req.body;
 
-    // Validate required parameters
     if (!paymentId) {
       console.error("Refund failed: Missing payment ID");
       return res.status(400).json({
@@ -179,17 +162,11 @@ exports.razorpayRefund = async (req, res) => {
       });
     }
 
-    // Log refund attempt
-    console.log(
-      `Initiating refund for payment: ${paymentId}, amount: ${amount}`
-    );
-
-    // Basic auth for Razorpay API - convert key_id:key_secret to base64
     const auth = Buffer.from(
       `${process.env.RAZORPAY_KEY_ID}:${process.env.RAZORPAY_KEY_SECRET}`
     ).toString("base64");
 
-    // Make direct API call to Razorpay
+    // Direct API call to Razorpay
     const response = await axios({
       method: "POST",
       url: `https://api.razorpay.com/v1/payments/${paymentId}/refund`,
@@ -198,37 +175,29 @@ exports.razorpayRefund = async (req, res) => {
         Authorization: `Basic ${auth}`,
       },
       data: {
-        amount: Math.floor(amount * 0.9), // Amount should already be in paise from client
+        amount: Math.floor(amount * 0.9),
         notes: notes || { reason: "Refund requested by user" },
-        speed: "normal", // Can be 'normal' or 'optimum'
+        speed: "normal",
       },
     });
 
-    // Get refund details from response
     const refundData = response.data;
-    console.log("Refund successful:", refundData);
 
-    // Update payment status in the database
     try {
       const paymentRecord = await payment.findOne({ paymentId: paymentId });
       if (paymentRecord) {
         paymentRecord.status = "refunded";
         paymentRecord.refundId = refundData.id;
         paymentRecord.refundedAt = new Date();
-        paymentRecord.refundAmount = amount / 100; // Convert paise to INR for storage
+        paymentRecord.refundAmount = amount / 100;
         await paymentRecord.save();
-        console.log(
-          `Payment record updated to refunded status. ID: ${paymentId}`
-        );
       } else {
         console.warn(`Payment record not found for ID: ${paymentId}`);
       }
     } catch (dbError) {
       console.error("Error updating payment record:", dbError);
-      // Continue with the response even if DB update fails
     }
 
-    // Return success response
     return res.status(200).json({
       success: true,
       message: `Refund initiated successfully with refundID:${refundData.id}`,
@@ -236,10 +205,8 @@ exports.razorpayRefund = async (req, res) => {
       refundDetails: refundData,
     });
   } catch (error) {
-    // Log the error
     console.error("Razorpay refund error:", error);
 
-    // Handle axios error responses from Razorpay
     if (error.response) {
       return res.status(error.response.status).json({
         success: false,
@@ -248,7 +215,6 @@ exports.razorpayRefund = async (req, res) => {
       });
     }
 
-    // Handle network or other errors
     return res.status(500).json({
       success: false,
       message: "Internal server error while processing refund",

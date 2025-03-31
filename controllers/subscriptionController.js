@@ -9,7 +9,7 @@ exports.getHome = (req, res, next) => {
   res.render("subscriptionSwapping/subscriptionHome", {
     pageTitle: "Subscription Swapping",
     path: "/subscription",
-    activePage: "subscription", // added for navbar active highlighting
+    activePage: "subscription",
   });
 };
 
@@ -18,7 +18,6 @@ exports.addToCart = async (req, res) => {
     const userId = req.user._id;
     const productId = req.params.productId;
 
-    // Force quantity to 1 for subscriptions
     const quantityToAdd = 1; // Override any incoming quantity
 
     const product = await Ott.findById(productId);
@@ -29,7 +28,6 @@ exports.addToCart = async (req, res) => {
 
     let cart = await Cart.findOne({ user: userId });
 
-    // Check if subscription already exists in cart
     if (cart) {
       const existingSubscription = cart.items.find(
         (item) =>
@@ -49,7 +47,7 @@ exports.addToCart = async (req, res) => {
       productType: "Subscription",
       productModel: "Ott",
       product: productId,
-      quantity: 1, // Force quantity to 1
+      quantity: 1,
     };
 
     if (!cart) {
@@ -70,7 +68,6 @@ exports.addToCart = async (req, res) => {
   }
 };
 
-// 3. Modify existing postAddProduct controller
 exports.postAddProduct = (req, res) => {
   req.session.tempProduct = {
     platform_name: req.body.platform_name,
@@ -92,7 +89,6 @@ exports.getProducts = async (req, res, next) => {
     const { search, minPrice, maxPrice, location, platform } = req.query;
     const filter = {};
 
-    // Search Filter
     if (search) {
       filter.$or = [
         { platform_name: { $regex: search, $options: "i" } },
@@ -101,19 +97,16 @@ exports.getProducts = async (req, res, next) => {
       ];
     }
 
-    // Price Range Filter
     if (minPrice || maxPrice) {
       filter.price = {};
       if (minPrice) filter.price.$gte = parseFloat(minPrice);
       if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
     }
 
-    // Location Filter
     if (location) {
       filter.location = new RegExp(location, "i");
     }
 
-    // Subscription Name Filter
     if (platform) {
       filter.platform_name = new RegExp(platform, "i");
     }
@@ -122,7 +115,6 @@ exports.getProducts = async (req, res, next) => {
       .populate("seller", "fullName _id")
       .lean();
 
-    // Get unique values for filters
     const locations = await Ott.distinct("location");
     const subscriptionNames = await Ott.distinct("platform_name");
 
@@ -162,11 +154,10 @@ exports.getProduct = (req, res, next) => {
         return res.redirect("/subscription/buy");
       }
 
-      // Calculate max bid correctly
       const monetaryBids = product.bids.filter((bid) => bid.bidAmount !== null);
       const maxBid = monetaryBids.reduce(
         (max, bid) => Math.max(max, bid.bidAmount),
-        product.min_price // Start with min_price as base
+        product.min_price
       );
 
       res.render("subscriptionSwapping/auction", {
@@ -219,7 +210,7 @@ exports.getAddBidProduct = (req, res, next) => {
     pageTitle: "Add Bid Product",
     path: "/add-bid-product",
     productId: prodId,
-    activePage: "subscription", // added for navbar active highlighting
+    activePage: "subscription",
   });
 };
 
@@ -231,7 +222,6 @@ exports.postAddBidProduct = async (req, res, next) => {
   const { title, imageUrl, description, location, bidAmount, paymentId } =
     req.body;
 
-  // Check for existing bid
   const existingBid = await BidProducts.findOne({
     bidder: req.user._id,
     auction: prodId,
@@ -245,21 +235,18 @@ exports.postAddBidProduct = async (req, res, next) => {
     return res.redirect(`/subscription/buy/${prodId}`);
   }
 
-  // Get product with monetary bids
   const product = await Ott.findById(prodId).populate({
     path: "bids",
     match: { bidAmount: { $ne: null } },
   });
 
-  // Calculate current max bid and count of monetary bids
   const monetaryBids = product.bids.filter((bid) => bid.bidAmount !== null);
   const currentMaxBid = monetaryBids.reduce(
     (max, bid) => Math.max(max, bid.bidAmount),
-    product.min_price // Start with min_price instead of product.price
+    product.min_price
   );
   const monetaryBidsCount = monetaryBids.length;
 
-  // Validate bid amount
   if (bidAmount) {
     const minRequired =
       monetaryBidsCount === 0
@@ -317,13 +304,11 @@ exports.postAddBidProduct = async (req, res, next) => {
     });
 };
 
-// Add this new method to subscriptionController.js
 exports.deleteBid = async (req, res, next) => {
   try {
     const bidId = req.params.bidId;
     const bid = await BidProducts.findByIdAndDelete(bidId);
 
-    // Remove bid reference from Ott product
     await Ott.findByIdAndUpdate(bid.auction, { $pull: { bids: bidId } });
 
     req.flash("success", "Bid deleted successfully");
@@ -334,7 +319,6 @@ exports.deleteBid = async (req, res, next) => {
   }
 };
 
-// Render credential verification page
 exports.getVerifyCredentials = (req, res) => {
   res.render("subscriptionSwapping/verify-credentials", {
     pageTitle: "Verify Credentials",
@@ -439,7 +423,6 @@ exports.getDirectVerifyCredentials = (req, res) => {
   });
 };
 
-// Modify the postDirectVerifyCredentials controller
 exports.postDirectVerifyCredentials = async (req, res) => {
   const { action, email, password } = req.body;
   const productData = req.session.tempDirectProduct;

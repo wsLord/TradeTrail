@@ -4,31 +4,29 @@ const Cart = require("../models/cartModel");
 
 async function clearExpiredRentals() {
   const currentDate = new Date();
-  const expiredRentals = await RentalBooking.find({ rentalEnd: { $lt: currentDate }, status: "active" });
+  const expiredRentals = await RentalBooking.find({
+    rentalEnd: { $lt: currentDate },
+    status: "active",
+  });
 
   for (const rental of expiredRentals) {
     await RentalProduct.findByIdAndUpdate(rental.product, {
       buyer: null,
-      currentBooking: null
+      currentBooking: null,
     });
 
     await RentalBooking.findByIdAndUpdate(rental._id, {
-      status: "completed"
+      status: "completed",
     });
   }
-
-  console.log('Expired rentals cleared and updated.');
 }
 
-// Add-to-Cart Controller Method
 exports.addToCart = async (req, res) => {
   try {
     const userId = req.user._id;
     const productId = req.params.productId;
     const { rentalStart, rentalEnd } = req.body;
 
-
-    // Validate dates
     if (!rentalStart || !rentalEnd) {
       req.flash("error", "Please select rental dates");
       return res.redirect(`/rental/details/${productId}`);
@@ -40,55 +38,59 @@ exports.addToCart = async (req, res) => {
       return res.redirect("/rental/rent");
     }
 
-    // Check product availability
     if (product.quantity < 1) {
       req.flash("error", "This product is currently out of stock");
       return res.redirect(`/rental/details/${productId}`);
     }
 
-    // Check existing cart quantity
     const cart = await Cart.findOne({ user: userId });
     let existingQuantity = 0;
 
     if (cart) {
       const existingItem = cart.items.find(
-        item => item.product.toString() === productId && 
-                item.productType === "Rental"
+        (item) =>
+          item.product.toString() === productId && item.productType === "Rental"
       );
       existingQuantity = existingItem ? existingItem.quantity : 0;
     }
 
-    const totalRequested = existingQuantity + 1; // Since we're adding 1 item
+    const totalRequested = existingQuantity + 1;
 
     if (totalRequested > product.quantity) {
       req.flash(
         "error",
-        // `Cannot add more items. Only ${product.quantity - existingQuantity} available in stock.`
+
         `Cannot add more than the quantity available.`
       );
       return res.redirect(`/rental/details/${productId}`);
     }
 
-    // Calculate rental duration
     const startDate = new Date(rentalStart);
     const endDate = new Date(rentalEnd);
     const diffTime = Math.abs(endDate - startDate);
-    
+
     let units;
-    switch(product.rate) {
-      case 'hour': units = diffTime / (1000 * 60 * 60); break;
-      case 'day': units = diffTime / (1000 * 60 * 60 * 24); break;
-      case 'week': units = diffTime / (1000 * 60 * 60 * 24 * 7); break;
-      case 'month': units = diffTime / (1000 * 60 * 60 * 24 * 30); break;
+    switch (product.rate) {
+      case "hour":
+        units = diffTime / (1000 * 60 * 60);
+        break;
+      case "day":
+        units = diffTime / (1000 * 60 * 60 * 24);
+        break;
+      case "week":
+        units = diffTime / (1000 * 60 * 60 * 24 * 7);
+        break;
+      case "month":
+        units = diffTime / (1000 * 60 * 60 * 24 * 30);
+        break;
     }
     const calculatedPrice = Math.ceil(units) * product.price;
 
-    // Update cart logic
     const updatedCart = cart || new Cart({ user: userId });
-    
+
     const existingItemIndex = updatedCart.items.findIndex(
-      item => item.product.toString() === productId && 
-              item.productType === "Rental"
+      (item) =>
+        item.product.toString() === productId && item.productType === "Rental"
     );
 
     if (existingItemIndex > -1) {
@@ -102,7 +104,7 @@ exports.addToCart = async (req, res) => {
         rentalStart: startDate,
         rentalEnd: endDate,
         calculatedPrice,
-        securityDeposit: product.securityDeposit
+        securityDeposit: product.securityDeposit,
       });
     }
 
@@ -113,10 +115,8 @@ exports.addToCart = async (req, res) => {
     req.flash("error", "Failed to add to cart.");
     res.redirect("/rental/rent");
   }
-
 };
 
-// Homepage for Renting
 exports.getHome = (req, res, next) => {
   res.render("rentals/rentalHome", {
     pageTitle: "Renting",
@@ -135,16 +135,33 @@ exports.getAddProduct = (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
-  const { title, price, description, location, rate, quantity, securityDeposit  } = req.body;
+  const {
+    title,
+    price,
+    description,
+    location,
+    rate,
+    quantity,
+    securityDeposit,
+  } = req.body;
 
   if (!req.files || req.files.length === 0) {
     console.log("No files uploaded!");
     return res.status(400).send("At least one image is required.");
   }
 
-  const imageUrls = req.files.map(file => file.path); // Get Cloudinary image URLs
- if (!title || !imageUrls || !price || !description || !location || !rate || !quantity || !securityDeposit) {
-    return res.status(400).send('All fields are required!');
+  const imageUrls = req.files.map((file) => file.path); // Get Cloudinary image URLs
+  if (
+    !title ||
+    !imageUrls ||
+    !price ||
+    !description ||
+    !location ||
+    !rate ||
+    !quantity ||
+    !securityDeposit
+  ) {
+    return res.status(400).send("All fields are required!");
   }
 
   const rentalProduct = new RentalProduct({
@@ -153,17 +170,15 @@ exports.postAddProduct = (req, res, next) => {
     price: price,
     description: description,
     location: location,
-    rate: rate,  // Save rate directly as per the form
+    rate: rate,
     quantity: quantity,
-    securityDeposit: securityDeposit,  // Save quantity directly
+    securityDeposit: securityDeposit,
     seller: req.user._id,
-
   });
 
   rentalProduct
     .save()
     .then(() => {
-      console.log("Rental Product Posted Successfully!");
       res.redirect("/rental/rent");
     })
     .catch((err) => {
@@ -174,41 +189,34 @@ exports.postAddProduct = (req, res, next) => {
     });
 };
 
-// Get all rental items (with search)
-
-exports.getRentItems = async (req, res,next) => {
+exports.getRentItems = async (req, res, next) => {
   try {
     const { search, minPrice, maxPrice, location, rate } = req.query;
     const query = {};
 
-    // Search Filter
     if (search) {
       query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { location: { $regex: search, $options: 'i' } }
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+        { location: { $regex: search, $options: "i" } },
       ];
     }
 
-    // Price Range Filter
     if (minPrice || maxPrice) {
       query.price = {};
       if (minPrice) query.price.$gte = parseFloat(minPrice);
       if (maxPrice) query.price.$lte = parseFloat(maxPrice);
     }
 
-    // Location Filter
     if (location) query.location = location;
 
-    // Rate Type Filter
     if (rate) query.rate = rate;
 
-    // Get Distinct Locations for Dropdown
-    const locations = await RentalProduct.distinct('location');
+    const locations = await RentalProduct.distinct("location");
 
     const products = await RentalProduct.find(query);
-    
-    res.render('rentals/rent-items', {
+
+    res.render("rentals/rent-items", {
       products,
       searchQuery: search,
       minPrice,
@@ -216,33 +224,26 @@ exports.getRentItems = async (req, res,next) => {
       location,
       rate,
       locations,
-      pageTitle: "Available Rentals",  
-      path: "/rental/rent",           
-      activePage: "rental"   
+      pageTitle: "Available Rentals",
+      path: "/rental/rent",
+      activePage: "rental",
     });
-
-
   } catch (err) {
     console.error(err);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
-
 };
 
-
-// Controller method to handle the buying action and decrementing quantity
 exports.buyProduct = (req, res, next) => {
-  const productId = req.params.productId; // Extract product ID from the URL
-      
-  // Find the rental product by its ID in the database
+  const productId = req.params.productId;
+
   RentalProduct.findById(productId)
-  .populate("seller", "fullName")
+    .populate("seller", "fullName")
     .then((product) => {
       if (product) {
-        // If the product has sufficient stock, decrement the quantity
         if (product.quantity > 0) {
-          product.quantity -= 1; // Decrement the quantity by 1
-          return product.save(); // Save the updated product data to the DB
+          product.quantity -= 1;
+          return product.save();
         } else {
           res
             .status(400)
@@ -255,18 +256,15 @@ exports.buyProduct = (req, res, next) => {
     })
     .then((updatedProduct) => {
       if (updatedProduct) {
-        // If successful, redirect back to the products page or send success message
         res.redirect("/rental/rent");
       }
     })
     .catch((err) => {
       console.error(err);
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: "An error occurred while processing the purchase",
-        });
+      res.status(500).json({
+        success: false,
+        message: "An error occurred while processing the purchase",
+      });
     });
 };
 
@@ -275,24 +273,23 @@ exports.getProductDetails = (req, res, next) => {
   let fetchedProduct;
 
   RentalProduct.findById(productId)
-  .populate("seller", "fullName")
-  .populate("orderIds")
+    .populate("seller", "fullName")
+    .populate("orderIds")
     .then((product) => {
       if (!product) {
         return res.status(404).send("Product not found");
       }
-      console.log(product);
-      
+
       fetchedProduct = product;
-      // Find an active booking for this product
-      return RentalBooking.findOne({ product: productId, status: "active" }).populate("user", "fullName");
+
+      return RentalBooking.findOne({
+        product: productId,
+        status: "active",
+      }).populate("user", "fullName");
     })
     .then((booking) => {
       if (booking) {
-        // Attach the booking information dynamically
         fetchedProduct.currentBooking = booking;
-        // fetchedProduct.populate('booking.user','fullName');
-        console.log(booking);
       }
       res.render("rentals/product-details", {
         pageTitle: fetchedProduct.title,
@@ -311,35 +308,31 @@ exports.updateCart = (req, res, next) => {
   let newQuantity = parseInt(req.body.quantity);
   const userId = req.user._id;
 
-  // Ensure the new quantity is at least 1
   if (newQuantity < 1) {
     newQuantity = 1;
   }
 
-  // First, verify the product exists and check its available stock
   RentalProduct.findById(productId)
     .then((product) => {
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
-      // Limit the new quantity to the available stock
+
       if (newQuantity > product.quantity) {
         newQuantity = product.quantity;
       }
-      // Now, find the cart for the user
+
       return Cart.findOne({ user: userId });
     })
     .then((cart) => {
       if (!cart) {
-        // If no cart exists, redirect (or create a new cart if desired)
         return res.redirect("/rental/cart");
       }
-      // Find the item in the cart
+
       const itemIndex = cart.items.findIndex(
         (item) => item.product.toString() === productId
       );
       if (itemIndex > -1) {
-        // Update the quantity
         cart.items[itemIndex].quantity = newQuantity;
       }
       return cart.save();
@@ -355,12 +348,9 @@ exports.updateCart = (req, res, next) => {
 
 exports.rentProduct = (req, res, next) => {
   const productId = req.params.productId;
-  const userId = req.user._id; // assuming the user is authenticated via JWT middleware
-  const rentalEnd = req.body.rentalEnd; // Date provided by the user
+  const userId = req.user._id;
+  const rentalEnd = req.body.rentalEnd;
 
-  // Optionally, validate that rentalEnd is in the future
-
-  // Create a new rental booking
   const booking = new RentalBooking({
     product: productId,
     user: userId,
@@ -370,8 +360,7 @@ exports.rentProduct = (req, res, next) => {
   booking
     .save()
     .then(() => {
-      // Optionally, update the product's available quantity or status
-      res.redirect("/rental/cart"); // or redirect to a confirmation page
+      res.redirect("/rental/cart");
     })
     .catch((err) => {
       console.error(err);

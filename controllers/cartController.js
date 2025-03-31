@@ -1,6 +1,7 @@
 const Cart = require("../models/cartModel");
 const mongoose = require("mongoose");
 
+// Get cart products
 exports.getCart = async (req, res) => {
   try {
     const cart = await Cart.findOne({ user: req.user._id })
@@ -17,7 +18,6 @@ exports.getCart = async (req, res) => {
           const ProductModel = mongoose.model(item.productModel);
           const product = await ProductModel.findById(item.product).lean();
 
-          // Convert date strings to Date objects
           const rentalStart = item.rentalStart
             ? new Date(item.rentalStart)
             : null;
@@ -77,7 +77,6 @@ exports.updateCart = async (req, res) => {
     const item = cart.items.id(req.params.itemId);
     if (!item) return res.redirect("/cart");
 
-    // Prevent quantity modification for subscriptions
     if (item.productType === "Subscription") {
       req.flash("error", "Subscription quantities cannot be modified");
       return res.redirect("/cart");

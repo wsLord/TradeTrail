@@ -13,7 +13,7 @@ const emailService = require("../services/emailService");
 
 // Initialize Razorpay with your test keys
 const razorpayInstance = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID, // Using your test key directly
+  key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
@@ -31,7 +31,6 @@ exports.makePayment = async (req, res) => {
         .json({ success: false, message: "Invalid section" });
     }
 
-    // Find user's cart and get relevant product details
     const cart = await Cart.findOne({ user: req.user._id });
 
     if (!cart) {
@@ -39,7 +38,7 @@ exports.makePayment = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Cart not found." });
     }
-    // Filter products based on the section and product IDs
+
     const filteredProducts = cart.items.filter(
       (item) => item.productType === section
     );
@@ -113,7 +112,7 @@ exports.makePayment = async (req, res) => {
 
 exports.getPaymentPage = (req, res) => {
   res.render("cart/unifiedCart", {
-    razorpayKeyId: process.env.RAZORPAY_KEY_ID, // Using your test key directly
+    razorpayKeyId: process.env.RAZORPAY_KEY_ID,
   });
 };
 
@@ -139,9 +138,6 @@ exports.verifyPayment = async (req, res) => {
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(sign)
       .digest("hex");
-
-    // console.log("Expected signature:", expectedSign);
-    // console.log("Received signature:", razorpay_signature);
 
     if (razorpay_signature !== expectedSign) {
       console.log("Signature verification failed!");
@@ -178,10 +174,8 @@ exports.verifyPayment = async (req, res) => {
         .json({ success: false, message: "Invalid section" });
     }
 
-    // Find user's cart and get relevant product details
     const cart = await Cart.findOne({ user: req.user._id });
 
-    // Filter products based on the section and product IDs
     const filteredProducts = cart.items.filter(
       (item) => item.productType === section
     );
@@ -230,13 +224,12 @@ exports.verifyPayment = async (req, res) => {
           await order.save();
           console.log("Order is saved");
 
-          // Update quantity
           const remainingQuantity = Math.max(
             0,
             item.product.quantity - item.quantity
           );
 
-          // CHANGE: Update product differently for subscriptions vs. others
+          // Update product differently for subscriptions vs. others
           if (section === "Subscription") {
             // For subscriptions, update singular orderId
             await model.findByIdAndUpdate(item.product._id, {
@@ -250,7 +243,6 @@ exports.verifyPayment = async (req, res) => {
             });
           }
 
-          // Handle rentals
           if (section === "Rental") {
             const booking = new RentalBooking({
               product: item.product,
@@ -267,10 +259,9 @@ exports.verifyPayment = async (req, res) => {
       })
     );
 
-    // ✅ Remove the products from the cart after successful payment
     cart.items = cart.items.filter((item) => !(item.productType === section));
     await cart.save();
-    //payment verification done
+
     console.log("Payment verified");
 
     return res.json({

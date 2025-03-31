@@ -140,13 +140,13 @@
 
   .otp-input-group {
     display: flex;
-    flex-direction: column; /* Stack vertically */
-    gap: 15px; /* Add spacing between elements */
+    flex-direction: column; 
+    gap: 15px; 
     margin: 15px 0;
   }
 
   .otp-field {
-    width: 100%; /* Full width */
+    width: 100%; 
     padding: 12px;
     border: 2px solid #3E6B48;
     border-radius: 8px;
@@ -258,48 +258,7 @@
             </p>
           <% } %>
         </div>
-<!-- 
-        <div class="rental-calendar">
-          <form action="/rental/add-to-cart/<%= product.id %>" method="POST">
-            <div class="date-fields-container">
-              <div class="form-group">
-                <label for="rentalStart">Start Date:</label>
-                <input type="date" name="rentalStart" id="rentalStart" required 
-                      min="<%= new Date().toISOString().split('T')[0] %>">
-              </div>
-              
-              <div class="form-group">
-                <label for="rentalEnd">End Date:</label>
-                <input type="date" name="rentalEnd" id="rentalEnd" required 
-                      min="<%= new Date().toISOString().split('T')[0] %>">
-              </div>
-            </div>
 
-            <div class="form-actions">
-              <button type="submit" class="add-to-cart-button <%= product.buyer ? 'disabled-button' : '' %>" 
-                      <%= product.buyer ? 'disabled' : '' %>>
-                Add to Cart (₹<span id="dynamicPrice">0</span>)
-              </button>
-              <% if (product.buyer) { %>
-                <p class="rented-message" style="color: red; font-weight: bold; margin-top: 10px;">
-                  Already Rented By: <%= product.buyer.fullName %>
-                </p>
-              <% } %>
-            </div>
-          </form>
-        </div>
-
-        <div class="price-summary-card">
-          <h3>Pricing Details</h3>
-          <div class="price-breakdown">
-            <p><strong>Rate:</strong> ₹<%= product.price %>/<%= product.rate %></p>
-            <p><strong>Security Deposit:</strong> ₹<%= product.securityDeposit %></p>
-          </div>
-          <div class="calculation-breakdown" id="calculationDetails"></div>
-          <h4 class="total-price">Total Estimate: ₹<span id="totalPrice">0</span></h4>
-        </div>
-      </div>
-    </div> -->
 
     <% if (product.orderIds && product.orderIds.some(order => !order.paymentTransferred) && user._id.equals(product.seller._id)) { %>
       <div class="otp-verification-card">
@@ -346,7 +305,7 @@
       slides[slideIndex].classList.add("active");
     }
 
-    // Initialize date inputs
+   
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('rentalStart').min = today;
     document.getElementById('rentalEnd').min = today;
@@ -372,7 +331,7 @@
         Transaction ID: ${data.transactionId}
       `;
       resultDiv.className = 'otp-result success';
-      // Refresh page after 2 seconds
+     
       setTimeout(() => location.reload(), 2000);
     } else {
       resultDiv.innerHTML = `❌ ${data.message}`;

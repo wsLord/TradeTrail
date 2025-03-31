@@ -9,8 +9,7 @@ const rentalBookingSchema = new Schema({
   },
   user: { type: Schema.Types.ObjectId, ref: "User", required: true },
   rentalStart: { type: Date, default: Date.now },
-  rentalEnd: { type: Date, required: true }, // The date when the item is due to be returned
-  // Optionally, you can add a status field: "active", "completed", "cancelled", etc.
+  rentalEnd: { type: Date, required: true },
   status: { type: String, default: "active" },
 });
 

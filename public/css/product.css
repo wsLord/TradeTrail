@@ -1,164 +1,166 @@
 body {
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #F5F8F2; /* Same as homepage */
-    text-align: center;
+  font-family: "Arial", sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f8f2; /* Same as homepage */
+  text-align: center;
 }
 
 .product-form {
-    width: 65rem;
-    max-width: 90%;
-    margin: auto;
-    display: block;
-    margin-top: 40pt;
-    padding: 3rem;
-    background: #ffffff; /* Light background for contrast */
-    border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  width: 65rem;
+  max-width: 90%;
+  margin: auto;
+  display: block;
+  margin-top: 40pt;
+  padding: 3rem;
+  background: #ffffff; /* Light background for contrast */
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .product__title {
-    font-size: 1.4rem;
-    font-weight: bold;
-    text-align: center;
+  font-size: 1.4rem;
+  font-weight: bold;
+  text-align: center;
 }
 
 .product__price {
-    text-align: center;
-    color: #4d4d4d;
-    margin-bottom: 0.5rem;
-    font-size: 1.2rem;
+  text-align: center;
+  color: #4d4d4d;
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
 }
 
 .product-item {
-    width: 22rem;
-    max-width: 95%;
-    margin: 1rem auto;
-    padding: 1rem;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  width: 22rem;
+  max-width: 95%;
+  margin: 1rem auto;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Styling each form control */
 .form-control {
-    margin-bottom: 1rem;
+  margin-bottom: 1rem;
 }
 
 .form-control label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 0.3rem;
-    font-size: 20px;
-    text-align: left;
-    padding-left: 2%;
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.3rem;
+  font-size: 20px;
+  text-align: left;
+  padding-left: 2%;
 }
 
 .form-control input,
 .form-control textarea,
-.form-control select { /* Added select styling */
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1rem;
+.form-control select {
+  /* Added select styling */
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
 }
 
 /* Hover effect on inputs, textareas, and selects */
 .form-control input:focus,
 .form-control textarea:focus,
-.form-control select:focus { /* Added select focus styling */
-    outline: none;
-    border-color: #3E6B48;
-    box-shadow: 0px 0px 5px rgba(62, 107, 72, 0.5);
+.form-control select:focus {
+  /* Added select focus styling */
+  outline: none;
+  border-color: #3e6b48;
+  box-shadow: 0px 0px 5px rgba(62, 107, 72, 0.5);
 }
 
 .btn {
-    width: 100%;
-    padding: 14px 30px; 
-    background-color: #3E6B48; 
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    margin-top: 30pt;
+  width: 100%;
+  padding: 14px 30px;
+  background-color: #3e6b48;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  margin-top: 30pt;
 }
 
 .btn:hover {
-    background-color: #2d5035;;
+  background-color: #2d5035;
 }
 
 .product__description {
-    text-align: center;
+  text-align: center;
 }
 
 /* Styling for the select dropdown */
 .form-control select {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1rem;
-    background-color: white;
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  background-color: white;
 }
 
 /* Hover and focus effects for the select dropdown */
 .form-control select:focus {
-    outline: none;
-    border-color: #3E6B48;
-    box-shadow: 0px 0px 5px rgba(62, 107, 72, 0.5);
+  outline: none;
+  border-color: #3e6b48;
+  box-shadow: 0px 0px 5px rgba(62, 107, 72, 0.5);
 }
 
 .tooltip-icon {
-    position: relative;
-    display: inline-block;
-    cursor: pointer;
-    color: #555;
-    font-size: 16px;
-    margin-left: 5px;
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  color: #555;
+  font-size: 16px;
+  margin-left: 5px;
 }
 
 .tooltip-icon:hover .tooltip-text {
-    visibility: visible;
-    opacity: 1;
+  visibility: visible;
+  opacity: 1;
 }
 
 .tooltip-text {
-    visibility: hidden;
-    width: 280px;
-    background-color: #333;
-    color: #fff;
-    text-align: center;
-    padding: 10px;
-    border-radius: 4px;
-    margin-left: 10px;
-    opacity: 0;
-    font-size: 16px;
+  visibility: hidden;
+  width: 280px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 10px;
+  border-radius: 4px;
+  margin-left: 10px;
+  opacity: 0;
+  font-size: 16px;
 }
 .scroll-text {
-    white-space: nowrap;
-    font-size: 24px;
-    font-weight: bold;
-    position: absolute;
-    animation: scrollText 10s linear infinite;
-  }
+  white-space: nowrap;
+  font-size: 24px;
+  font-weight: bold;
+  position: absolute;
+  animation: scrollText 10s linear infinite;
+}
 
-  @keyframes scrollText {
-    from {
-      left: -100%;
-    }
-    to {
-      left: 100%;
-    }
+@keyframes scrollText {
+  from {
+    left: -100%;
   }
+  to {
+    left: 100%;
+  }
+}
 
-  .scroll-container {
-    width: 100%;
-    overflow: hidden;
-    position: relative;
-    height: 40px;
-    background: lightgray;
-  }
+.scroll-container {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  height: 40px;
+  background: lightgray;
+}

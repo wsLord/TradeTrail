@@ -5,12 +5,11 @@ const Cart = require("../models/cartModel");
 
 const MIN_BID_INCREMENT = 100;
 
-//homepage for second hand
 exports.getHome = (req, res, next) => {
   res.render("secondHand/secondHandHome", {
     pageTitle: "Second Hand",
     path: "/secondHand",
-    activePage: "secondHand", // Added activePage
+    activePage: "secondHand",
   });
 };
 
@@ -19,16 +18,14 @@ exports.getAddProduct = (req, res, next) => {
   res.render("secondHand/add-product", {
     pageTitle: "Add Product",
     path: "/secondHand/sell/add-product",
-    activePage: "secondHand", // Added activePage
+    activePage: "secondHand",
   });
 };
 
-//creating products for sell
 exports.postAddProduct = (req, res, next) => {
   const { title, price, min_price, description, location, startDate, endDate } =
     req.body;
-  // Format image URL for consistency
-  // const imageUrls = req.files.map(file => `/uploads/${file.filename}`);
+
   const imageUrls = req.files.map((file) => file.path);
 
   const product = new Product({
@@ -56,12 +53,10 @@ exports.postAddProduct = (req, res, next) => {
     });
 };
 
-//all the products for buy page
 exports.getProducts = (req, res, next) => {
   const { search, minPrice, maxPrice, location, saleType } = req.query;
   const filter = {};
 
-  // Search Filter
   if (search) {
     filter.$or = [
       { title: { $regex: search, $options: "i" } },
@@ -70,19 +65,16 @@ exports.getProducts = (req, res, next) => {
     ];
   }
 
-  // Price Range Filter
   if (minPrice || maxPrice) {
     filter.price = {};
     if (minPrice) filter.price.$gte = parseFloat(minPrice);
     if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
   }
 
-  // Location Filter
   if (location) {
     filter.location = new RegExp(location, "i");
   }
 
-  // Sale Type Filter
   if (saleType) {
     filter.saleType = saleType;
   }
@@ -115,8 +107,6 @@ exports.getProducts = (req, res, next) => {
     });
 };
 
-//every product auction page
-// "/buy/:productId"
 exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
   Product.findById(prodId)
@@ -157,20 +147,17 @@ exports.getProduct = (req, res, next) => {
     });
 };
 
-//add product bid page
-// "/buy/:productId/add-bid-product"
 exports.getAddBidProduct = (req, res, next) => {
   const prodId = req.params.productId;
   res.render("secondHand/addBidProduct", {
     pageTitle: "Add Bid Product",
     path: "/add-bid-product",
     productId: prodId,
-    activePage: "secondHand", // Added activePage
+    activePage: "secondHand",
     messages: req.flash(),
   });
 };
 
-//save new bidproduct in db
 exports.postAddBidProduct = async (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ message: "Unauthorized: Please log in" });
@@ -178,11 +165,8 @@ exports.postAddBidProduct = async (req, res, next) => {
 
   const prodId = req.params.productId;
   const { title, imageUrl, description, location, bidAmount, paymentId } =
-    req.body; // Extract paymentId from form submission
+    req.body;
 
-  console.log("is in routes", paymentId);
-
-  // Check for existing bid
   const existingBid = await BidProduct.findOne({
     bidder: req.user._id,
     auction: prodId,
@@ -196,21 +180,18 @@ exports.postAddBidProduct = async (req, res, next) => {
     return res.redirect(`/secondHand/buy/${prodId}`);
   }
 
-  // Get product with monetary bids
   const product = await Product.findById(prodId).populate({
     path: "bids",
     match: { bidAmount: { $ne: null } },
   });
 
-  // Calculate current max bid and count
   const monetaryBids = product.bids.filter((bid) => bid.bidAmount !== null);
   const currentMaxBid = monetaryBids.reduce(
     (max, bid) => Math.max(max, bid.bidAmount),
-    product.min_price // Start with min_price
+    product.min_price
   );
   const monetaryBidsCount = monetaryBids.length;
 
-  // Validate bid amount
   if (bidAmount) {
     const minRequired =
       monetaryBidsCount === 0
@@ -242,7 +223,7 @@ exports.postAddBidProduct = async (req, res, next) => {
     description: description || null,
     location: location || null,
     bidAmount: bidAmount ? Number(bidAmount) : null,
-    paymentId, // Store the payment ID
+    paymentId,
     bidder: req.user._id,
     auction: prodId,
   });
@@ -273,10 +254,8 @@ exports.deleteBid = async (req, res, next) => {
     const bidId = req.params.bidId;
     const bid = await BidProduct.findByIdAndDelete(bidId);
 
-    // Remove bid reference from Product
     await Product.findByIdAndUpdate(bid.auction, { $pull: { bids: bidId } });
 
-    // Add session save before redirect
     req.session.save((err) => {
       if (err) {
         console.error("Session save error:", err);
@@ -314,14 +293,14 @@ exports.postDirectAddProduct = async (req, res) => {
       title,
       imageUrls,
       price: parseFloat(price),
-      min_price: parseFloat(price), // Set to same as price
+      min_price: parseFloat(price),
       description,
       location,
       quantity: parseInt(quantity),
       seller: req.user._id,
       saleType: "direct",
-      startDate: new Date(), // Add current date
-      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      startDate: new Date(),
+      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
 
     await product.save();
@@ -338,7 +317,6 @@ exports.addToCart = async (req, res) => {
   try {
     const userId = req.user._id;
     const productId = req.params.productId;
-    // console.log(productId);
 
     const quantityToAdd = parseInt(req.body.quantity) || 1;
 
@@ -348,7 +326,6 @@ exports.addToCart = async (req, res) => {
       return res.redirect("/secondHand");
     }
 
-    // Check available stock
     const cart = await Cart.findOne({ user: userId });
     let existingQuantity = 0;
 
@@ -366,13 +343,12 @@ exports.addToCart = async (req, res) => {
     if (totalRequested > product.quantity) {
       req.flash(
         "error",
-        // `Only ${product.quantity - existingQuantity} item(s) available.`
+
         `Cannot add more than the quantity available.`
       );
       return res.redirect(req.get("Referrer") || "/secondHand");
     }
 
-    // Add/Update cart
     if (!cart) {
       const newCart = new Cart({
         user: userId,
