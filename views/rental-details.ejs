@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= product.title %> Details</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/chatbot.css">
+  <link rel="stylesheet" href="/css/rentalStyles.css">
+  <link rel="icon" type="image/png" href="/assets/logo2.png">
+  
+  <style>
+    .rental-calendar {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .calculation-breakdown {
+      margin-top: 10px;
+      padding: 10px;
+      background: #e9ecef;
+      border-radius: 4px;
+    }
+    .section-title {
+      font-size: 1.2em;
+      color: #333;
+      text-decoration: underline;
+      margin-bottom: 10px;
+    }
+    .slider {
+      position: relative;
+      width: 90%;
+      height: 500px;
+      overflow: hidden;
+      margin: 0 auto;
+      background: #f5f5f5;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .slide {
+      display: none;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 20px;
+    }
+    .active {
+      display: block;
+    }
+    .prev, .next {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      padding: 15px;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .prev { left: 20px; }
+    .next { right: 20px; }
+    .disabled-button {
+      background-color: #ccc;
+      color: #666;
+      cursor: not-allowed;
+    }
+    .product-image-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 25px;
+      padding: 30px;
+    }
+    .rental-calendar {
+      margin-top: 30px;
+    }
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 50px;
+      align-items: start;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 30px;
+    }
+    h1 {
+      text-align: center;
+      margin: 0;
+      font-size: 2.4rem;
+      color: #2c3e50;
+      width: 100%;
+      padding: 15px 0;
+      border-bottom: 2px solid #eee;
+    }
+    .product-info-column {
+      padding: 25px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      gap: 15px;
+    }
+    .date-fields-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .form-actions {
+      margin-top: 25px;
+      text-align: center;
+    }
+    .add-to-cart-button {
+      background: #b3cf99;
+      color: #333;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .add-to-cart-button:hover {
+      background: #a3c585;
+    }
+    .otp-verification-card {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    border: 1px solid #dee2e6;
+  }
+
+  .otp-input-group {
+    display: flex;
+    flex-direction: column; 
+    gap: 15px; 
+    margin: 15px 0;
+  }
+
+  .otp-field {
+    width: 100%; 
+    padding: 12px;
+    border: 2px solid #3E6B48;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+  }
+
+  .otp-field:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(62, 107, 72, 0.2);
+  }
+
+  .verify-otp-btn {
+    width: 100%;
+    padding: 14px;
+    background: #3E6B48;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .verify-otp-btn:hover {
+    background: #2d5035;
+    transform: translateY(-1px);
+  }
+
+  .otp-result {
+    font-weight: bold;
+    padding: 10px;
+    text-align: center;
+    border-radius: 4px;
+  }
+
+  .otp-result.success {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .otp-result.error {
+    background: #f8d7da;
+    color: #721c24;
+  }
+  .payment-status {
+    padding: 8px;
+    margin: 10px 0;
+    border-radius: 4px;
+  }
+
+  .payment-status.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+
+  .payment-status.pending {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+  }
+
+  #back-btn {
+      background: linear-gradient(135deg, #4caf50 0%, #357d37 100%);
+      color: white;
+      padding: 1.2rem 2.5rem;
+      border-radius: 30px;
+      font-size: 1.1rem;
+      width: fit-content;
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+      margin: 20px auto;
+    }
+
+  </style>
+</head>
+<body>
+  <div id="navbar">
+    <%- include('./common/chatbot.ejs') %>
+  </div>
+
+  <main class="product-details-container">
+    <div class="details-grid">
+      <div class="product-image-column">
+        <div class="slider">
+          <% product.imageUrls.forEach((image, index) => { %>
+            <img src="<%= image %>" class="slide <% if(index === 0) { %> active <% } %>" alt="Product Image">
+          <% }) %>
+          <button class="prev" onclick="changeSlide(-1)">&#10094;</button>
+          <button class="next" onclick="changeSlide(1)">&#10095;</button>
+        </div>
+        <h1><%= product.title %></h1>
+      </div>
+      
+      <div class="product-info-column">
+        <h2 class="section-title">Product Details</h2>
+        <p class="description"><%= product.description %></p>
+        <div class="seller-info">
+          <p><strong>Seller:</strong> <%= product.seller.fullName %></p>
+          <p><strong>Location:</strong> <%= product.location %></p>
+        </div>
+        
+        <div class="product-meta">
+          <p><strong>Rate:</strong> ₹<%= product.price %>/<%= product.rate %></p>
+          <p><strong>Security Deposit:</strong> ₹<%= product.securityDeposit %></p>
+          <% if (product.currentBooking) { %>
+            <p class="availability-notice">
+              Next available after: <%= new Date(product.currentBooking.rentalEnd).toLocaleDateString('en-IN') %>
+            </p>
+          <% } %>
+        </div>
+
+
+    <% if (product.orderIds && product.orderIds.some(order => !order.paymentTransferred) && user._id.equals(product.seller._id)) { %>
+      <div class="otp-verification-card">
+        <h4>OTP Verification & Payment</h4>
+        <div class="otp-input-group">
+          <input type="text" id="upiInput" class="otp-field" placeholder="Enter your UPI ID" pattern=".+@.+\..+">
+          <input type="text" id="otpInput" class="otp-field" placeholder="Enter buyer's OTP" maxlength="6">
+          <button class="verify-otp-btn" onclick="verifyOTP('<%= product._id %>', 'rental')">Verify & Initiate Payment</button>
+        </div>
+        <div id="otpResult" class="otp-result"></div>
+      </div>
+      <% } %>
+
+      <% if (product.orderIds && product.orderIds.length > 0) { %>
+        <% product.orderIds.forEach(order => { %>
+          <% if (order.paymentTransferred) { %>
+            <div class="payment-status success">
+              ✓ Payment transferred (TXID: <%= order.transactionId %>)
+            </div>
+          <% } else { %>
+            <div class="payment-status pending">
+              Payment pending verification
+            </div>
+          <% } %>
+        <% }) %>
+      <% } %>
+    
+  <button onclick="window.location.href='/profile'" id="back-btn">Back to Profile</button>
+      
+  </main>
+
+  <span id="rateValue" style="display:none;"><%= product.rate %></span>
+  <span id="priceValue" style="display:none;"><%= product.price %></span>
+  <span id="depositValue" style="display:none;"><%= product.securityDeposit %></span>
+
+  <script src="/assets/rentalDetails.js"></script>
+  <script>
+    let slideIndex = 0;
+    const slides = document.querySelectorAll(".slide");
+    
+    function changeSlide(n) {
+      slides[slideIndex].classList.remove("active");
+      slideIndex = (slideIndex + n + slides.length) % slides.length;
+      slides[slideIndex].classList.add("active");
+    }
+
+   
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('rentalStart').min = today;
+    document.getElementById('rentalEnd').min = today;
+  </script>
+  <script>
+    async function verifyOTP(productId, productType) {
+  const upi = document.getElementById('upiInput').value;
+  const otp = document.getElementById('otpInput').value;
+  const resultDiv = document.getElementById('otpResult');
+  
+  try {
+    const response = await fetch('/api/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId, productType, otp, upiId: upi })
+    });
+
+    const data = await response.json();
+    
+    if (data.success) {
+      resultDiv.innerHTML = `
+        ✅ ${data.message}<br>
+        Transaction ID: ${data.transactionId}
+      `;
+      resultDiv.className = 'otp-result success';
+     
+      setTimeout(() => location.reload(), 2000);
+    } else {
+      resultDiv.innerHTML = `❌ ${data.message}`;
+      resultDiv.className = 'otp-result error';
+    }
+  } catch (error) {
+    resultDiv.innerHTML = '⚠️ Error processing request';
+    resultDiv.className = 'otp-result error';
+  }
+}
+    </script>
+
+</body>
+</html>

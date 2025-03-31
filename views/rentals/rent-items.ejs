@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= pageTitle %></title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/chatbot.css">
+  <link rel="stylesheet" href="/css/rentalStyles.css">
+  <link rel="icon" type="image/png" href="/assets/logo2.png">
+</head>
+
+<body>
+  
+  <div id="navbar">
+    <%- include('../common/navigation.ejs') %>
+    <%- include('../common/chatbot.ejs') %>
+  </div>
+
+  <main>
+    <h1>Rental Products</h1>
+    
+    <div class="filter-container">
+      <form action="/rental/rent" method="GET" class="search-form">
+        <input 
+          type="text" 
+          name="search" 
+          placeholder="Search products..."
+          value="<%= searchQuery || '' %>"
+        >
+        <button type="submit" class="filter-button">Search</button>
+      </form>
+      
+      <button class="filter-toggle" onclick="toggleFilters()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel" viewBox="0 0 16 16">
+          <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5v-2zm1 .5v1.308l4.372 4.858A.5.5 0 0 1 7 8.5v5.306l2-.666V8.5a.5.5 0 0 1 .128-.334L13.5 3.808V2h-11z"/>
+        </svg>
+        Filters
+      </button>
+    </div>
+
+    
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeFilters()"></div>
+    <div class="filter-sidebar" id="filterSidebar">
+      <div class="filter-header">
+        <h2>Filters</h2>
+        <button class="filter-close" onclick="closeFilters()">&times;</button>
+      </div>
+
+      <form action="/rental/rent" method="GET" id="filterForm">
+       
+        <div class="filter-section">
+          <h3>Price Range</h3>
+          <div class="filter-group">
+            <input type="number" name="minPrice" placeholder="Min" 
+                  value="<%= minPrice %>" step="0.01">
+            <span></span>
+            <input type="number" name="maxPrice" placeholder="Max" 
+                  value="<%= maxPrice %>" step="0.01">
+          </div>
+        </div>
+
+        
+        <div class="filter-section">
+          <h3>Location</h3>
+          <div class="filter-group">
+            <select name="location">
+              <option value="">All Locations</option>
+              <% locations.forEach(loc => { %>
+                <option value="<%= loc %>" <%= location === loc ? 'selected' : '' %>>
+                  <%= loc %>
+                </option>
+              <% }); %>
+            </select>
+          </div>
+        </div>
+
+        
+        <div class="filter-section">
+          <h3>Rental Rate</h3>
+          <div class="filter-group">
+            <select name="rate">
+              <option value="">Any Rate</option>
+              <option value="hour" <%= rate === 'hour' ? 'selected' : '' %>>Hourly</option>
+              <option value="day" <%= rate === 'day' ? 'selected' : '' %>>Daily</option>
+              <option value="week" <%= rate === 'week' ? 'selected' : '' %>>Weekly</option>
+              <option value="month" <%= rate === 'month' ? 'selected' : '' %>>Monthly</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="filter-actions">
+        <button type="submit" class="filter-button" style="background: linear-gradient(135deg, #469e49 0%, #275d28 100%); margin-top: 20px;">Apply Filters</button>
+        <button type="button" class="clear-button" onclick="window.location.href='/rental/rent'">Clear All</button>
+        </div>
+      </form>
+    </div>
+
+    <% if (products && products.length > 0) { %>
+      <div class="rental-list">
+
+        <div class="rental-item">
+          <a href="/rental/post" class="post-button">
+            <div class="circle">
+                +
+            </div>
+            <span class="post-text">POST AN ITEM !</span>
+        </a>
+        </div>
+
+        <% products.forEach((product, index) => { %>
+
+          <div class="rental-item">
+            <div class="product-card">
+              
+              
+              <div class="image-slider-container">
+                <button class="prev" onclick="prevImage(<%= index %>)">&#10094;</button>
+                <div class="image-slider" id="slider-<%= index %>">
+                  <% if (product.imageUrls && product.imageUrls.length > 0) { %>
+                    <% product.imageUrls.forEach(image => { %>
+                      <img src="<%= image %>" alt="<%= product.title %>">
+                    <% }); %>
+                  <% } else { %>
+                    <img src="/images/default-placeholder.png" alt="No Image Available">
+                  <% } %>
+                </div>
+                <button class="next" onclick="nextImage(<%= index %>)">&#10095;</button>
+              </div>
+
+              <div class="product-info">
+                <h3><%= product.title %></h3>
+                <p class="price">Price: <%= product.price %> per <%= product.rate %></p>
+                <p><%= product.location %></p>
+                
+
+                <div class="button-group vertical">
+                  <a href="/rental/details/<%= product.id %>" class="view-details-button">View Details</a>
+                  <form action="/rental/add-to-cart/<%= product.id %>" method="POST" class="inline-form">
+                    <button type="submit" class="add-to-cart-button">Add to Cart</button>
+                  </form>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <h1>No Products Found!</h1>
+    <% } %>
+  </main>
+
+  <script>
+    
+    function toggleFilters() {
+      document.getElementById('filterSidebar').classList.toggle('active');
+      document.getElementById('sidebarOverlay').style.display = 'block';
+    }
+
+    function closeFilters() {
+      document.getElementById('filterSidebar').classList.remove('active');
+      document.getElementById('sidebarOverlay').style.display = 'none';
+    }
+
+    
+    function nextImage(index) {
+      let slider = document.getElementById(`slider-${index}`);
+      let images = slider.getElementsByTagName("img");
+      let totalImages = images.length;
+      let currentIndex = parseInt(slider.dataset.index || "0");
+
+      if (currentIndex < totalImages - 1) {
+        currentIndex++;
+        slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+        slider.dataset.index = currentIndex;
+      }
+    }
+
+    function prevImage(index) {
+      let slider = document.getElementById(`slider-${index}`);
+      let currentIndex = parseInt(slider.dataset.index || "0");
+
+      if (currentIndex > 0) {
+        currentIndex--;
+        slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+        slider.dataset.index = currentIndex;
+      }
+    }
+
+    
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.filter-sidebar') && 
+          !e.target.closest('.filter-toggle')) {
+        closeFilters();
+      }
+    });
+  </script>
+</body>
+</html>

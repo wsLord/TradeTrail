@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Subscription Cart</title>
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="/css/cart.css" />
+    <link rel="stylesheet" href="/css/forms.css" />
+    <link rel="stylesheet" href="/css/rentalStyles.css" />
+    <link rel="stylesheet" href="/css/chatbot.css" />
+    <link rel="icon" type="image/png" href="/assets/logo2.png" />
+  </head>
+  <body>
+    <div id="navbar">
+      <%- include('../common/navigation.ejs') %> <%-
+      include('../common/chatbot.ejs') %>
+    </div>
+    <main class="cart-container">
+      <div class="cart-header">
+        <h1>Your Subscription Cart</h1>
+      </div>
+      <% if (subscriptionCart.items.length === 0) { %>
+      <p>Your subscription cart is empty.</p>
+      <% } else { %>
+      <table class="cart-items">
+        <thead>
+          <tr>
+            <th>Subscription</th>
+            <th>Platform</th>
+            <th>Unit Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+            <th>Remove</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% let grandTotal = 0; %> <% subscriptionCart.items.forEach(item => {
+          %> <% if (item.product) { %> <% const totalPrice = item.product.price
+          * item.quantity; %> <% grandTotal += totalPrice; %>
+          <tr class="cart-item">
+            <td>
+              <% if (item.product.imageUrl) { %>
+              <img
+                src="<%= item.product.imageUrl %>"
+                alt="<%= item.product.platform_name %>"
+                style="max-width: 50px"
+              />
+              <% } else { %>
+              <span><%= item.product.platform_name %></span>
+              <% } %>
+            </td>
+            <td><%= item.product.platform_name %></td>
+            <td>₹<%= item.product.price.toFixed(2) %></td>
+            <td>
+              <form
+                action="/subscription/update-cart/<%= item.product._id %>"
+                method="POST"
+              >
+                <input
+                  type="number"
+                  name="quantity"
+                  value="<%= item.quantity %>"
+                  min="1"
+                  max="<%= item.product.quantity %>"
+                  class="quantity-input"
+                />
+                <button type="submit">Update</button>
+              </form>
+            </td>
+            <td>₹<%= totalPrice.toFixed(2) %></td>
+            <td>
+              <form
+                action="/subscription/cart/delete-item/<%= item.product._id %>"
+                method="POST"
+              >
+                <button
+                  type="submit"
+                  class="delete-button"
+                  aria-label="Remove Item"
+                  style="background-color: black; color: white"
+                >
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+          <% } else { %>
+          <tr class="cart-item">
+            <td colspan="6">Product information is unavailable.</td>
+          </tr>
+          <% } %> <% }); %>
+        </tbody>
+      </table>
+      <div class="cart-total">Grand Total: ₹<%= grandTotal.toFixed(2) %></div>
+      <div style="clear: both"></div>
+      <button class="checkout-button">Proceed to Checkout</button>
+      <% } %>
+    </main>
+  </body>
+</html>

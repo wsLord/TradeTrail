@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Direct Selling</title>
+    <link rel="stylesheet" href="/css/forms.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="/css/product.css" />
+    <link rel="stylesheet" href="/css/chatbot.css" />
+    <link rel="icon" type="image/png" href="/assets/logo2.png" />
+  </head>
+  <body>
+    <%- include('../common/navigation.ejs') %> <%-
+    include('../common/chatbot.ejs') %>
+
+    <main>
+      <form
+        class="product-form"
+        action="/subscription/sell/direct-add-product"
+        method="POST"
+      >
+        <div class="form-control">
+          <label for="platform_name">Platform Name</label>
+          <select
+            name="platform_name"
+            id="platform_name"
+            required
+            onchange="handlePlatformChange()"
+          >
+            <option value="Netflix" data-image="/images/platforms/netflix.png">
+              Netflix
+            </option>
+            <option
+              value="Amazon Prime"
+              data-image="/images/platforms/prime.png"
+            >
+              Amazon Prime
+            </option>
+            <option value="Disney+" data-image="/images/platforms/disney.png">
+              Disney+
+            </option>
+            <option value="Hulu" data-image="/images/platforms/hulu.png">
+              Hulu
+            </option>
+            <option value="Other" data-image="/images/platforms/default.png">
+              Other
+            </option>
+          </select>
+
+          <input
+            type="text"
+            name="custom_platform"
+            id="custom_platform"
+            placeholder="Enter platform name"
+            style="display: none"
+          />
+        </div>
+        <div class="form-control" style="display: none">
+          <input
+            type="hidden"
+            name="imageUrl"
+            id="imageUrl"
+            value="/images/platforms/netflix.png"
+          />
+        </div>
+        <div class="form-control">
+          <label for="price">Price</label>
+          <input type="number" name="price" step="0.01" required />
+        </div>
+        <div class="form-control">
+          <label for="description">Description</label>
+          <textarea name="description" rows="5" required></textarea>
+        </div>
+        <button class="btn" type="submit">Next →</button>
+      </form>
+    </main>
+    <script>
+      function handlePlatformChange() {
+        const platformSelect = document.getElementById("platform_name");
+        const customPlatformInput = document.getElementById("custom_platform");
+        const imageUrlInput = document.getElementById("imageUrl");
+        const platformImage = document.getElementById("platformImage");
+
+        const selectedOption =
+          platformSelect.options[platformSelect.selectedIndex];
+        const selectedImage = selectedOption.getAttribute("data-image");
+
+        imageUrlInput.value = selectedImage;
+        platformImage.src = selectedImage;
+
+        if (platformSelect.value === "Other") {
+          customPlatformInput.style.display = "block";
+          customPlatformInput.required = true;
+        } else {
+          customPlatformInput.style.display = "none";
+          customPlatformInput.required = false;
+        }
+      }
+    </script>
+  </body>
+</html>

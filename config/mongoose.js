@@ -7,7 +7,7 @@ const connectToMongoDB = async () => {
     if (!url) {
       throw new Error("MONGO_DB_URI is not defined in .env file");
     }
-    await mongoose.connect(url); // Removed deprecated options
+    await mongoose.connect(url); 
     console.log("Connected to MongoDB");
   } catch (error) {
     console.error("Error connecting to MongoDB:", error.message);

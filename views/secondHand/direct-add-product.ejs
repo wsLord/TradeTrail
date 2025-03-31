@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Direct Selling</title>
+    <link rel="stylesheet" href="/css/forms.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="/css/chatbot.css" />
+    <link rel="stylesheet" href="/css/product.css" />
+    <link rel="icon" type="image/png" href="/assets/logo2.png" />
+  </head>
+  <body>
+    <%- include('../common/navigation.ejs') %> <%-
+    include('../common/chatbot.ejs') %>
+
+    <main>
+      <form
+        class="product-form"
+        action="/secondHand/sell/direct-add-product"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+        <div class="form-control">
+          <label for="title">Title</label>
+          <input type="text" name="title" required />
+        </div>
+        <div class="form-control">
+          <label for="image">Upload Images</label>
+          <input
+            type="file"
+            name="images"
+            id="images"
+            accept="image/*"
+            multiple
+            required
+          />
+        </div>
+        <div class="form-control">
+          <label for="price">Price</label>
+          <input type="number" name="price" step="0.01" required />
+        </div>
+        <div class="form-control">
+          <label for="quantity">Quantity</label>
+          <input type="number" name="quantity" min="1" required />
+        </div>
+        <div class="form-control">
+          <label for="description">Description</label>
+          <textarea name="description" rows="5" required></textarea>
+        </div>
+        <div class="form-control">
+          <label for="location">Location</label>
+          <input type="text" name="location" required />
+        </div>
+        <button class="btn" type="submit">List Item</button>
+      </form>
+    </main>
+  </body>
+</html>

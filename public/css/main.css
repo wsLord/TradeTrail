@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,700');
-
+@import url("https://fonts.googleapis.com/css?family=Open+Sans:400,700");
 * {
   box-sizing: border-box;
 }
@@ -7,11 +6,11 @@
 body {
   padding: 0;
   margin: 0;
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
 }
 
 main {
-  padding: 1rem;
+  padding: 4rem;
   margin: auto;
 }
 
@@ -180,6 +179,13 @@ form {
 .card__actions {
   padding: 1rem;
   text-align: center;
+  margin-bottom: 10px;
+}
+
+.card__actions {
+  display: flex;
+  gap: 15px;
+  /* Creates space between buttons */
 }
 
 .card__actions button,
@@ -220,8 +226,31 @@ form {
   .main-header__nav {
     display: flex;
   }
-
   #side-menu-toggle {
     display: none;
   }
+}
+
+/* In your main CSS file */
+.verify-btn {
+  background: #28a745;
+  color: white;
+  padding: 5px 15px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background 0.3s ease;
+}
+
+.verify-btn:hover {
+  background: #218838;
+}
+
+.pending-badge {
+  background: #ffc107;
+  color: #000;
+  padding: 3px 10px;
+  border-radius: 15px;
+  margin-right: 10px;
 }

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auction Details</title>
+  <link rel="icon" type="image/png" href="/assets/logo2.png">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/forms.css">
+  <link rel="stylesheet" href="/css/navigation.css">
+  <link rel="stylesheet" href="/css/rentalStyles.css">
+  <link rel="stylesheet" href="/css/auction.css">
+  <style>
+
+    button {
+      background-color: #4b6043;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #back-btn {
+      background: linear-gradient(135deg, #4caf50 0%, #357d37 100%);
+      color: white;
+      padding: 1.2rem 2.5rem;
+      border-radius: 30px;
+      font-size: 1.1rem;
+      width: fit-content;
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+      margin: 20px 41% 30px;
+    }
+
+
+    
+    .disabled-button, button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    button:disabled:hover {
+      background-color: #ccc;
+    }
+
+   
+    .no-bids {
+      text-align: center;
+      padding: 20px;
+      background-color: #f9f9f9;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    section{
+      text-align: left;
+    }
+
+    .otp-input-group{
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-around;
+      gap: 5%;
+      margin: 20px auto;
+    }
+
+    .otp-input-group input {
+      width: 300px; 
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      text-align: center;
+      font-size: 14px;
+      margin: 0 auto 10px;
+    }
+
+    .verify-otp-btn {
+      background: #085a17;
+      color: #fff;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      transition: 0.3s ease;
+      width: 200px;
+    }
+
+  </style>
+
+</head>
+<body>
+  <main>
+    <br>
+  <section>
+    <h1>Auction Details for <%= product.title %></h1>
+    <p>Seller: <%= product.seller.fullName %></p>
+    <p>Minimum Price: ₹<%= product.min_price %></p>
+  </section>
+  
+<!-- Monetary Bids Section -->
+<section>
+  <h2>Monetary Bids</h2>
+  <% if (monetaryBids.length > 0) { %>
+    <table>
+      <thead>
+        <tr>
+          <th>Bidder</th>
+          <th>Amount</th>
+          <th>paymentId</th>
+          <th>Action</th>
+
+        </tr>
+      </thead>
+      <tbody>
+        <% monetaryBids.forEach(bid => { %>
+          <tr>
+            <td><%= bid.bidder.fullName %></td>
+            <td>₹<%= bid.bidAmount %></td>
+            <td> <%=bid.paymentId %></td>
+            <td>
+              <form action="/profile/secondHand/accept-bid" method="POST">
+                <input type="hidden" name="bidId" value="<%= bid._id %>">
+                <button 
+                  type="button" 
+                  class="<%= product.winner ? 'disabled-button' : '' %>" 
+                  <%= product.winner ? 'disabled' : '' %>
+                  onclick="handleBidAcceptance(event, '<%= bid._id %>', '<%= bid.bidAmount %>')"
+                >
+                  <%= product.winner ? 'Bid Accepted' : 'Accept' %>
+                </button>
+              </form>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  <% } else { %>
+    <div class="no-bids">No monetary bids yet.</div>
+  <% } %>
+</section>
+
+
+  <!-- Product Bids Section -->
+<section>
+  <h2>Product Bids</h2>
+  <% if (productBids.length > 0) { %>
+    <table>
+      <thead>
+        <tr>
+          <th>Bidder</th>
+          <th>Product Name</th>
+          <th>Description</th>
+          <th>Location</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% productBids.forEach(bid => { %>
+          <tr>
+            <td><%= bid.bidder.fullName %></td>
+            <td><%= bid.title || 'N/A' %></td>
+            <td><%= bid.description || 'No description' %></td>
+            <td><%= bid.location || 'Unknown' %></td>
+            <td>
+                <form action="/profile/secondHand/accept-bid" method="POST">
+                  <input type="hidden" name="bidId" value="<%= bid._id %>">
+                <button 
+                type="button" 
+                class="<%= product.winner ? 'disabled-button' : '' %>" 
+                <%= product.winner ? 'disabled' : '' %>
+                onclick="handleBidAcceptance(event, '<%= bid._id %>', '<%= bid.bidAmount %>')"
+                >
+                <%= product.winner ? 'Bid Accepted' : 'Accept' %>
+                </button>
+
+                </form>
+              </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  <% } else { %>
+    <div class="no-bids">No product bids yet.</div>
+  <% } %>
+</section>
+
+  
+<% if (product.auctionStatus === 'completed' && product.orderIds && product.orderIds.length > 0) { 
+  const order = product.orderIds.find(o => !o.paymentTransferred); %>
+  <% if (order && user._id.equals(product.seller._id)) { %>
+    <section class="otp-verification-card">
+      <h3>Complete Payment Transfer</h3>
+      <div class="otp-instructions">
+        <p>Ask the buyer for the OTP sent to their email to complete the transaction</p>
+      </div>
+      <div class="otp-input-group">
+        <input type="text" id="upiInput" class="otp-field" 
+              placeholder="Your UPI ID (e.g. name@bank)" 
+              pattern=".+@.+\..+"
+              required>
+        <input type="text" id="otpInput" class="otp-field" 
+              placeholder="Enter buyer's OTP" 
+              maxlength="6"
+              required>
+        <button class="verify-otp-btn" 
+                onclick="verifyAuctionOTP('<%= product._id %>')">
+          Verify & Transfer
+        </button>
+      </div>
+      <div id="otpResult" class="otp-result"></div>
+    </section>
+
+    <script>
+    async function verifyAuctionOTP(productId) {
+      const upi = document.getElementById('upiInput').value;
+      const otp = document.getElementById('otpInput').value;
+      const resultDiv = document.getElementById('otpResult');
+      
+      if (!/^[\w.-]+@[\w]+/.test(upi)) {
+        resultDiv.innerHTML = '❌ Invalid UPI ID format';
+        resultDiv.className = 'otp-result error';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            productId: productId,
+            otp: otp,
+            upiId: upi,
+            productType: 'secondhand'
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          resultDiv.innerHTML = `
+            <div class="success-message">
+              ✅ ${data.message}<br>
+              Transaction ID: ${data.transactionId}
+            </div>
+          `;
+          resultDiv.className = 'otp-result success';
+          setTimeout(() => location.reload(), 2000);
+        } else {
+          resultDiv.innerHTML = `❌ ${data.message}`;
+          resultDiv.className = 'otp-result error';
+        }
+      } catch (error) {
+        resultDiv.innerHTML = '⚠️ Network error - please try again';
+        resultDiv.className = 'otp-result error';
+      }
+    }
+    </script>
+  <% } %>
+<% } %>
+
+
+<% if (product.orderIds && product.orderIds.length > 0) { %>
+  <% product.orderIds.forEach(order => { %>
+    <% if (order.paymentTransferred) { %>
+      <div class="payment-status success">
+        ✓ Payment completed (TXID: <%= order.transactionId %>)
+      </div>
+    <% } else if (user._id.equals(product.seller._id)) { %>
+      <div class="payment-status pending">
+        ⏳ Waiting for OTP verification from buyer
+      </div>
+    <% } else if (user._id.equals(order.buyer._id)) { %>
+      <div class="payment-status info">
+        ℹ️ OTP sent to your email - please share with seller
+      </div>
+    <% } %>
+  <% }) %>
+<% } %>
+
+    <button onclick="window.location.href='/profile'" id="back-btn">Back to Profile</button>
+
+    </main>
+</body>
+
+  <script>
+  const monetaryBids = JSON.parse('<%- JSON.stringify(monetaryBids) %>');
+  </script>
+
+<script>
+function handleBidAcceptance(event, selectedPaymentId, selectedBidAmount) {
+    
+    event.preventDefault(); // Prevent default behavior
+    if (!confirm("Are you sure you want to accept this bid? All other bids will be refunded.")) {
+      return;
+    }
+    
+    
+    event.target.closest('form').submit();
+}
+ 
+  </script>
+</html>

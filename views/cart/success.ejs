@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Successful</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f8fb;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .container {
+        background: #fff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        max-width: 400px;
+      }
+      .checkmark {
+        font-size: 50px;
+        color: #4caf50;
+      }
+      h1 {
+        color: #333;
+        margin: 20px 0 10px;
+      }
+      p {
+        color: #666;
+        font-size: 16px;
+      }
+      .payment-info {
+        background: #e7f6e7;
+        padding: 10px;
+        margin: 15px 0;
+        border-radius: 5px;
+        font-weight: bold;
+        color: #2d6a2d;
+      }
+      .btn {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background: #4caf50;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+      }
+      .btn:hover {
+        background: #45a049;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="checkmark">✔</div>
+      <h1>Payment Successful</h1>
+      <p>
+        Thank you for your purchase! Your payment has been successfully
+        processed.
+      </p>
+      <div class="payment-info">
+        <p><strong>Payment ID:</strong> <%= paymentId %></p>
+      </div>
+      <a href="/" class="btn">Go to Dashboard</a>
+    </div>
+  </body>
+</html>

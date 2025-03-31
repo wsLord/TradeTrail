@@ -1,38 +1,187 @@
-@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,700');
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap");
 
+/* General Page Styles */
 body {
-    font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f8f2;
+  color: #333;
 }
-.container {
-    border: 2px solid black;
-    padding: 10px;
-    width: 600px;
-    margin: auto;
+
+main {
+  padding: 20px;
+  max-width: 1200px;
+  margin: auto;
 }
-.navbar {
-    border-bottom: 2px solid black;
-    padding-bottom: 5px;
-    font-weight: bold;
-    text-align: center;
+
+h1,
+h2 {
+  margin-bottom: 10px;
+  color: #4b6043;
 }
-.auction-section {
-    padding: 10px;
+
+h1 {
+  font-size: 2rem;
 }
-.bid-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 10px;
+
+h2 {
+  font-size: 1.5rem;
+  margin-top: 5px;
 }
-.table-container {
-    margin-top: 20px;
+
+/* Flash Message Styling */
+.alert-box {
+  position: relative;
+  padding: 12px 30px;
+  border-radius: 10px;
+  margin: 15px 0;
+  text-align: center;
+  font-weight: 600;
 }
+
+.alert-success {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.alert-error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.alert-info {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  padding: 20px;
+  border-radius: 4px;
+}
+
+.close-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.2em;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0 5px;
+}
+
+/* Price display */
+.price-display p {
+  margin: 5px 0;
+  font-weight: 600;
+}
+
+/* Bid Forms */
+form {
+  margin-top: 10px;
+}
+
+input[type="number"] {
+  width: 100%;
+  max-width: 300px;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+button {
+  background-color: #3e6b48;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+button:hover {
+  background-color: #2d5035;
+}
+
+.btn-delete,
+.delete-btn {
+  background-color: #ad1a12;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.btn-delete:hover,
+.delete-btn:hover {
+  background-color: #e22d1e;
+}
+
+/* Tables */
 table {
-    width: 100%;
-    border-collapse: collapse;
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
 }
-th, td {
-    border-bottom: 1px solid black;
-    padding: 5px;
-    text-align: left;
+
+th,
+td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+thead {
+  background-color: #577149;
+  color: white;
+}
+
+th {
+  font-weight: 600;
+}
+
+td {
+  font-size: 0.95rem;
+}
+
+/* Section Styling */
+section {
+  margin-bottom: 25px;
+  padding: 40px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Links as buttons */
+a button {
+  background-color: #3e6b48;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+a button:hover {
+  background-color: #2d5035;
+}
+
+/* Small notes */
+small {
+  display: block;
+  margin-bottom: 10px;
+  color: #777;
+  font-size: 0.9rem;
 }

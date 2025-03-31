@@ -1,193 +1,372 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>"Business Offer Signup"</title>
-  
-  <!-- Font Awesome for icons -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-  
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Arial', sans-serif;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>"Business Offer Signup"</title>
 
-    body {                  
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background-color: #f7fff0;
-      padding: 20px;
-    }
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/chatbot.css" />
+    <link rel="icon" type="image/png" href="/assets/logo2.png" />
 
-    .container {
-      display: flex;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-      max-width: 900px;
-      width: 100%;
-    }
-
-    .info-section {              
-      background: #ddead1;
-      padding: 40px;
-      width: 50%;
-    }
-
-    .info-section h1 {
-      font-size: 36px;
-      color: #333;
-      margin-bottom: 10px;
-    }
-
-    .info-section h1 span {    
-      color: #52694a;
-    }
-
-    .info-section p {
-      color: #666;
-      margin-top: 20px;
-      line-height: 1.6;
-    }
-
-    .form-section {
-      padding: 40px;
-      width: 50%;
-      background: white;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-    }
-
-    input[type="text"], input[type="email"], input[type="password"] {
-      padding: 12px;
-      margin-bottom: 15px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 16px;
-    }
-
-    label {
-      display: flex;
-      align-items: center;
-      margin-bottom: 15px;
-      color: #666;
-    }
-
-    label input[type="checkbox"] {
-      margin-right: 10px;
-      accent-color: #75975e;
-    }
-
-    button {
-      background: #75975e;
-      color: white;
-      padding: 12px;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-      margin-bottom: 15px;
-    }
-
-    button:hover {
-      background: #4b6043;
-    }
-
-    .login-link {
-      text-align: center;
-      margin-top: 10px;
-    }
-
-    .login-link a {
-      color: #75975e;
-      text-decoration: none;
-      font-size: 14px;
-    }
-
-    .login-link a:hover {
-      color: #4b6043;
-      text-decoration: underline;
-    }
-  </style>
-</head>
-<body>
-
-  <!-- Include Navigation -->
-  <%- include('../common/navigation.ejs') %> 
-
-  <div class="container">
-    <div class="info-section">
-      <h1>Trade<span>Trail</span></h1>
-      <p>"Secure and seamless trading experience."</p>
-    </div>
-    <div class="form-section">
-      <form id="signupForm">
-        <input type="text" id="firstName" placeholder="First name" required>
-        <input type="text" id="lastName" placeholder="Last name" required>
-        <input type="email" id="email" placeholder="Email address" required>
-        <input type="password" id="password" placeholder="Password" required>
-        <label>
-          <input type="checkbox"> Remember Me
-        </label>
-        <button type="submit">SIGN UP</button>
-        
-        <div class="login-link">
-          Already have an account? <a href="/api/auth/login">Login</a>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script>
-    document.getElementById("signupForm").addEventListener("submit", async function(event) {
-      event.preventDefault();
-
-      const firstName = document.getElementById("firstName").value.trim();
-      const lastName = document.getElementById("lastName").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
-
-      if (!firstName || !lastName || !email || !password) {
-        alert("Please fill in all fields.");
-        return;
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Arial", sans-serif;
       }
 
-      const userData = { firstName, lastName, email, password };
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-color: #f7fff0;
+        padding: 20px;
+      }
 
-      try {
-        const response = await fetch("/api/auth/signup", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(userData),
-        });
+      .container {
+        display: flex;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        max-width: 900px;
+        width: 100%;
+      }
 
-        const data = await response.json();
-        console.log("Server Response:", data);
+      .info-section {
+        background: #ddead1;
+        padding: 40px;
+        width: 50%;
+      }
 
-        if (response.ok) {
-          alert("Signup successful!");
-          window.location.href = "/api/auth/home";
-        } else {
-          alert(data.message || "Signup failed. Please try again.");
+      .info-section h1 {
+        font-size: 36px;
+        color: #333;
+        margin-bottom: 10px;
+      }
+
+      .info-section h1 span {
+        color: #52694a;
+      }
+
+      .info-section p {
+        color: #666;
+        margin-top: 20px;
+        line-height: 1.6;
+      }
+
+      .form-section {
+        padding: 40px;
+        width: 50%;
+        background: white;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+      }
+
+      input[type="text"],
+      input[type="email"],
+      input[type="password"] {
+        padding: 12px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+
+      label {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        color: #666;
+      }
+
+      label input[type="checkbox"] {
+        margin-right: 10px;
+        accent-color: #75975e;
+      }
+
+      button {
+        background: #75975e;
+        color: white;
+        padding: 12px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-bottom: 15px;
+      }
+
+      button:hover {
+        background: #588248;
+      }
+
+      .login-link {
+        text-align: center;
+        margin-top: 10px;
+      }
+
+      .login-link a {
+        color: #75975e;
+        text-decoration: none;
+        font-size: 14px;
+      }
+
+      .login-link a:hover {
+        color: #4b6043;
+        text-decoration: underline;
+      }
+
+      .oauth-providers {
+        margin: 25px 0;
+        text-align: center;
+      }
+
+      .divider {
+        display: flex;
+        align-items: center;
+        margin: 25px 0;
+        color: #666;
+      }
+
+      .divider::before,
+      .divider::after {
+        content: "";
+        flex: 1;
+        border-bottom: 1px solid #eee;
+        margin: 0 10px;
+      }
+
+      .oauth-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 12px;
+        margin: 8px 0;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background: white;
+        color: #444;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .oauth-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .oauth-btn i {
+        margin-right: 10px;
+        font-size: 18px;
+      }
+      .oauth-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 12px;
+        margin: 8px 0;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background: white;
+        color: #444;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .oauth-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .oauth-btn.google {
+        border-color: #000000;
+        color: #3c4043;
+      }
+
+      .oauth-btn.google:hover {
+        background: #eeeeee;
+      }
+
+      .oauth-btn.google .logo {
+        width: 18px;
+        height: 18px;
+        margin-right: 12px;
+      }
+
+      .oauth-btn.facebook {
+        border-color: #7e93c1;
+        color: #3b5998;
+      }
+
+      .oauth-btn.facebook:hover {
+        background: #eeeeee;
+      }
+
+      .oauth-btn i.fab {
+        font-size: 18px;
+        margin-right: 12px;
+      }
+
+      .loading-spinner {
+        display: none;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+        margin-right: 8px;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
         }
-      } catch (error) {
-        console.error("Error:", error);
-        alert("An error occurred. Please try again later.");
       }
-    });
-  </script>
 
-</body>
+      .button-loading .loading-spinner {
+        display: inline-block;
+      }
+
+      .google {
+        border-color: #db4437;
+        color: #db4437;
+      }
+      .facebook {
+        border-color: #3b5998;
+        color: #3b5998;
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('../common/chatbot.ejs') %>
+
+    <div class="container">
+      <div class="info-section">
+        <h1>Trade<span>Trail</span></h1>
+        <p>Swap, Sell, Rent, Repeat!</p>
+        <img
+          src="/assets/logo.png"
+          alt="TradeTrail Logo"
+          style="display: block; margin: auto; margin-top: 90px; height: 200px"
+        />
+      </div>
+      <div class="form-section">
+        <form id="signupForm">
+          <input type="text" id="firstName" placeholder="First name" required />
+          <input type="text" id="lastName" placeholder="Last name" required />
+          <input type="email" id="email" placeholder="Email address" required />
+          <input
+            type="password"
+            id="password"
+            placeholder="Password"
+            required
+          />
+          <button type="submit" id="signupButton">
+            <span class="loading-spinner"></span>
+            SIGN UP
+          </button>
+
+          <div class="oauth-providers">
+            <p class="divider">Or continue with</p>
+            <button
+              class="oauth-btn google"
+              onclick="window.location.href='/api/auth/google'"
+            >
+              <img
+                src="https://www.gstatic.com/images/branding/googleg/1x/googleg_standard_color_18dp.png"
+                alt="Google logo"
+                class="logo"
+              />
+              Google
+            </button>
+            <button
+              class="oauth-btn facebook"
+              onclick="window.location.href='/api/auth/facebook'"
+            >
+              <i class="fab fa-facebook"></i> Facebook
+            </button>
+          </div>
+
+          <div class="login-link">
+            Already have an account? <a href="/api/auth/login">Login</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      function isValidEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(String(email).toLowerCase());
+      }
+
+      document
+        .getElementById("signupForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          const button = document.getElementById("signupButton");
+          button.classList.add("button-loading");
+          button.disabled = true;
+          button.innerHTML = `<span class="loading-spinner"></span> Creating account...`;
+
+          const firstName = document.getElementById("firstName").value.trim();
+          const lastName = document.getElementById("lastName").value.trim();
+          const email = document.getElementById("email").value.trim();
+          const password = document.getElementById("password").value.trim();
+
+          if (!firstName || !lastName || !email || !password) {
+            alert("Please fill in all fields.");
+            return;
+          }
+
+          if (!isValidEmail(email)) {
+            alert("Please enter a valid email address");
+            return;
+          }
+
+          const userData = { firstName, lastName, email, password };
+
+          try {
+            const response = await fetch("/api/auth/signup", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(userData),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              alert(
+                "Signup successful! Please check your email to verify your account"
+              );
+              window.location.href = "/api/auth/login"; // Redirect to login instead of home
+            } else {
+              alert(data.message || "Signup failed. Please try again.");
+            }
+          } catch (error) {
+            console.error("Error:", error);
+            alert("An error occurred. Please try again later.");
+          } finally {
+            button.classList.remove("button-loading");
+            button.disabled = false;
+            button.innerHTML = "SIGN UP";
+          }
+        });
+    </script>
+  </body>
 </html>

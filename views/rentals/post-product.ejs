@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title><%= pageTitle %></title>
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="/css/forms.css" />
+    <link rel="stylesheet" href="/css/product.css" />
+    <link rel="stylesheet" href="/css/chatbot.css" />
+    <link rel="icon" type="image/png" href="/assets/logo2.png" />
+  </head>
+
+  <body>
+    <%- include('../common/navigation.ejs') %> <%-
+    include('../common/chatbot.ejs') %>
+
+    <main>
+      <form
+        class="product-form"
+        action="/rental/post"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+        <div class="form-control">
+          <label for="title">Title</label>
+          <input type="text" name="title" id="title" required />
+        </div>
+
+        <div class="form-control">
+          <label for="image">Upload Images</label>
+          <input
+            type="file"
+            name="images"
+            id="images"
+            accept="image/*"
+            multiple
+            required
+          />
+        </div>
+
+        <div class="form-control">
+          <label for="rate">Price Type</label>
+          <select name="rate" id="rate" required>
+            <option value="" selected>Select one</option>
+            <option value="hour">Price/hour</option>
+            <option value="day">Price/day</option>
+            <option value="week">Price/week</option>
+            <option value="month">Price/month</option>
+          </select>
+        </div>
+
+        <div class="form-control">
+          <label for="price">Price</label>
+          <input type="number" name="price" id="price" step="10" required />
+        </div>
+
+        <div class="form-control">
+          <label for="quantity">Quantity Available</label>
+          <input type="number" name="quantity" id="quantity" min="1" required />
+        </div>
+
+        <div class="form-control">
+          <label for="securityDeposit">Security Deposit</label>
+          <input
+            type="number"
+            name="securityDeposit"
+            id="securityDeposit"
+            min="0"
+            required
+          />
+        </div>
+
+        <div class="form-control">
+          <label for="description">Description</label>
+          <textarea
+            name="description"
+            id="description"
+            rows="5"
+            required
+          ></textarea>
+        </div>
+
+        <div class="form-control">
+          <label for="location">Location</label>
+          <textarea name="location" id="location" rows="5" required></textarea>
+        </div>
+
+        <button class="btn" type="submit">Add Product</button>
+      </form>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Error</title>
+    <link rel="icon" type="image/png" href="/assets/logo2.png" />
+  </head>
+  <body>
+    <h1><%= message %></h1>
+    <% if (error) { %>
+    <pre><%= error.stack %></pre>
+    <% } %>
+  </body>
+</html>

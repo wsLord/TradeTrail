@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your Cart</title>
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="/css/cart.css" />
+    <link rel="stylesheet" href="/css/forms.css" />
+    <link rel="stylesheet" href="/css/chatbot.css" />
+    <link rel="stylesheet" href="/css/rentalStyles.css" />
+    <link rel="icon" type="image/png" href="/assets/logo2.png" />
+
+    <style>
+      .cart-section {
+        margin: 2rem 0;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 1rem;
+      }
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        padding: 1rem;
+        background-color: #f5f5f5;
+        border-radius: 6px;
+      }
+      .section-content {
+        display: none;
+        margin-top: 1rem;
+      }
+      .section-content.active {
+        display: block;
+      }
+      .toggle-btn {
+        font-size: 1.5rem;
+        /* background: none; */
+        background-color: #838383;
+        border: none;
+        cursor: pointer;
+        padding: 0 1rem;
+      }
+      .rental-details {
+        background: #f8f9fa;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 5px;
+      }
+      .price-breakdown {
+        margin-top: 10px;
+        padding-left: 20px;
+        border-left: 3px solid #007bff;
+      }
+      .section-checkout {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        text-align: right;
+      }
+      .checkout-section-btn {
+        background-color: #2f9146;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+      }
+      .checkout-section-btn:hover {
+        background-color: #156225;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="navbar">
+      <%- include('../common/navigation.ejs') %> <%-
+      include('../common/chatbot.ejs') %>
+    </div>
+    <main class="cart-container">
+      <div class="cart-header">
+        <h1>Your Cart</h1>
+      </div>
+
+      <% const sections = { Rental: cart.items.filter(item => item.productType
+      === 'Rental'), Subscription: cart.items.filter(item => item.productType
+      === 'Subscription'), SecondHand: cart.items.filter(item =>
+      item.productType === 'SecondHand') }; %> <%
+      Object.entries(sections).forEach(([sectionName, items]) => { let
+      sectionTotal = 0; let sectionDeposit = 0; %>
+      <div class="cart-section">
+        <div
+          class="section-header"
+          onclick="toggleSection('<%= sectionName %>')"
+        >
+          <h2><%= sectionName %> (<%= items.length %>)</h2>
+          <button class="toggle-btn" data-section="<%= sectionName %>">
+            +
+          </button>
+        </div>
+        <div class="section-content" id="<%= sectionName %>-content">
+          <% if (items.length === 0) { %>
+          <p>No <%= sectionName %> items in cart</p>
+          <% } else { %>
+          <table class="cart-items">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Title</th>
+                <% if (sectionName === 'Rental') { %>
+                <th>Rental Period</th>
+                <th>Rate</th>
+                <% } else if (sectionName === 'Subscription') { %>
+                <th>Platform</th>
+                <% } %>
+                <th>Unit Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th>Remove</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% items.forEach(item => { let totalPrice = 0; let itemDeposit =
+              0; if (sectionName === 'Rental') { totalPrice =
+              item.calculatedPrice * item.quantity; itemDeposit =
+              item.securityDeposit; sectionDeposit += itemDeposit; } else {
+              totalPrice = item.product.price * item.quantity; } sectionTotal +=
+              totalPrice; %>
+              <tr class="cart-item">
+                <td>
+                  <% if (item.productType === 'Rental' || item.productType ===
+                  'SecondHand') { %>
+                  <img
+                    src="<%= item.product.imageUrls[0] %>"
+                    alt="<%= item.product.title %>"
+                    style="max-width: 100px"
+                  />
+                  <% } else if (item.productType === 'Subscription') { %>
+                  <img
+                    src="<%= item.product.imageUrl %>"
+                    alt="<%= item.product.platform_name %>"
+                    style="max-width: 100px"
+                  />
+                  <% } %>
+                </td>
+                <td><%= item.product.title || item.product.platform_name %></td>
+
+                <% if (sectionName === 'Rental') { %>
+                <td>
+                  <% if (item.rentalStart && item.rentalEnd) { %>
+                  <div class="rental-details">
+                    <%= item.rentalStart.toISOString().split('T')[0] %> to <%=
+                    item.rentalEnd.toISOString().split('T')[0] %> <% const
+                    diffTime = item.rentalEnd - item.rentalStart; const diffDays
+                    = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); %> (<%=
+                    diffDays %> days)
+                  </div>
+                  <% } else { %>
+                  <div class="text-warning">Dates not selected</div>
+                  <% } %>
+                </td>
+                <td>
+                  <div class="price-breakdown">
+                    ₹<%= item.product.price %>/<%= item.product.rate %> <% if
+                    (item.product.rate === 'day' && (item.diffDays || 0) > 1) {
+                    %> × <%= item.diffDays || 1 %> days <% } %>
+                  </div>
+                </td>
+                <% } else if (sectionName === 'Subscription') { %>
+                <td><%= item.product.platform_name %></td>
+                <% } %>
+
+                <td>
+                  ₹<%= sectionName === 'Rental' ? (item.calculatedPrice ||
+                  0).toFixed(2) : (item.product?.price || 0).toFixed(2) %> <% if
+                  (sectionName === 'Rental') { %>
+                  <div class="security-deposit">
+                    + ₹<%= item.securityDeposit %> deposit
+                  </div>
+                  <% } %>
+                </td>
+
+                <td>
+                  <% if (sectionName === 'Rental') { %>
+                  <span><%= item.quantity %></span>
+                  <% } else { %>
+                  <form action="/cart/update/<%= item._id %>" method="POST">
+                    <input
+                      type="number"
+                      name="quantity"
+                      value="<%= item.quantity %>"
+                      min="1"
+                      max="<%= item.product.quantity %>"
+                      class="quantity-input"
+                    />
+                    <button type="submit">Update</button>
+                  </form>
+                  <% } %>
+                </td>
+
+                <td>
+                  ₹<%= (totalPrice + (sectionName === 'Rental' ? itemDeposit :
+                  0)).toFixed(2) %> <% if (sectionName === 'Rental') { %>
+                  <div class="price-breakdown">
+                    (₹<%= totalPrice.toFixed(2) %> + ₹<%= (itemDeposit ||
+                    0).toFixed(2) %> deposit)
+                  </div>
+                  <% } %>
+                </td>
+
+                <td>
+                  <form action="/cart/delete/<%= item._id %>" method="POST">
+                    <button
+                      type="submit"
+                      class="delete-button"
+                      style="background-color: rgb(117, 0, 0); color: white"
+                    >
+                      Delete
+                    </button>
+                  </form>
+                </td>
+                <td>
+                  <input
+                    type="hidden"
+                    class="product-id"
+                    value="<%= item.product._id %>"
+                  />
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+          </table>
+
+          <!-- Section Checkout Button -->
+          <div class="section-checkout">
+            <button
+              class="checkout-section-btn"
+              data-section="<%= sectionName %>"
+              data-total="<%= (sectionTotal + (sectionName === 'Rental' ? sectionDeposit : 0)).toFixed(2) %>"
+              onclick="makePayment(event)"
+            >
+              Checkout <%= sectionName %> - ₹<%= (sectionTotal + (sectionName
+              === 'Rental' ? sectionDeposit : 0)).toFixed(2) %>
+            </button>
+          </div>
+          <% } %>
+        </div>
+      </div>
+      <% }); %>
+    </main>
+
+    <script>
+      function toggleSection(sectionName) {
+        const content = document.getElementById(`${sectionName}-content`);
+        const btn = document.querySelector(`[data-section="${sectionName}"]`);
+        content.classList.toggle("active");
+        btn.textContent = content.classList.contains("active") ? "-" : "+";
+      }
+
+      // Expand first non-empty section
+      document.querySelectorAll(".cart-section").forEach((section) => {
+        if (section.querySelector(".cart-item")) {
+          const sectionName = section
+            .querySelector("h2")
+            .textContent.split(" ")[0];
+          toggleSection(sectionName);
+        }
+      });
+
+      //
+    </script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <script>
+      function makePayment(event) {
+        let button = event.target;
+        let section = button.getAttribute("data-section");
+
+        fetch("/api/payment/makePayment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ section }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              const options = {
+                ...data.options,
+                handler: function (response) {
+                  verifyPayment(response, section);
+                },
+              };
+
+              const rzp = new Razorpay(options);
+              rzp.open();
+            } else {
+              alert("Payment initialization failed");
+            }
+          })
+          .catch(() => alert("Failed to create order"));
+      }
+
+      function verifyPayment(response, section) {
+        fetch("/api/payment/verifyPayment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...response, section }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              alert("Payment successful! Redirecting...");
+
+              window.location.href = data.redirectUrl;
+            } else {
+              alert("Payment verification failed");
+            }
+          })
+          .catch((error) => {
+            console.error("Error verifying payment:", error);
+            alert("Error verifying payment");
+          });
+      }
+    </script>
+  </body>
+</html>

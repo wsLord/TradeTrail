@@ -1,0 +1,57 @@
+<div class="chatbot-container">
+  <div
+    class="chat-icon"
+    onclick="toggleChat()"
+    role="button"
+    aria-label="Open chat"
+    tabindex="0"
+  >
+    <svg viewBox="0 0 64 64">
+      <path
+        class="chat-bubble"
+        d="M12 12h40v30H28.86L12 50.86V12"
+        rx="5"
+        ry="5"
+      />
+
+      <g class="chat-lines">
+        <path d="M20 25h24" />
+        <path d="M20 32h18" />
+        <path d="M20 39h14" />
+      </g>
+    </svg>
+  </div>
+  <div class="chatbot-interface" id="chatInterface">
+    <div class="chat-header">
+      <h3>TradeTrail Assistant</h3>
+      <button
+        class="close-button"
+        onclick="toggleChat()"
+        aria-label="Close chat"
+      >
+        <svg class="close-icon" viewBox="0 0 24 24">
+          <path
+            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+          />
+        </svg>
+      </button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="message bot-message">Hello! How can I help you today?</div>
+
+      <div class="loading-message" id="loadingTemplate" style="display: none">
+        <div class="loading-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="userInput" placeholder="Type your message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+</div>
+
+<script src="/assets/chatbot.js"></script>

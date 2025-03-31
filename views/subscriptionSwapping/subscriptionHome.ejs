@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title><%= pageTitle %></title>
+
+    <link rel="stylesheet" href="/css/rentalStyles.css" />
+    <link rel="stylesheet" href="/css/chatbot.css" />
+    <link rel="icon" type="image/png" href="/assets/logo2.png" />
+  </head>
+
+  <%- include('../common/navigation.ejs') %> <%-
+  include('../common/chatbot.ejs') %>
+
+  <div class="renting-container">
+    <h1>Subscriptions</h1>
+    <p>Choose an option to proceed</p>
+
+    <div class="options">
+      <div class="option">
+        <h2>Want to Post an OTT subscription?</h2>
+        <p>
+          List your OTT Subscriptions for sale and find interested buyers easily
+        </p>
+        <button onclick="window.location.href='/subscription/sell'">
+          Post an OTT Subscription to Sell
+        </button>
+      </div>
+
+      <div class="option">
+        <h2>Want to access an OTT subscription?</h2>
+        <p>Browse available OTT subscriptions and get what you need</p>
+        <button onclick="window.location.href='/subscription/buy'">
+          Browse OTT Subsciptions
+        </button>
+      </div>
+    </div>
+  </div>
+</html>

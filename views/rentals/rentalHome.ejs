@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= pageTitle %></title>
+    <link rel="stylesheet" href="/css/rentalStyles.css" />
+    <link rel="stylesheet" href="/css/chatbot.css" />
+    <link rel="icon" type="image/png" href="/assets/logo2.png" />
+  </head>
+  <body>
+    <div id="navbar">
+      <%- include('../common/navigation.ejs') %> <%-
+      include('../common/chatbot.ejs') %>
+    </div>
+
+    <div class="renting-container">
+      <h1>Renting Options</h1>
+      <p>Choose an option to proceed</p>
+
+      <div class="options">
+        <div class="option">
+          <h2>Want to Post Something?</h2>
+          <p>List your item for rent and find interested renters easily</p>
+          <button onclick="window.location.href='/rental/post'">
+            Post an Item to Rent
+          </button>
+        </div>
+
+        <div class="option">
+          <h2>Want to Rent Something?</h2>
+          <p>Browse available rental items and get what you need</p>
+          <button onclick="window.location.href='/rental/rent'">
+            Rent an Item
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

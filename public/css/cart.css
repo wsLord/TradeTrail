@@ -1,0 +1,182 @@
+/* Reset default styles */
+
+body,
+h1,
+h2,
+h3,
+p,
+table {
+  margin: 0;
+  padding: 0;
+  font-family: "Arial", sans-serif;
+}
+
+body {
+  background-color: #f8f9fa;
+  color: #333;
+}
+
+/* Navbar */
+
+#navbar {
+  margin-bottom: 20px;
+}
+
+/* Container styling */
+
+.container,
+.cart-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Page title */
+
+h1,
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+h1 {
+  color: #3e6b48;
+  font-size: 26px;
+}
+
+/* Table styles */
+
+.cart-items {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.cart-items th,
+.cart-items td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.cart-items th {
+  background-color: #3e6b48;
+  color: white;
+  font-weight: bold;
+}
+
+.cart-items tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.cart-items img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+/* Quantity Input */
+
+.quantity-input {
+  width: 50px;
+  text-align: center;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* Cart Total */
+
+.cart-total {
+  font-size: 20px;
+  font-weight: bold;
+  text-align: right;
+  margin-top: 20px;
+  padding: 10px;
+  background: #f1f1f1;
+  border-radius: 5px;
+}
+
+/* Buttons */
+
+.btn,
+.checkout-button,
+form button {
+  display: inline-block;
+  padding: 10px 15px;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.btn {
+  background: #3e6b48;
+  text-decoration: none;
+}
+
+.btn:hover {
+  background: #218838;
+}
+
+.checkout-button {
+  width: 100%;
+  background: #28a745;
+  font-size: 18px;
+  padding: 12px;
+}
+
+.checkout-button:hover {
+  background: #218838;
+}
+
+form button {
+  background: #28a745;
+  padding: 8px 12px;
+}
+
+form button:hover {
+  background: #218838;
+}
+
+/* Responsive Design */
+
+@media (max-width: 600px) {
+  .cart-items th,
+  .cart-items td {
+    font-size: 14px;
+    padding: 8px;
+  }
+  .cart-items img {
+    width: 60px;
+    height: 60px;
+  }
+  .checkout-button {
+    font-size: 16px;
+  }
+}
+
+/* Cart Header Styling */
+
+.cart-items thead {
+  background-color: #f1f1f1;
+  /* Light gray background */
+}
+
+.cart-items th {
+  padding: 12px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+  /* Dark text for readability */
+  border-bottom: 2px solid #ddd;
+  /* Adds a separator */
+}

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Choose Listing Type</title>
+    <link rel="stylesheet" href="/css/chatbot.css" />
+    <link rel="icon" type="image/png" href="/assets/logo2.png" />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: #f5f8f2;
+      }
+
+      .renting-container {
+        max-width: 1200px;
+        margin: 6rem auto 0;
+        padding: 0 1.5rem;
+      }
+
+      h1 {
+        text-align: center;
+        color: #2c3e50;
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #7f8c8d;
+        margin-bottom: 3rem;
+        font-size: 1.1rem;
+      }
+
+      .options {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2.5rem;
+        align-items: stretch;
+      }
+
+      .option {
+        background: #ffffff;
+        border-radius: 15px;
+        padding: 2.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100%;
+        transition: transform 0.3s ease;
+        margin: 35px;
+      }
+
+      .option:hover {
+        transform: translateY(-5px);
+      }
+
+      .option h2 {
+        color: #2c3e50;
+        font-size: 1.6rem;
+        margin-bottom: 30px;
+        text-align: center;
+        line-height: 1.3;
+      }
+
+      .option p {
+        color: #7f8c8d;
+        font-size: 1rem;
+        line-height: 1.6;
+        text-align: center;
+        min-height: 80px;
+        display: flex;
+        align-items: center;
+        padding: 0 1rem;
+      }
+
+      .button-container {
+        margin-top: auto;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+
+      .option button {
+        background: linear-gradient(135deg, #4caf50 0%, #357d37 100%);
+        color: white;
+        padding: 1.2rem 2.5rem;
+        border-radius: 30px;
+        font-size: 1.1rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.8rem;
+        width: fit-content;
+        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+        margin-bottom: 20px;
+      }
+
+      .option button:hover {
+        transform: scale(1.02);
+        box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+      }
+
+      .option:nth-child(2) button {
+        background: linear-gradient(135deg, #4caf50 0%, #357d37 100%);
+        box-shadow: 0 4px 15px rgba(33, 150, 243, 0.2);
+      }
+
+      @media (max-width: 768px) {
+        .options {
+          grid-template-columns: 1fr;
+          gap: 2rem;
+        }
+
+        .option {
+          padding: 2rem;
+        }
+
+        h1 {
+          font-size: 2rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('../common/navigation.ejs') %> <%-
+    include('../common/chatbot.ejs') %>
+
+    <div class="renting-container">
+      <h1>Sell Your Subscription</h1>
+      <p class="subtitle">Choose the best way to sell your subscription</p>
+
+      <div class="options">
+        <div class="option">
+          <h2>Direct Selling</h2>
+          <p>
+            Set a fixed price for quick and guaranteed sales with immediate
+            purchases
+          </p>
+          <div class="button-container">
+            <button
+              onclick="window.location.href='/subscription/sell/direct-add-product'"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M12 2v20M2 12h20" />
+              </svg>
+              Create Direct Listing
+            </button>
+          </div>
+        </div>
+
+        <div class="option">
+          <h2>Auction Listing</h2>
+          <p>
+            Start competitive bidding to maximize your item's value through our
+            auction system
+          </p>
+          <div class="button-container">
+            <button
+              onclick="window.location.href='/subscription/sell/add-product'"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M13 2L2 13l9 9 11-11-9-9zM9.5 9.5l5 5M15.5 9.5l-5 5" />
+              </svg>
+              Start Auction
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link rel="stylesheet" href="/css/rentalStyles.css" />
+    <link rel="icon" type="image/png" href="/assets/logo2.png" />
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f5f8f2;
+        text-align: center;
+      }
+
+      .profile-card {
+        background: #fff;
+        color: #333;
+        padding: 40px 35px;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 1000px;
+        margin: 40px auto;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        text-align: left;
+        transition: all 0.3s ease;
+      }
+
+      .profile-content {
+        flex: 1;
+        padding-right: 50px;
+      }
+
+      h3 {
+        margin: 0 0 30px 0;
+        font-size: 36px;
+        color: #2c3e50;
+        text-align: center;
+        width: 100%;
+      }
+
+      h3::after {
+        content: "";
+        display: block;
+        width: 60px;
+        height: 3px;
+        background: #3e6b48;
+        margin: 15px auto 0;
+      }
+
+      p {
+        margin: 15px 0;
+        font-size: 18px;
+        line-height: 1.6;
+        color: #34495e;
+      }
+
+      p strong {
+        color: #2c3e50;
+        min-width: 100px;
+        display: inline-block;
+      }
+
+      .edit-btn {
+        background: linear-gradient(135deg, #44a559, #3c6d47);
+        color: white;
+        padding: 12px 35px;
+        border: none;
+        cursor: pointer;
+        border-radius: 30px;
+        font-size: 17px;
+        letter-spacing: 0.5px;
+        margin-top: 25px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(62, 107, 72, 0.2);
+        display: block;
+        width: fit-content;
+        margin: 25px auto 0;
+      }
+
+      .edit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(62, 107, 72, 0.3);
+      }
+
+      .form-group label {
+        font-weight: 500;
+        color: #34495e;
+        margin-bottom: 8px;
+        display: block;
+      }
+
+      .form-control {
+        border: 2px solid #ecf0f1;
+        border-radius: 8px;
+        padding: 10px 15px;
+        transition: border-color 0.3s ease;
+        width: 100%;
+        max-width: 400px;
+      }
+
+      .form-control:focus {
+        border-color: #3e6b48;
+        box-shadow: none;
+      }
+
+      .btn-primary {
+        background: #3e6b48;
+        border: none;
+        padding: 10px 25px;
+        margin-right: 15px;
+        border-radius: 8px;
+      }
+
+      .btn-secondary {
+        background: #95a5a6;
+        border: none;
+        padding: 10px 25px;
+        border-radius: 8px;
+      }
+
+      .badge-card {
+        background: #fff;
+        color: #333;
+        padding: 30px;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 1000px;
+        margin: 30px auto;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      }
+
+      .badges-container {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        justify-content: space-evenly;
+        padding: 20px 0;
+      }
+
+      .badge-img {
+        width: 160px;
+        height: 180px;
+        object-fit: cover;
+        border-radius: 12px;
+        transition: transform 0.2s ease;
+      }
+
+      .badge-img:hover {
+        transform: scale(1.05);
+      }
+
+      .profile-pic {
+        width: 220px;
+        height: 220px;
+        border-radius: 15px;
+        object-fit: cover;
+        border: 4px solid #c7ddb5;
+        padding: 10px;
+        transition: all 0.3s ease;
+      }
+
+      .profile-pic-section {
+        margin-left: 30px;
+      }
+
+      .upload-overlay {
+        bottom: 15px;
+        right: 15px;
+        background: #e6efdf;
+        padding: 8px 15px;
+        border-radius: 25px;
+        font-size: 14px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+        z-index: 1;
+      }
+
+      .upload-overlay:hover {
+        background: #c7ddb5;
+        transform: scale(1.05);
+      }
+
+      .auction-products-card,
+      .rental-products-card,
+      .direct-products-card,
+      .subscription-products-card {
+        background: #fff;
+        color: #333;
+        padding: 30px;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 1000px;
+        margin: 30px auto;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      }
+
+      .auction-products-card h3,
+      .rental-products-card h3,
+      .direct-products-card h3,
+      .subscription-products-card h3 {
+        margin-bottom: 20px;
+        font-size: 24px;
+        color: #2c3e50;
+      }
+
+      .auction-products-card h4,
+      .rental-products-card h4,
+      .direct-products-card h4,
+      .subscription-products-card h4 {
+        background: linear-gradient(135deg, #137c73, #074641);
+        color: white;
+        padding: 12px 35px;
+        border-radius: 30px;
+        font-size: 20px;
+        letter-spacing: 0.6px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(62, 107, 72, 0.2);
+        width: fit-content;
+        margin: 15px auto 20px;
+      }
+
+      .auction-products-card h4:hover,
+      .rental-products-card h4:hover,
+      .direct-products-card h4:hover,
+      .subscription-products-card h4:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(62, 107, 72, 0.3);
+      }
+
+      .auction-products-card ul,
+      .rental-products-card ul,
+      .direct-products-card ul,
+      .subscription-products-card ul {
+        list-style: none;
+        padding: 0;
+        margin: auto;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20%;
+      }
+
+      .auction-products-card li,
+      .rental-products-card li,
+      .direct-products-card li,
+      .subscription-products-card li {
+        margin-bottom: 15px;
+      }
+
+      .auction-products-card li a,
+      .rental-products-card li a,
+      .direct-products-card li a,
+      .subscription-products-card li a {
+        text-decoration: none;
+        color: #007bff;
+      }
+
+      .auction-products-card li a:hover,
+      .rental-products-card li a:hover,
+      .direct-products-card li a:hover,
+      .subscription-products-card li a:hover {
+        color: #0056b3;
+      }
+
+      .rental-products-card li ul,
+      .direct-products-card li li,
+      .subscription-products-card li div,
+      .auction-products-card ul ul {
+        background-color: #13a89c24;
+        padding: 10px;
+        border-radius: 4%;
+        width: 100%;
+      }
+
+      @media (max-width: 768px) {
+        .auction-products-card,
+        .rental-products-card,
+        .direct-products-card,
+        .subscription-products-card {
+          padding: 20px;
+          margin: 20px auto;
+        }
+
+        .profile-card {
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding: 30px 20px;
+        }
+
+        .profile-content {
+          padding-right: 0;
+          margin-bottom: 30px;
+        }
+
+        .profile-pic {
+          width: 200px;
+          height: 200px;
+          margin: 0;
+        }
+
+        p {
+          text-align: center;
+        }
+
+        .edit-btn {
+          width: 100%;
+          max-width: 200px;
+        }
+
+        .form-control {
+          max-width: 100%;
+        }
+      }
+      .profile-actions {
+        width: 100%;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <%- include('./common/navigation.ejs') %>
+
+    <main>
+      <div class="profile-card">
+        <div class="profile-content">
+          <h3><%= user.fullName %></h3>
+
+          <div id="viewMode">
+            <p><strong>Email:</strong> <%= user.email %></p>
+            <p>
+              <strong>City:</strong>
+              <span id="cityText"><%= user.city || 'Not specified' %></span>
+            </p>
+            <p>
+              <strong>State:</strong>
+              <span id="stateText"><%= user.state || 'Not specified' %></span>
+            </p>
+            <p>
+              <strong>Country:</strong>
+              <span id="countryText"
+                ><%= user.country || 'Not specified' %></span
+              >
+            </p>
+            <p>
+              <strong>Phone:</strong>
+              <span id="phoneText"><%= user.phone || 'Not specified' %></span>
+            </p>
+            <div class="profile-actions">
+              <button class="edit-btn" onclick="toggleEditMode()">
+                Edit Profile
+              </button>
+              <button
+                class="edit-btn"
+                onclick="logout()"
+                style="background: linear-gradient(135deg, #f46c43, #b52b27)"
+              >
+                Logout
+              </button>
+              <% if (user.password) { %>
+              <button
+                class="edit-btn"
+                data-toggle="modal"
+                data-target="#changePasswordModal"
+                style="background: linear-gradient(135deg, #3498db, #105c8f)"
+              >
+                Change Password
+              </button>
+              <% } %>
+            </div>
+          </div>
+
+          <form
+            id="editMode"
+            style="display: none"
+            action="/profile"
+            method="POST"
+          >
+            <div class="form-group">
+              <label>City:</label>
+              <input
+                type="text"
+                class="form-control"
+                name="city"
+                value="<%= user.city || '' %>"
+              />
+            </div>
+            <div class="form-group">
+              <label>State:</label>
+              <input
+                type="text"
+                class="form-control"
+                name="state"
+                value="<%= user.state || '' %>"
+              />
+            </div>
+            <div class="form-group">
+              <label>Country:</label>
+              <input
+                type="text"
+                class="form-control"
+                name="country"
+                value="<%= user.country || '' %>"
+              />
+            </div>
+            <div class="form-group">
+              <label>Phone:</label>
+              <input
+                type="tel"
+                class="form-control"
+                name="phone"
+                value="<%= user.phone || '' %>"
+              />
+            </div>
+            <div style="margin-top: 25px">
+              <button type="submit" class="btn btn-primary">
+                Save Changes
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="toggleEditMode()"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+
+          <div
+            class="modal fade"
+            id="changePasswordModal"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="changePasswordModalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="changePasswordModalLabel">
+                    Change Password
+                  </h5>
+                  <button
+                    type="button"
+                    class="close"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <form id="changePasswordForm">
+                  <div class="modal-body">
+                    <div class="form-group">
+                      <label>Current Password</label>
+                      <input
+                        type="password"
+                        class="form-control"
+                        name="currentPassword"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>New Password</label>
+                      <input
+                        type="password"
+                        class="form-control"
+                        name="newPassword"
+                        minlength="6"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>Confirm New Password</label>
+                      <input
+                        type="password"
+                        class="form-control"
+                        name="confirmPassword"
+                        minlength="6"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      data-dismiss="modal"
+                    >
+                      Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                      Change Password
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-pic-section">
+          <img
+            src="<%= user.profilePic %>"
+            alt="Profile Picture"
+            class="profile-pic"
+            id="profilePic"
+            onclick="document.getElementById('fileInput').click()"
+          />
+          <div
+            class="upload-overlay"
+            onclick="document.getElementById('fileInput').click()"
+          >
+            📷 Update Photo
+          </div>
+          <input
+            type="file"
+            id="fileInput"
+            style="display: none"
+            accept="image/*"
+            onchange="uploadProfilePic(this.files[0])"
+          />
+        </div>
+      </div>
+
+      <div class="auction-products-card">
+        <h3>Secondhand Auction</h3>
+        <% if (secondHandAuction.length > 0) { %>
+        <ul>
+          <% secondHandAuction.forEach(product => { %>
+          <li>
+            <a
+              href="/profile/auction/<%= product._id %>"
+              style="linear-gradient(135deg, #137c73, #074641);"
+            >
+              <h4>Product: <%= product.title %></h4>
+              <% if (product.orderIds && product.orderIds.length > 0) { %>
+
+              <ul>
+                <% product.orderIds.forEach(order => { %> <% if (order.buyer) {
+                %>
+                <li>
+                  <p>Buyer: <%= order.buyer.fullName %></p>
+                  <p>Quantity: <%= order.quantity %></p>
+                  <% if (order.otp) { %>
+                  <p>OTP: Generated</p>
+                  <% } else { %>
+                  <p>OTP: Not generated yet</p>
+                  <% } %>
+                </li>
+                <% } else { %>
+                <li>Buyer information not available.</li>
+                <% } %> <% }); %>
+              </ul>
+              <% } else { %>
+              <p>No Bids Yet</p>
+              <% } %>
+            </a>
+          </li>
+          <% }); %>
+        </ul>
+        <% } else { %>
+        <p>You haven't posted any auction products yet.</p>
+        <% } %>
+      </div>
+
+      <div class="auction-products-card">
+        <h3>Subscription Auction</h3>
+        <% if (subscriptionAuction.length > 0) { %>
+        <ul>
+          <% subscriptionAuction.forEach(product => { %>
+          <li>
+            <a
+              href="/profile/subscription-auction/<%= product._id %>"
+              style="text-decoration: none; color: #007bff"
+            >
+              <h4>Product: <%= product.platform_name %></h4>
+              <% if (product.orderId) { %>
+              <ul>
+                <% /* Removed iteration; instead, directly check product.orderId
+                */ %> <% if (product.orderId.buyer) { %>
+                <li>
+                  <p>Buyer: <%= product.orderId.buyer.fullName %></p>
+                  <p>Quantity: <%= product.orderId.quantity %></p>
+                  <% if (product.orderId.otp) { %>
+                  <p>OTP: Generated</p>
+                  <% } else { %>
+                  <p>OTP: Not generated yet</p>
+                  <% } %>
+                </li>
+                <% } else { %>
+                <li>Buyer information not available.</li>
+                <% } %>
+              </ul>
+              <% } else { %>
+              <p>Not sold yet</p>
+              <% } %>
+            </a>
+          </li>
+          <% }); %>
+        </ul>
+        <% } else { %>
+        <p>You haven't posted any auction products yet.</p>
+        <% } %>
+      </div>
+
+      <!-- Rental Products Section -->
+      <div class="rental-products-card">
+        <h3>Rental Products You Posted</h3>
+        <% if (rentalProducts.length > 0) { %>
+        <ul>
+          <% rentalProducts.forEach(product => { %>
+          <li>
+            <a
+              href="/profile/rentals/<%= product._id %>"
+              style="text-decoration: none; color: #007bff"
+            >
+              <h4>Product: <%= product.title %></h4>
+              <% if (product.orderIds && product.orderIds.length > 0) { %>
+
+              <ul>
+                <% product.orderIds.forEach(order => { %> <% if (order.buyer) {
+                %>
+                <li>
+                  <p>Buyer: <%= order.buyer.fullName %></p>
+                  <p>Quantity: <%= order.quantity %></p>
+                  <% if (order.otp) { %>
+                  <p>OTP: Generated</p>
+                  <% } else { %>
+                  <p>OTP: Not generated yet</p>
+                  <% } %>
+                </li>
+                <% } %> <% }); %>
+              </ul>
+              <% } else { %>
+              <p>Not Sold Yet</p>
+              <% } %>
+            </a>
+          </li>
+          <% }); %>
+        </ul>
+        <% } else { %>
+        <p>You haven't posted any rental products yet.</p>
+        <% } %>
+      </div>
+
+      <!-- Direct Purchase (Second Hand) Products Section -->
+      <div class="direct-products-card">
+        <h3>Your Direct SecondHand Products</h3>
+        <% if (directSecondhandProducts && directSecondhandProducts.length > 0)
+        { %>
+        <ul>
+          <% directSecondhandProducts.forEach(product => { %>
+          <li>
+            <a
+              href="/profile/secondHand/<%= product._id %>"
+              style="text-decoration: none; color: #007bff"
+            >
+              <h4>Product: <%= product.title %></h4>
+
+              <% if (product.orderIds && product.orderIds.length > 0) { %>
+
+              <ul>
+                <% product.orderIds.forEach(order => { %> <% if (order.buyer) {
+                %>
+                <li>
+                  <p>Buyer: <%= order.buyer.fullName %></p>
+                  <p>Quantity: <%= order.quantity %></p>
+                  <% if (order.otp) { %>
+                  <p>OTP: Generated</p>
+                  <% } else { %>
+                  <p>OTP: Not generated yet</p>
+                  <% } %>
+                </li>
+                <% } else { %>
+                <li>Buyer information not available.</li>
+                <% } %> <% }); %>
+              </ul>
+              <% } else { %>
+              <p>Not Sold Yet</p>
+              <% } %>
+            </a>
+          </li>
+          <% }); %>
+        </ul>
+        <% } else { %>
+        <p>You haven't posted any direct purchase products yet.</p>
+        <% } %>
+      </div>
+
+      <!-- Subscription Products Section -->
+      <div class="subscription-products-card">
+        <h3>Your Direct Subscription Products</h3>
+        <% if (directSubscriptionProducts && directSubscriptionProducts.length >
+        0) { %>
+        <ul>
+          <% directSubscriptionProducts.forEach(product => { %>
+          <li>
+            <a
+              href="/profile/subscription/<%= product._id %>"
+              style="text-decoration: none; color: #007bff"
+            >
+              <h4>Platform: <%= product.platform_name %></h4>
+
+              <% if (product.orderId) { %>
+              <div>
+                <% if (product.orderId.buyer) { %>
+                <p>Buyer: <%= product.orderId.buyer.fullName %></p>
+                <% } else { %>
+                <p>Buyer information not available.</p>
+                <% } %> <% if (product.orderId.quantity) { %>
+                <p>Quantity: <%= product.orderId.quantity %></p>
+                <% } %> <% if (product.orderId.otp) { %>
+                <p>OTP: Generated</p>
+                <% } else { %>
+                <p>OTP: Not generated yet</p>
+                <% } %>
+              </div>
+              <% } else { %>
+              <p>Not Sold Yet</p>
+              <% } %>
+            </a>
+          </li>
+          <% }); %>
+        </ul>
+        <% } else { %>
+        <p>You haven't posted any subscription products yet.</p>
+        <% } %>
+      </div>
+
+      <div class="badge-card">
+        <p style="margin: 5px; font-size: 20px; color: #2c3e50">
+          <strong>Badges Earned</strong>
+        </p>
+        <div class="badges-container">
+          <% if (user.badges && user.badges.length > 0) { %> <%
+          user.badges.forEach(function(badge) { %>
+          <img src="<%= badge %>" alt="Badge" class="badge-img" />
+          <% }); %> <% } else { %>
+          <p style="color: #95a5a6">No badges earned yet!</p>
+          <% } %>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      function toggleEditMode() {
+        const viewMode = document.getElementById("viewMode");
+        const editMode = document.getElementById("editMode");
+        viewMode.style.display =
+          viewMode.style.display === "none" ? "block" : "none";
+        editMode.style.display =
+          editMode.style.display === "none" ? "block" : "none";
+      }
+
+      async function uploadProfilePic(file) {
+        const loader = document.createElement("div");
+        loader.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                    background: rgba(255, 255, 255, 0.9); z-index: 9999; display: flex; 
+                    align-items: center; justify-content: center;">
+                    <div class="spinner-border text-success" style="width: 3rem; height: 3rem;"></div>
+                </div>
+            `;
+        document.body.appendChild(loader);
+
+        try {
+          const formData = new FormData();
+          formData.append("image", file);
+
+          const response = await fetch("/profile/picture", {
+            method: "POST",
+            body: formData,
+          });
+          const data = await response.json();
+          if (data.success) {
+            document.getElementById("profilePic").src = data.profilePic;
+          }
+        } catch (error) {
+          console.error("Upload error:", error);
+          alert("Error uploading image");
+        } finally {
+          document.body.removeChild(loader);
+        }
+      }
+    </script>
+    <script>
+      async function logout() {
+        try {
+          const response = await fetch("/api/auth/logout", {
+            method: "POST",
+            credentials: "include",
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            window.location.href = "/api/auth/login";
+          } else {
+            console.error("Logout failed:", result.message);
+            alert("Logout failed. Please try again.");
+          }
+        } catch (error) {
+          console.error("Error logging out:", error);
+          alert("Network error. Please check your connection.");
+        }
+      }
+    </script>
+
+    <script>
+      document
+        .getElementById("changePasswordForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const formData = {
+            currentPassword: document.querySelector(
+              'input[name="currentPassword"]'
+            ).value,
+            newPassword: document.querySelector('input[name="newPassword"]')
+              .value,
+            confirmPassword: document.querySelector(
+              'input[name="confirmPassword"]'
+            ).value,
+          };
+
+          try {
+            const response = await fetch("/profile/change-password", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(formData),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+              alert("Password changed successfully!");
+              $("#changePasswordModal").modal("hide");
+            } else {
+              alert(result.message || "Error changing password");
+            }
+          } catch (error) {
+            console.error("Error:", error);
+            alert("An error occurred. Please try again.");
+          }
+        });
+    </script>
+  </body>
+</html>
