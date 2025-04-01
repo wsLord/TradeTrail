@@ -272,7 +272,7 @@ const initiateRefund = async (paymentId, amount) => {
         Authorization: `Basic ${auth}`,
       },
       data: {
-        amount: Math.floor(amount * 100 * 0.9),
+        amount: Math.floor(amount * 100 ),
         notes: { reason: "Bid refund due to another bid being accepted" },
         speed: "normal",
       },
